@@ -35,15 +35,17 @@ def find_addition(old_text, new_text, match_ratio=0.8):
     """
     # Приводим оба текста к нижнему регистру
     old_text = old_text.lower()
+    logging.debug(f"[find_addition] old_text: {old_text}")
     new_text = new_text.lower()
+    logging.debug(f"[find_addition] new_text: {new_text}")
 
     # Вычисляем длину части для сравнения (30% длины старого текста, минимум 3 символа)
     min_length = 3
     part_length = max(int(len(old_text) * 0.3), min_length)
 
     if len(old_text) < part_length:
-        logging.warning("Старый текст слишком короткий для выполнения сравнения.")
-        return None
+        logging.warning("Старый текст слишком короткий длина участка будет его длина.")
+        part_length = len(old_text) -1
 
     # Берём часть старого текста для поиска
     old_part = old_text[-part_length:]

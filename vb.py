@@ -6,6 +6,9 @@ import threading  # Для запуска слушателя клавиатур�
 from screen_region import *
 from recognize_text import capture_and_recognize
 from find_message import *
+import time
+
+old_text = ""
 
 # Настройка логирования
 logging.basicConfig(
@@ -51,8 +54,10 @@ def main():
     root.destroy()
     logging.debug("Окно с прямоугольником закрыто.")
 
-    # Load previously saved text
-    current_text = load_previous_text()
+    # Reset current text after region update
+    old_text = load_previous_text()
+    logging.debug(f"[main] old_text: {old_text}.")
+
     running = True
     region_lock = threading.Lock()
 
@@ -65,7 +70,6 @@ def main():
 
     # Define function to handle 'r' key press for region update
     def on_press(key):
-        nonlocal current_text
         try:
             if key.char == 'r':
                 logging.info("Нажата клавиша 'r' для изменения области экрана.")
@@ -78,9 +82,12 @@ def main():
                     input()
                     root.destroy()
                     logging.debug("Окно с новым прямоугольником закрыто.")
+                    time.sleep(3)
                     # Reset current text after region update
-                    current_text = capture_and_recognize(region)
-                    save_current_text(current_text)
+                    old_text = capture_and_recognize(region)
+                    logging.debug(f"[main] old_text: {old_text}.")
+                    save_current_text(old_text)
+
         except AttributeError:
             pass  # Ignore non-character key presses
 
@@ -94,14 +101,14 @@ def main():
                 # Capture and recognize text from the selected region
                 new_text = capture_and_recognize(region)
 
-            if new_text and new_text != current_text:
+            if new_text and new_text != old_text:
                 logging.debug("Обнаружено изменение в тексте.")
-                added_text = find_addition(current_text, new_text)
+                added_text = find_addition(old_text, new_text)
                 if added_text:
                     logging.info(f"Отправка нового текста в Telegram: {added_text}")
                     send_to_telegram(added_text)
-                    current_text = new_text
-                    save_current_text(current_text)
+                    old_text = new_text
+                    save_current_text(old_text)
                 else:
                     logging.warning("Не удалось определить добавленный текст.")
             else:
@@ -115,7 +122,7 @@ def main():
     except Exception as e:
         logging.error(f"Произошла ошибка: {e}")
     finally:
-        save_current_text(current_text)
+        save_current_text(new_text)
         listener.stop()
         logging.info("Программа завершена.")
 
