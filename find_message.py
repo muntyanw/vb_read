@@ -36,6 +36,7 @@ def find_addition(old_text, new_text, match_ratio=0.8):
     # Приводим оба текста к нижнему регистру
     old_text = old_text.lower()
     logging.debug(f"[find_addition] old_text: {old_text}")
+    new_text_origin = new_text
     new_text = new_text.lower()
     logging.debug(f"[find_addition] new_text: {new_text}")
 
@@ -63,7 +64,7 @@ def find_addition(old_text, new_text, match_ratio=0.8):
         # Если совпадение удовлетворяет условию (80% совпадения), фиксируем начало нового текста
         if matches / part_length >= match_ratio:
             # Возвращаем новый добавленный текст, начиная с найденной позиции
-            addition = new_text[shift + part_length:]
+            addition = new_text_origin[shift + part_length:]
             logging.debug(f"Найдено совпадение с {matches} совпавшими символами из {part_length} (порог {match_ratio * 100}%).")
             logging.debug(f"Добавленный текст: {addition}")
             return addition

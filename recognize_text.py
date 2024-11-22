@@ -1,11 +1,8 @@
-import cv2
-import numpy as np
 import logging
-from PIL import Image
 import pyautogui
 import pytesseract
 import re
-
+from utils import read_setting
 import cv2
 import numpy as np
 from PIL import Image
@@ -41,28 +38,9 @@ def preprocess_image(pil_image):
     return Image.fromarray(processed)
 
 
-
 def filter_recognized_text(text):
-    """Фильтрует текст, оставляя только корректные строки."""
-    # Список символов, которые нужно удалить
-    symbols_to_remove = [',', '.']  # Можно добавить другие символы при необходимости
 
-    filtered_lines = []
-    for line in text.splitlines():
-        # Удаляем символы из строки
-        for symbol in symbols_to_remove:
-            line = line.replace(symbol, '')
-
-        # Пропускаем пустые строки после удаления символов
-        if not line.strip():
-            continue
-
-        # Фильтруем строки, которые содержат только буквы, цифры и пробелы
-        if re.match(r'^[а-яА-ЯёЁa-zA-Z0-9\s]+$', line):
-            filtered_lines.append(line.strip())
-
-    # Возвращаем строки, объединённые в одну строку через пробел
-    return " ".join(filtered_lines)
+    return text
 
 
 def capture_and_recognize(region):
@@ -74,17 +52,18 @@ def capture_and_recognize(region):
         processed_image = preprocess_image(screenshot)
 
         # Perform OCR
-        custom_config = r'--oem 3 --psm 6'
-        text = pytesseract.image_to_string(processed_image, lang='rus', config=custom_config)
+        custom_config = read_setting("capture_and_recognize.custom_config")
+        lang = read_setting("capture_and_recognize.lang")
+        text = pytesseract.image_to_string(processed_image, lang=lang, config=custom_config)
 
         logging.debug(f"Recognized text (before filtering):\n{text}")
 
         # Filter the recognized text
-        #filtered_text = filter_recognized_text(text)
+        filtered_text = filter_recognized_text(text)
 
-        logging.debug(f"Recognized text (after filtering):\n{text}")
+        logging.debug(f"Recognized text (after filtering):\n{filtered_text}")
 
-        return text
+        return filtered_text
 
     except Exception as e:
         logging.error(f"Error during capture and recognition: {e}")

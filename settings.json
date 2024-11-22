@@ -1,0 +1,6 @@
+{
+  "capture_and_recognize": {
+    "lang": "rus+ukr+pol",
+    "custom_config": "--oem 3 --psm 6"
+  }
+}
