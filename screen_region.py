@@ -1,4 +1,4 @@
-import log
+from log import log_and_print
 import json
 import sys
 import tkinter as tk
@@ -63,53 +63,53 @@ def select_region():
     root = tk.Tk()
     root.attributes("-topmost", True)
     root.attributes("-fullscreen", True)
+    root.attributes("-alpha", 0.2)
+    root.configure(background='black')
 
-    system = platform.system()
-
-    if system == 'Windows':
-        # Решение для Windows
-        root.attributes("-transparentcolor", 'grey')
-        root.config(bg='grey')
-        canvas = tk.Canvas(root, cursor="crosshair", bg='grey')
-    else:
-        # Решение для других систем
-        root.attributes("-alpha", 0.2)
-        canvas = tk.Canvas(root, cursor="crosshair", bg='black')
-
+    canvas = tk.Canvas(root, cursor="crosshair", bg='black')
     canvas.pack(fill=tk.BOTH, expand=True)
 
-    selection = {'x1': None, 'y1': None, 'x2': None, 'y2': None}
     rect = None
+    start_x = None
+    start_y = None
+    abs_start_x = None
+    abs_start_y = None
+    abs_end_x = None
+    abs_end_y = None
 
     def on_mouse_down(event):
-        selection['x1'] = event.x_root
-        selection['y1'] = event.y_root
+        nonlocal start_x, start_y, abs_start_x, abs_start_y
+        start_x = event.x
+        start_y = event.y
+        abs_start_x = event.x_root
+        abs_start_y = event.y_root
 
     def on_mouse_move(event):
         nonlocal rect
         if rect:
             canvas.delete(rect)
-        selection['x2'] = event.x_root
-        selection['y2'] = event.y_root
         rect = canvas.create_rectangle(
-            selection['x1'], selection['y1'], selection['x2'], selection['y2'], outline='red', width=2
+            start_x, start_y, event.x, event.y, outline='red', width=2
         )
 
     def on_mouse_up(event):
-        selection['x2'] = event.x_root
-        selection['y2'] = event.y_root
-        root.destroy()
+        nonlocal abs_end_x, abs_end_y
+        abs_end_x = event.x_root
+        abs_end_y = event.y_root
+        root.quit()  # Выходим из mainloop
 
     canvas.bind("<ButtonPress-1>", on_mouse_down)
     canvas.bind("<B1-Motion>", on_mouse_move)
     canvas.bind("<ButtonRelease-1>", on_mouse_up)
 
     root.mainloop()
+    root.destroy()  # Закрываем окно после выхода из mainloop
 
-    x1 = min(selection['x1'], selection['x2'])
-    y1 = min(selection['y1'], selection['y2'])
-    x2 = max(selection['x1'], selection['x2'])
-    y2 = max(selection['y1'], selection['y2'])
+    # Вычисляем координаты после завершения mainloop
+    x1 = min(abs_start_x, abs_end_x)
+    y1 = min(abs_start_y, abs_end_y)
+    x2 = max(abs_start_x, abs_end_x)
+    y2 = max(abs_start_y, abs_end_y)
     width = x2 - x1
     height = y2 - y1
     log_and_print(f"Новая область выбрана: left={x1}, top={y1}, width={width}, height={height}")

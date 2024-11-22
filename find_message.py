@@ -1,5 +1,5 @@
 import os
-import log
+from log import log_and_print
 
 def load_previous_text(file_name='previous_text.txt'):
     log_and_print(f"Загрузка предыдущего текста из файла {file_name}")

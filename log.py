@@ -1,8 +1,9 @@
-import log
+import logging
+from datetime import datetime
 
 # Настройка логирования
 logging.basicConfig(
-    filename='facebook_automation.log',
+    filename='log.log',
     filemode='w',
     format='%(asctime)s - %(levelname)s - %(message)s',
     level=logging.INFO,
@@ -10,7 +11,8 @@ logging.basicConfig(
 )
 
 def log_and_print(message, level='info'):
-    print(message)
+    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+    print(f"[{current_time}] {message}")
     if level == 'info':
         logging.info(message)
     elif level == 'warning':

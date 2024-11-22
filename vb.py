@@ -127,12 +127,12 @@ def main():
                 log_and_print("Обнаружено изменение в тексте.")
                 added_text = find_addition(old_text, new_text)
                 if added_text:
-                    log_and_print(f"Отправка нового текста в Telegram: {added_text}")
-                    send_to_telegram(added_text)
+                    log_and_print(f"Отправка нового текста в Facebook: {added_text}")
+                    process_one_message(added_text)
                     old_text = new_text
                     save_current_text(old_text)
                 else:
-                    log_and_print.warning("Не удалось определить добавленный текст.")
+                    log_and_print("Не удалось определить добавленный текст.")
             else:
                 log_and_print("Изменений в тексте не обнаружено.")
 
@@ -142,7 +142,7 @@ def main():
     except KeyboardInterrupt:
         log_and_print("Прерывание программы пользователем.")
     except Exception as e:
-        log_and_print.error(f"Произошла ошибка: {e}")
+        log_and_print(f"Произошла ошибка: {e}")
     finally:
         save_current_text(new_text)
         listener.stop()

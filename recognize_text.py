@@ -1,4 +1,4 @@
-import log
+from log import log_and_print
 import pyautogui
 import pytesseract
 import re
@@ -39,7 +39,6 @@ def preprocess_image(pil_image):
 
 
 def filter_recognized_text(text):
-
     return text
 
 
@@ -49,7 +48,7 @@ def capture_and_recognize(region):
         # Take a screenshot
         screenshot = pyautogui.screenshot(region=region)
         # Preprocess the image (if needed)
-        processed_image = preprocess_image(screenshot)
+        processed_image = screenshot #preprocess_image(
 
         # Perform OCR
         custom_config = read_setting("capture_and_recognize.custom_config")
