@@ -14,6 +14,18 @@ processing_semaphore = asyncio.Semaphore(1)
 telegram_channel_name = None
 telegram_channel_id = None
 
+def init_tg():
+    global name_viber
+    global service_channel_name
+
+    name_viber = read_setting('name_viber')
+    service_channels = read_setting('service_tg_channels')
+    if not service_channels:
+        log_and_print("Список сервісних каналів пуст.", 'warning')
+        return
+    service_channel_data = service_channels[0]
+    service_channel_name = service_channel_data.get('service_channel_name')
+
 async def send_message_to_tg_channel(bot_client, channel_name, message_text, image_path=None):
     try:
         # Получаем объект канала
@@ -64,42 +76,43 @@ async def start_listening(bot_client):
 
 async def startTgClient(fb_creds, fb_groups, settings):
 
-    creds = load_json('creds.json')
-    tg_creds = creds.get('tg_creds', {})
-    log_and_print(f"tg_creds {tg_creds}.", 'info')
+    try:
+        creds = load_json('creds.json')
+        tg_creds = creds.get('tg_creds', {})
+        log_and_print(f"tg_creds {tg_creds}.", 'info')
 
-    bot_token = tg_creds.get('bot_token')
-    api_id = tg_creds.get('api_id')
-    api_hash = tg_creds.get('api_hash')
+        bot_token = tg_creds.get('bot_token')
+        api_id = tg_creds.get('api_id')
+        api_hash = tg_creds.get('api_hash')
 
-    #sendOneMessagessToFb("", fb_creds, fb_groups, image_path="E:\\ttofb\\downloads\\31.jpg")
+        #sendOneMessagessToFb("", fb_creds, fb_groups, image_path="E:\\ttofb\\downloads\\31.jpg")
 
-    if not (telegram_channel_name and bot_token and api_id and api_hash):
-        log_and_print("Недостаточно данных для подключения к Telegram.", 'error')
-        return
+        if not (telegram_channel_name and bot_token and api_id and api_hash):
+            log_and_print("Недостаточно данных для подключения к Telegram.", 'error')
+            return
 
-    # Создаем клиент Telethon
-    bot_client = TelegramClient('bot_session', api_id, api_hash)
+        # Создаем клиент Telethon
+        bot_client = TelegramClient('bot_session', api_id, api_hash)
 
-    while True:
-        try:
-            log_and_print(f"Запуск клиента с токеном: {bot_token}", 'info')
-            await bot_client.start(bot_token=bot_token)
-            log_and_print("Клиент успешно запущен.", 'info')
+        while True:
+            try:
+                log_and_print(f"Запуск клиента с токеном: {bot_token}", 'info')
+                await bot_client.start(bot_token=bot_token)
+                log_and_print("Клиент успешно запущен.", 'info')
 
-            # Получаем информацию о боте
-            bot_info = await bot_client.get_me()
+                # Получаем информацию о боте
+                bot_info = await bot_client.get_me()
 
-            log_and_print(f"Имя бота: {bot_info.first_name}", 'info')
-            log_and_print(f"Юзернейм бота: {bot_info.username}", 'info')
+                log_and_print(f"Имя бота: {bot_info.first_name}", 'info')
+                log_and_print(f"Юзернейм бота: {bot_info.username}", 'info')
 
-            break  # Выход из цикла, если подключение успешно
-        except RPCError as e:
-            log_and_print(f"Ошибка подключения к Telegram: {e}. Повторная попытка через 10 секунд...", 'error')
-            await asyncio.sleep(10)  # Задержка перед повторной попыткой
-        except Exception as e:
-            log_and_print(f"Непредвиденная ошибка: {e}. Повторная попытка через 10 секунд...", 'error')
-            await asyncio.sleep(10)  # Задержка
+                break  # Выход из цикла, если подключение успешно
+            except RPCError as e:
+                log_and_print(f"Ошибка подключения к Telegram: {e}. Повторная попытка через 10 секунд...", 'error')
+                await asyncio.sleep(10)  # Задержка перед повторной попыткой
+            except Exception as e:
+                log_and_print(f"Непредвиденная ошибка: {e}. Повторная попытка через 10 секунд...", 'error')
+                await asyncio.sleep(10)  # Задержка
 
     except Exception as e:
         log_and_print(f"Ошибка при запуске клиента: {e}", 'error')

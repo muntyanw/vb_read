@@ -1,4 +1,4 @@
-import logging
+import log
 import pyautogui
 import pytesseract
 import re
@@ -56,15 +56,15 @@ def capture_and_recognize(region):
         lang = read_setting("capture_and_recognize.lang")
         text = pytesseract.image_to_string(processed_image, lang=lang, config=custom_config)
 
-        logging.debug(f"Recognized text (before filtering):\n{text}")
+        log_and_print(f"Recognized text (before filtering):\n{text}")
 
         # Filter the recognized text
         filtered_text = filter_recognized_text(text)
 
-        logging.debug(f"Recognized text (after filtering):\n{filtered_text}")
+        log_and_print(f"Recognized text (after filtering):\n{filtered_text}")
 
         return filtered_text
 
     except Exception as e:
-        logging.error(f"Error during capture and recognition: {e}")
+        log_and_print(f"Error during capture and recognition: {e}")
         return None

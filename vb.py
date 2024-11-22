@@ -11,7 +11,7 @@ import asyncio
 from log import log_and_print
 from browser_utils import sendOneMessagessToFb
 from utils import read_setting, load_json
-from tg import send_message_to_tg_channel
+from tg import send_message_to_tg_channel, init_tg
 from log import log_and_print
 
 old_text = ""
@@ -24,11 +24,6 @@ service_channel_data = None
 service_channel_name = None
 name_viber = None
 bot_client = None
-
-def send_to_telegram(message):
-    # Ваша реализация отправки сообщения в Telegram
-    log_and_print(f"Отправка сообщения в Telegram:\n{message}")
-    pass  # Здесь должен быть ваш код отправки
 
 async def process_one_message(message_text):
 
@@ -50,19 +45,6 @@ async def process_one_message(message_text):
         except Exception as e:
             log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')
             await asyncio.sleep(10)  # Задержка
-
-def init_tg():
-    global name_viber
-    global service_channel_name
-
-    name_viber = read_setting('name_viber')
-    service_channels = read_setting('service_tg_channels')
-    if not service_channels:
-        log_and_print("Список сервісних каналів пуст.", 'warning')
-        return
-    service_channel_data = service_channels[0]
-    service_channel_name = service_channel_data.get('service_channel_name')
-
 
 def main():
     log_and_print("Запуск программы")

@@ -1,4 +1,4 @@
-import logging
+import log
 
 # Настройка логирования
 logging.basicConfig(
@@ -14,6 +14,6 @@ def log_and_print(message, level='info'):
     if level == 'info':
         logging.info(message)
     elif level == 'warning':
-        logging.warning(message)
+        log_and_print(message)
     elif level == 'error':
-        logging.error(message)
+        log_and_print(message)
