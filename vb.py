@@ -7,32 +7,70 @@ from screen_region import *
 from recognize_text import capture_and_recognize
 from find_message import *
 import time
+import asyncio
+from log import log_and_print
+from browser_utils import sendOneMessagessToFb
+from utils import read_setting, load_json
+from tg import send_message_to_tg_channel
+from log import log_and_print
 
 old_text = ""
+# Глобальный флаг для предотвращения двойной реакции
+processed_messages = set()
+# Семафор для последовательной обработки сообщений
+processing_semaphore = asyncio.Semaphore(1)
 
-# Настройка логирования
-logging.basicConfig(
-    level=logging.DEBUG,  # Уровень логирования DEBUG для подробной информации
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler('vbtofb.log', encoding='utf-8'),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+service_channel_data = None
+service_channel_name = None
+name_viber = None
+bot_client = None
 
 def send_to_telegram(message):
     # Ваша реализация отправки сообщения в Telegram
-    logging.info(f"Отправка сообщения в Telegram:\n{message}")
+    log_and_print(f"Отправка сообщения в Telegram:\n{message}")
     pass  # Здесь должен быть ваш код отправки
+
+async def process_one_message(message_text):
+
+    # Добавляем ID сообщения в список обработанных
+    processed_messages.add(message_text)
+
+    # Обрабатываем сообщение последовательно с использованием семафора
+    async with processing_semaphore:
+        try:
+            log_and_print(f'Обработка сообщения: {message_text}', 'info')
+
+            await send_message_to_tg_channel(bot_client, service_channel_name,
+                                             f"Відправляєм повідомлення з Вайбера {name_viber}  - {message_text} - цикл по группам почався.")
+
+            sendOneMessagessToFb(message_text)
+
+            await send_message_to_tg_channel(bot_client, service_channel_name, f"Вайбер {name_viber} - Цикл по групам закінчен.")
+
+        except Exception as e:
+            log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')
+            await asyncio.sleep(10)  # Задержка
+
+def init_tg():
+    global name_viber
+    global service_channel_name
+
+    name_viber = read_setting('name_viber')
+    service_channels = read_setting('service_tg_channels')
+    if not service_channels:
+        log_and_print("Список сервісних каналів пуст.", 'warning')
+        return
+    service_channel_data = service_channels[0]
+    service_channel_name = service_channel_data.get('service_channel_name')
 
 
 def main():
-    logging.info("Запуск программы")
+    log_and_print("Запуск программы")
 
     # Load initial region from JSON
     left, top, width, height = read_region_from_json()
     region = [left, top, width, height]
-    logging.debug(f"Область для захвата: {region}")
+    log_and_print(f"Область для захвата: {region}")
 
     # Draw the initial rectangle on screen
     root = draw_rectangle_on_screen(*region)
@@ -52,18 +90,18 @@ def main():
         print("Подгоните окно Viber под новый красный прямоугольник и нажмите 'Enter' в консоли.")
         input()
     root.destroy()
-    logging.debug("Окно с прямоугольником закрыто.")
+    log_and_print("Окно с прямоугольником закрыто.")
 
     # Reset current text after region update
     old_text = load_previous_text()
-    logging.debug(f"[main] old_text: {old_text}.")
+    log_and_print(f"[main] old_text: {old_text}.")
 
     running = True
     region_lock = threading.Lock()
 
     def signal_handler(sig, frame):
         nonlocal running
-        logging.info("Получен сигнал завершения. Остановка программы.")
+        log_and_print("Получен сигнал завершения. Остановка программы.")
         running = False
 
     signal.signal(signal.SIGINT, signal_handler)
@@ -72,7 +110,7 @@ def main():
     def on_press(key):
         try:
             if key.char == 'r':
-                logging.info("Нажата клавиша 'r' для изменения области экрана.")
+                log_and_print("Нажата клавиша 'r' для изменения области экрана.")
                 with region_lock:
                     left, top, width, height = select_region()
                     region[:] = [left, top, width, height]
@@ -81,15 +119,17 @@ def main():
                     print("Подгоните окно Viber под новый красный прямоугольник и нажмите 'Enter' в консоли.")
                     input()
                     root.destroy()
-                    logging.debug("Окно с новым прямоугольником закрыто.")
+                    log_and_print("Окно с новым прямоугольником закрыто.")
                     time.sleep(3)
                     # Reset current text after region update
                     old_text = capture_and_recognize(region)
-                    logging.debug(f"[main] old_text: {old_text}.")
+                    log_and_print(f"[main] old_text: {old_text}.")
                     save_current_text(old_text)
 
         except AttributeError:
             pass  # Ignore non-character key presses
+
+    init_tg()
 
     # Start keyboard listener in a separate thread
     listener = keyboard.Listener(on_press=on_press)
@@ -102,29 +142,29 @@ def main():
                 new_text = capture_and_recognize(region)
 
             if new_text and new_text != old_text:
-                logging.debug("Обнаружено изменение в тексте.")
+                log_and_print("Обнаружено изменение в тексте.")
                 added_text = find_addition(old_text, new_text)
                 if added_text:
-                    logging.info(f"Отправка нового текста в Telegram: {added_text}")
+                    log_and_print(f"Отправка нового текста в Telegram: {added_text}")
                     send_to_telegram(added_text)
                     old_text = new_text
                     save_current_text(old_text)
                 else:
-                    logging.warning("Не удалось определить добавленный текст.")
+                    log_and_print.warning("Не удалось определить добавленный текст.")
             else:
-                logging.debug("Изменений в тексте не обнаружено.")
+                log_and_print("Изменений в тексте не обнаружено.")
 
             # Delay before the next capture
             time.sleep(5)
 
     except KeyboardInterrupt:
-        logging.info("Прерывание программы пользователем.")
+        log_and_print("Прерывание программы пользователем.")
     except Exception as e:
-        logging.error(f"Произошла ошибка: {e}")
+        log_and_print.error(f"Произошла ошибка: {e}")
     finally:
         save_current_text(new_text)
         listener.stop()
-        logging.info("Программа завершена.")
+        log_and_print("Программа завершена.")
 
 
 if __name__ == '__main__':
