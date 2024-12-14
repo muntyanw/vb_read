@@ -1,5 +1,4 @@
 
-import time
 import signal
 from pynput import keyboard  # Для перехвата нажатия клавиш
 import threading  # Для запуска слушателя клавиатуры в отдельном потоке
@@ -8,45 +7,16 @@ from recognize_text import capture_and_recognize
 from find_message import *
 import time
 import asyncio
-from log import log_and_print
-from browser_utils import sendOneMessagessToFb
-from utils import read_setting, load_json
-from tg import send_message_to_tg_channel, init_tg
+from tg import send_message_to_tg_channel, startTgClient
 from log import log_and_print
 
 old_text = ""
-# Глобальный флаг для предотвращения двойной реакции
-processed_messages = set()
-# Семафор для последовательной обработки сообщений
-processing_semaphore = asyncio.Semaphore(1)
 
-service_channel_data = None
-service_channel_name = None
-name_viber = None
-bot_client = None
+async def main():
 
-async def process_one_message(message_text):
+    global bot_client
+    new_text = ""
 
-    # Добавляем ID сообщения в список обработанных
-    processed_messages.add(message_text)
-
-    # Обрабатываем сообщение последовательно с использованием семафора
-    async with processing_semaphore:
-        try:
-            log_and_print(f'Обработка сообщения: {message_text}', 'info')
-
-            await send_message_to_tg_channel(bot_client, service_channel_name,
-                                             f"Відправляєм повідомлення з Вайбера {name_viber}  - {message_text} - цикл по группам почався.")
-
-            sendOneMessagessToFb(message_text)
-
-            await send_message_to_tg_channel(bot_client, service_channel_name, f"Вайбер {name_viber} - Цикл по групам закінчен.")
-
-        except Exception as e:
-            log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')
-            await asyncio.sleep(10)  # Задержка
-
-def main():
     log_and_print("Запуск программы")
 
     # Load initial region from JSON
@@ -111,7 +81,7 @@ def main():
         except AttributeError:
             pass  # Ignore non-character key presses
 
-    init_tg()
+    bot_client, name_viber, channels, channel_names = await startTgClient()
 
     # Start keyboard listener in a separate thread
     listener = keyboard.Listener(on_press=on_press)
@@ -123,21 +93,24 @@ def main():
                 # Capture and recognize text from the selected region
                 new_text = capture_and_recognize(region)
 
-            if new_text and new_text != old_text:
+            if new_text and are_texts_different(new_text, old_text):
                 log_and_print("Обнаружено изменение в тексте.")
                 added_text = find_addition(old_text, new_text)
                 if added_text:
                     log_and_print(f"Отправка нового текста в Facebook: {added_text}")
-                    process_one_message(added_text)
-                    old_text = new_text
-                    save_current_text(old_text)
+                    for channel_name in channel_names:
+                        await process_one_message(added_text, bot_client, channel_name, name_viber)
                 else:
                     log_and_print("Не удалось определить добавленный текст.")
+
+                old_text = new_text
+                save_current_text(old_text)
+
             else:
                 log_and_print("Изменений в тексте не обнаружено.")
 
             # Delay before the next capture
-            time.sleep(5)
+            time.sleep(15)
 
     except KeyboardInterrupt:
         log_and_print("Прерывание программы пользователем.")

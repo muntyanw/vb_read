@@ -7,7 +7,7 @@ def load_previous_text(file_name='previous_text.txt'):
         try:
             with open(file_name, 'r', encoding='utf-8') as f:
                 text = f.read()
-            log_and_print("Предыдущий текст успешно загружен")
+            log_and_print(f"Предыдущий текст успешно загружен text = {text}")
             return text
         except Exception as e:
             log_and_print(f"Ошибка при чтении файла {file_name}: {e}")
@@ -21,11 +21,33 @@ def save_current_text(text, file_name='previous_text.txt'):
     try:
         with open(file_name, 'w', encoding='utf-8') as f:
             f.write(text)
-        log_and_print("Текущий текст успешно сохранён")
+        log_and_print(f"Текущий текст успешно сохранён text = {text}")
     except Exception as e:
         log_and_print(f"Ошибка при сохранении текста в файл {file_name}: {e}")
 
-def find_addition(old_text, new_text, match_ratio=0.8):
+def are_texts_different(text1, text2, threshold=0.2):
+    # Приводим тексты к одному регистру и удаляем лишние пробелы
+    text1 = text1.strip().lower()
+    text2 = text2.strip().lower()
+
+    # Находим длину более длинного текста
+    max_length = max(len(text1), len(text2))
+
+    # Если оба текста пусты, считаем их одинаковыми
+    if max_length == 0:
+        return False
+
+    # Подсчитываем количество отличий
+    differences = sum(1 for a, b in zip(text1, text2) if a != b)
+    differences += abs(len(text1) - len(text2))  # Учитываем разницу в длине
+
+    # Вычисляем долю различий
+    difference_ratio = differences / max_length
+
+    # Возвращаем результат на основе порога
+    return difference_ratio > threshold
+
+def find_addition(old_text, new_text, match_ratio=0.6):
     """
     Ищет новый добавленный текст в новом тексте относительно старого текста.
     :param old_text: Старый текст.
@@ -70,12 +92,12 @@ def find_addition(old_text, new_text, match_ratio=0.8):
             return addition
 
     # Если совпадение не найдено
-    log_and_print("Совпадение не найдено.")
-    return None
+    log_and_print("Совпадение не найдено. Значит єто полностью новий текст.")
+    return new_text
 
 
     # Извлекаем часть нового текста, которая идёт после найденной подстроки
     addition_start = pos + len(last_part)
     addition = new_text[addition_start:].strip()
 
-    return addition
+    return addition.strip()

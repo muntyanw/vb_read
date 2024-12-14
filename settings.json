@@ -1,19 +1,8 @@
 {
-  "name_viber": "Samarkand",
+  "name_viber": "Канал1",
   "capture_and_recognize": {
     "lang": "rus+ukr+pol",
     "custom_config": "--oem 3 --psm 6"
   },
-   "fone_colors": [
-    "Светло-серая иллюстрация, фоновое изображение",
-    "Сплошной бирюзовый, фон",
-    "Розовая иллюстрация, фоновое изображение",
-    "Розово-желтый градиент, фоновое изображение"
-  ],
-  "chromedriver_port": 9223,
-  "service_tg_channels": [
-    {
-      "service_channel_name": -1002260176427
-    }
-  ]
+   "freq_screen_second": 10
 }

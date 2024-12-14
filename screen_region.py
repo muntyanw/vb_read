@@ -2,7 +2,6 @@ from log import log_and_print
 import json
 import sys
 import tkinter as tk
-import platform
 
 def read_region_from_json(json_file='region.json'):
     log_and_print(f"Чтение области экрана из файла {json_file}")
