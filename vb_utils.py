@@ -90,18 +90,12 @@ def left_click(x=0, y=0):
     mouse.click(button="left", coords=(x, y))
     log_and_print(f"Left-clicked at ({x}, {y}) on the chat panel")
 
-def isText(menuList):
-    return "Копіювати повідомлення" in menuList
-
-def isImage(menuList):
-    return "Копіювати зображення" in menuList
-
 # Глобальный флаг для предотвращения двойной реакции
 processed_messages = set()
 # Семафор для последовательной обработки сообщений
 processing_semaphore = asyncio.Semaphore(1)
 
-async def process_one_message(message_text, bot_client, channel_name, name_viber):
+async def process_one_message(message_text, bot_client, channel_name, name_viber, image_path):
 
     log_and_print(f"bot_client: {bot_client}", 'info')
     log_and_print(f"service_channel_name: {channel_name}", 'info')
@@ -114,7 +108,7 @@ async def process_one_message(message_text, bot_client, channel_name, name_viber
         try:
             log_and_print(f'Обработка сообщения: {message_text}', 'info')
 
-            await send_message_to_tg_channel(bot_client, channel_name, message_text)
+            await send_message_to_tg_channel(bot_client, channel_name, message_text, image_path)
 
         except Exception as e:
             log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')

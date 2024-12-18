@@ -324,6 +324,7 @@ def find_text_upward_with_highlight(start_x, start_y, y_max, height, template_he
 
         # Шаг вверх
         current_y -= step
+        # time.sleep(3)
 
     cv2.destroyAllWindows()  # Закрываем окна после завершения
     return None
