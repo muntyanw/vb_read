@@ -10,7 +10,6 @@ def clear_file(file_path):
     except Exception as e:
         print(f"Error clearing file '{file_path}': {e}")
 
-
 def read_setting(field_path):
     """
     Reads a specific field's value from a JSON settings file.
@@ -34,6 +33,36 @@ def read_setting(field_path):
     except (FileNotFoundError, KeyError, json.JSONDecodeError) as e:
         print(f"Error reading field '{field_path}' from '{file_path}': {e}")
         return None
+
+def write_setting(field_path, new_value):
+    """
+    Writes a new value to a specific field in a JSON settings file.
+
+    :param field_path: Dot-separated path to the field (e.g., "capture_and_recognize.lang").
+    :param new_value: The new value to set for the specified field.
+    """
+    file_path = "settings.json"
+
+    try:
+        # Open and load the JSON file
+        with open(file_path, 'r') as file:
+            settings = json.load(file)
+
+        # Navigate to the desired field and set the new value
+        keys = field_path.split('.')
+        value = settings
+        for key in keys[:-1]:  # Traverse to the second-to-last key
+            value = value[key]
+
+        value[keys[-1]] = new_value  # Set the new value at the final key
+
+        # Write the modified settings back to the file
+        with open(file_path, 'w') as file:
+            json.dump(settings, file, indent=4)
+        log_and_print(f"[write_setting] Field '{field_path}' updated successfully. new_value = {new_value}")
+
+    except (FileNotFoundError, KeyError, json.JSONDecodeError) as e:
+        log_and_print(f"[write_setting] Error writing field '{field_path}' to '{file_path}': {e}")
 
 def load_json(file_path):
     log_and_print(f"Загрузка данных из JSON файла {file_path}.", 'info')

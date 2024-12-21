@@ -45,7 +45,6 @@ def right_click_on_panel(x_offset=0, y_offset=0):
     log_and_print(f"Right-clicked at ({center_x}, {center_y}) on the chat panel")
     return center_x, center_y
 
-
 def right_click(app, window_title, x=0, y=0):
     """
     Устанавливает фокус на окно, а затем кликает правой кнопкой мыши по указанным координатам.
@@ -114,7 +113,6 @@ async def process_one_message(message_text, bot_client, channel_name, name_viber
             log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')
             await asyncio.sleep(10)  # Задержка
 
-
 def reformat_telegram_text(input_text):
     """
     Takes a text, finds all text enclosed in single asterisks (*),
@@ -133,3 +131,4 @@ def reformat_telegram_text(input_text):
     formatted_text = re.sub(pattern, r'**\1**', input_text)
 
     return formatted_text
+

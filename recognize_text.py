@@ -9,31 +9,45 @@ from PIL import Image
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-def preprocess_image(pil_image):
+import cv2
+
+
+def preprocess_image(image_np):
     """
-    Preprocess the image to make messages visible while hiding timestamps and checkmarks.
+    Преобразует изображение для улучшения качества OCR.
+
+    :param image_np: Изображение в формате NumPy массива (RGB)
+    :return: Обработанное изображение в оттенках серого
     """
-    # Convert PIL Image to OpenCV format
-    image = np.array(pil_image)
+    # Проверяем размерность массива
+    if len(image_np.shape) != 3 or image_np.shape[2] != 3:
+        raise ValueError("Изображение должно быть цветным (3 канала).")
 
-    # Convert to grayscale for easier processing
-    gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+    # Конвертируем из RGB в BGR
+    image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
-    # Apply CLAHE (Contrast Limited Adaptive Histogram Equalization)
-    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-    enhanced_image = clahe.apply(gray)  # Apply CLAHE to enhance contrast
+    # Конвертируем в оттенки серого
+    gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
 
-    # Detect areas with timestamps and checkmarks (using brightness threshold)
-    _, binary = cv2.threshold(enhanced_image, 200, 255, cv2.THRESH_BINARY)
+    # Улучшаем контрастность с помощью CLAHE
+    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))  # Увеличен clipLimit для большего усиления контраста
+    enhanced = clahe.apply(gray)
 
-    # Define a mask to remove timestamps and checkmarks
-    mask = np.zeros_like(binary)
+    # Адаптивная бинаризация с измененными параметрами
+    thresh = cv2.adaptiveThreshold(enhanced, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                   cv2.THRESH_BINARY_INV, 15, 10)  # Используем инверсию и меньший блок
 
-    # Apply the mask to hide timestamps and checkmarks
-    processed = cv2.bitwise_and(enhanced_image, enhanced_image, mask=~mask)
+    # Морфологическое закрытие для заполнения пробелов внутри букв
+    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
+    closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
 
-    # Convert back to PIL Image format
-    return Image.fromarray(processed)
+    # Удаление небольших шумов с помощью морфологического открытия
+    opened = cv2.morphologyEx(closed, cv2.MORPH_OPEN, kernel, iterations=1)
+
+    # Опционально: применение билинейного фильтра для сглаживания краев
+    # opened = cv2.bilateralFilter(opened, 9, 75, 75)
+
+    return opened
 
 def filter_recognized_text(text):
     """
@@ -53,10 +67,10 @@ def showImage(processed_image, region):
     processed_array = np.array(processed_image)
     window_name = "Processed Image"
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-    cv2.moveWindow(window_name, region[0], region[1])
+    cv2.moveWindow(window_name, 10, 10)
     cv2.imshow(window_name, processed_array)
     cv2.waitKey(1)
-    cv2.waitKey(30000)
+    cv2.waitKey(10000)
     cv2.destroyAllWindows()
 
 def capture_and_recognize(region):
@@ -89,38 +103,26 @@ def capture_and_recognize(region):
         log_and_print(f"Error during capture and recognition: {e}")
         return None
 
-
-def capture_and_find_multiple_text_coordinates(region, search_phrases):
-    """
-    Выполняет скриншот заданного региона экрана, распознаёт текст,
-    и для каждого ключа (фразы) возвращает координаты (x, y, w, h),
-    если фраза найдена. Если не найдена – возвращает None.
-
-    Параметры:
-    - region: кортеж (left, top, width, height) для pyautogui.screenshot
-    - search_phrases: словарь {ключ: искомая_фраза}, где:
-        ключ - название/идентификатор фразы
-        искомая_фраза - строка, которую нужно найти на изображении
-
-    Возвращает:
-    - result_dict: словарь {ключ: (x, y, w, h) или None},
-      для каждого искомого текста.
-    """
+def capture_and_find_multiple_text_coordinates(region, search_phrases, visualize = False):
     log_and_print(f"[capture_and_find_multiple_text_coordinates] region: {region}, search_phrases: {search_phrases}")
     try:
         cv2.destroyAllWindows()
-        # Делаем скриншот заданного региона
-        screenshot = pyautogui.screenshot(region=region)
 
-        # Предобработка изображения
-        processed_image = preprocess_image(screenshot)
+        # Захват скриншота
+        screenshot_np = take_screenshot(region)
+        log_and_print(f"[capture_and_find_text_coordinates] Скриншот захвачен успешно.")
 
-        # Считываем настройки для Tesseract
-        custom_config = read_setting("capture_and_recognize.custom_config")
-        lang = read_setting("capture_and_recognize.lang")
+        # Предварительная обработка изображения
+        processed_image = preprocess_image(screenshot_np)
+        log_and_print(f"[capture_and_find_text_coordinates] Изображение обработано успешно.")
 
-        # Получаем данные с координатами и текстом
-        data = pytesseract.image_to_data(processed_image, lang=lang, config=custom_config, output_type=pytesseract.Output.DICT)
+        # Выполнение OCR с получением позиций
+        data = perform_ocr_with_positions(processed_image, lang='rus')
+
+        # Визуализация результатов OCR (опционально)
+        if visualize:
+            visualize_ocr_results(processed_image, data)
+
         log_and_print(f"Результат распознания меню data = {data}")
         # Подготовим словарь результатов
         # Изначально для всех ключей значение None
@@ -128,16 +130,21 @@ def capture_and_find_multiple_text_coordinates(region, search_phrases):
 
         # Перебираем каждый ключ-фразу из словаря поиска
         for key, phrase in search_phrases.items():
+            log_and_print(f"phrase = {phrase}")
+            search_word_lower = phrase.lower()
             # Проходим по всем распознанным словам
-            for i, recognized_text in enumerate(data["text"]):
-                if recognized_text and phrase in recognized_text:
-                    # Если нашли совпадение, сохраняем координаты и выходим из цикла
-                    x = data["left"][i]
-                    y = data["top"][i]
-                    w = data["width"][i]
-                    h = data["height"][i]
-                    result_dict[key] = (x, y, w, h)
-                    break
+            for recognized in data:
+                log_and_print(f"word = {recognized["text"]}")
+                if recognized["text"]:
+                    word_lower = recognized["text"].lower()
+                    if search_word_lower == word_lower:
+                        # Если нашли совпадение, сохраняем координаты и выходим из цикла
+                        x = recognized["left"]
+                        y = recognized["top"]
+                        w = recognized["width"]
+                        h = recognized["height"]
+                        result_dict[key] = (x, y, w, h)
+                        break
 
         # Логируем результаты
         for k, coords in result_dict.items():
@@ -152,96 +159,129 @@ def capture_and_find_multiple_text_coordinates(region, search_phrases):
         log_and_print(f"Error during capture and coordinate recognition: {e}")
         return {key: None for key in search_phrases}
 
+def take_screenshot(region):
+    screenshot = pyautogui.screenshot(region=region)
+    image_np = np.array(screenshot)
+    return image_np
 
-def preprocess_image_for_purple_text(image):
-    """
-    Предобрабатывает изображение для выделения фиолетового текста.
+def preprocess_image(image_np):
+    # Проверяем размерность массива
+    if len(image_np.shape) != 3 or image_np.shape[2] != 3:
+        raise ValueError("Изображение должно быть цветным (3 канала).")
 
-    Параметры:
-    - image: изображение в формате PIL.Image
-
-    Возвращает:
-    - mask: бинарная маска фиолетового текста
-    """
-    # Конвертируем изображение из PIL в OpenCV формат (BGR)
-    image_np = np.array(image)
+    # Конвертируем из RGB в BGR
     image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
 
-    # Конвертируем в HSV цветовое пространство
-    hsv = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2HSV)
+    # Конвертируем в оттенки серого
+    gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
 
-    # Определяем диапазон фиолетового цвета в HSV
-    # Эти значения могут потребовать корректировки в зависимости от вашего изображения
-    lower_purple = np.array([130, 50, 50])
-    upper_purple = np.array([160, 255, 255])
+    # Улучшаем контрастность с помощью CLAHE (Contrast Limited Adaptive Histogram Equalization)
+    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+    enhanced = clahe.apply(gray)
 
-    # Создаем маску для фиолетового цвета
-    mask = cv2.inRange(hsv, lower_purple, upper_purple)
+    # Адаптивная бинаризация
+    thresh = cv2.adaptiveThreshold(enhanced, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                   cv2.THRESH_BINARY, 31, 2)
 
-    # Применяем морфологические операции для очистки маски
-    kernel = np.ones((3, 3), np.uint8)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel, iterations=2)
-    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel, iterations=1)
+    # Удаление небольших шумов с помощью морфологических операций
+    kernel = np.ones((1, 1), np.uint8)
+    cleaned = cv2.morphologyEx(thresh, cv2.MORPH_OPEN, kernel)
 
-    return mask
+    return cleaned
 
-def capture_and_find_text_coordinates(region, search_word, preprocess=True, case_sensitive=False):
+def perform_ocr_with_positions(image, lang='rus'):
+    custom_config = r'--oem 3 --psm 6'
+    data = pytesseract.image_to_data(image, lang=lang, config=custom_config, output_type=Output.DICT)
+
+    n_boxes = len(data['level'])
+    words_with_positions = []
+
+    for i in range(n_boxes):
+        if int(data['conf'][i]) > 60 and data['text'][i].strip() != "":
+            word_info = {
+                'text': data['text'][i],
+                'left': data['left'][i],
+                'top': data['top'][i],
+                'width': data['width'][i],
+                'height': data['height'][i],
+                'conf': data['conf'][i]
+            }
+            words_with_positions.append(word_info)
+
+    return words_with_positions
+
+def visualize_ocr_results(image, ocr_data):
     """
-    Выполняет скриншот заданного региона экрана, распознаёт текст,
-    и возвращает координаты всех вхождений заданного слова.
+    Отображает распознанные слова с их позициями на изображении.
 
-    Параметры:
-    - region: кортеж (left, top, width, height) для pyautogui.screenshot
-    - search_word: слово (строка), которое нужно найти на изображении
-    - preprocess: булевый флаг, указывающий, нужно ли предобрабатывать изображение
-    - case_sensitive: булевый флаг для учета регистра при поиске
-
-    Возвращает:
-    - coordinates: список кортежей (x, y, w, h), где каждое кортеж представляет координаты найденного слова
+    :param image: Обработанное изображение (оттенки серого)
+    :param ocr_data: Список слов с их позициями
     """
+    # Конвертируем обратно в BGR для отображения цветных рамок
+    image_bgr = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)
+
+    for word in ocr_data:
+        # Рисуем прямоугольник вокруг слова
+        cv2.rectangle(image_bgr,
+                      (word['left'], word['top']),
+                      (word['left'] + word['width'], word['top'] + word['height']),
+                      (0, 255, 0), 2)
+        # Наносим текст слова
+        cv2.putText(image_bgr, word['text'],
+                    (word['left'], word['top'] - 10),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.5, (0, 0, 255), 2, cv2.LINE_AA)
+
+    # Отображаем изображение
+    cv2.imshow("OCR Results", image_bgr)
+    cv2.waitKey(1)
+    input("Press key from continue")
+    cv2.destroyAllWindows()
+
+def capture_and_find_text_coordinates(region, search_words, preprocess=True, case_sensitive=False, visualize = False):
     try:
-        # Делает скриншот заданного региона
-        screenshot = pyautogui.screenshot(region=region)
+        # Захват скриншота
+        screenshot_np = take_screenshot(region)
+        log_and_print(f"[capture_and_find_text_coordinates] Скриншот захвачен успешно.")
 
-        # Предобработка изображения (по желанию)
-        if preprocess:
-            processed_image = preprocess_image(screenshot)
+        if preprocess :
+            # Предварительная обработка изображения
+            processed_image = preprocess_image(screenshot_np)
+            log_and_print(f"[capture_and_find_text_coordinates] Изображение обработано успешно.")
         else:
-            # Конвертируем изображение из PIL в OpenCV формат без предобработки
-            processed_image = cv2.cvtColor(cv2.cvtColor(np.array(screenshot), cv2.COLOR_RGB2BGR), cv2.COLOR_BGR2GRAY)
+            processed_image = screenshot_np
 
-        #showImage(processed_image, region)
+        # Выполнение OCR с получением позиций
+        ocr_results = perform_ocr_with_positions(processed_image, lang='rus')
 
-        # Настройки для Tesseract
-        custom_config = r'--oem 3 --psm 6'  # OEM 3: Default, based on what is available. PSM 6: Assume a single uniform block of text.
-        lang = 'rus'  # Укажите нужные языки, например, английский и украинский
-
-        # Выполняем распознавание текста с данными о позициях
-        data = pytesseract.image_to_data(processed_image, lang=lang, config=custom_config, output_type=Output.DICT)
+        # Визуализация результатов OCR (опционально)
+        if visualize:
+            visualize_ocr_results(processed_image, ocr_results)
 
         # Подготавливаем список для хранения координат
         coordinates = []
 
         # Проходим по всем распознанным словам
-        for i, word in enumerate(data['text']):
-            log_and_print(f"word: {word}")
-            if not word:
+        for word in ocr_results:
+            log_and_print(f"word: {word['text']}")
+            if not word['text']:
                 continue  # Пропускаем пустые строки
 
             # Обрабатываем регистр в зависимости от флага
-            if not case_sensitive:
-                word_lower = word.lower()
-                search_word_lower = search_word.lower()
-            else:
-                word_lower = word
-                search_word_lower = search_word
+            for search_word in search_words:
+                if not case_sensitive:
+                    word_lower = word['text'].lower()
+                    search_word_lower = search_word.lower()
+                else:
+                    word_lower = word['text']
+                    search_word_lower = search_word
 
-            if search_word_lower in word_lower:
-                x = data['left'][i]
-                y = data['top'][i]
-                w = data['width'][i]
-                h = data['height'][i]
-                coordinates.append((x, y, w, h))
+                if search_word_lower in word_lower:
+                    x = word['left']
+                    y = word['top']
+                    w = word['width']
+                    h = word['height']
+                    coordinates.append((x, y, w, h))
 
         return coordinates
 

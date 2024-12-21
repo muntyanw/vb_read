@@ -1,10 +1,9 @@
 from tg import startTgClient
 from vb_utils import *
-from paint import *
 from recognize_text import capture_and_find_multiple_text_coordinates, capture_and_find_text_coordinates
 from log import log_and_print
 import pyperclip
-from find_message import load_previous_text, save_current_text, is_subtext_present_at_threshold
+from find_message import load_previous_text, save_current_text, remove_service_symbols_and_spaces
 from pywinauto import Application, mouse
 import ctypes
 import cv2
@@ -12,6 +11,9 @@ from PIL import Image, ImageOps, ImageGrab
 from io import BytesIO
 from collections import deque
 import hashlib
+from ScreenRegionSelector import ScreenRegionSelector
+import keyboard
+from utils import read_setting, write_setting
 
 # Константы WinAPI
 SWP_NOSIZE = 0x0001
@@ -20,7 +22,6 @@ SWP_NOACTIVATE = 0x0010
 SWP_DRAWFRAME = 0x0020
 
 s = {}
-
 
 def get_image_hash(image, size=(8, 8)):
     """
@@ -57,60 +58,30 @@ def get_image_hash(image, size=(8, 8)):
 
     return hash_hex
 
-class ImageHashHistory:
-    def __init__(self, max_size=400):
-        """
-        Инициализация хранилища с максимально допустимым размером.
-        """
-        self.max_size = max_size
-        self.hashes = deque()
-
-    def add_hash(self, new_hash):
-        """
-        Добавляет новый хэш в начало очереди.
-        Если длина превышает max_size, удаляется самый старый хэш с другого конца.
-        """
-        self.hashes.appendleft(new_hash)
-        if len(self.hashes) > self.max_size:
-            self.hashes.pop()
-
-    def contains(self, hash_to_check):
-        """
-        Проверяет, содержится ли указанный хэш в текущем списке.
-        """
-        return hash_to_check in self.hashes
-
-    def get_all_hashes(self):
-        """
-        Возвращает список всех хэшей (от нового к старому).
-        Это не обязательно, но может быть полезно для отладки.
-        """
-        return list(self.hashes)
-
-history = ImageHashHistory(max_size=10)
-
 class Context:
     def __init__(self, bot_client, name_viber, channels, channel_names, old_text,
-                 ymax=820,
-                 xstart=360,
                  x_menu_left_padding=40,
                  y_menu_top_padding=40,
                  y_menu_minus_padding=160,
                  width_menu=190,
                  height_menu=220,
                  height_item_menu=40,
-                 height_search_board_mess=600,
                  x_offset_out_mess=400,
                  template_board="images/komentar.png",
                  pause_read_messages_second = 10,
-                 template_height = 0,
-                 search_phrases = {
-                    "isText": "Скопировать",
-                    "isImage": "Копировать"
-                 },
-                 width_search_board_mess = 650):
+                 search_phrases = None,
+                 search_board_mess_x_start=360,
+                 search_board_mess_x_end=1000,
+                 search_board_mess_y_start=100,
+                 search_board_mess_y_end=1000,
+                 ):
 
         # Assign parameters to instance attributes
+        if search_phrases is None:
+            search_phrases = {
+                "isText": "Скопировать",
+                "isImage": "Копировать"
+            }
         self.bot_client = bot_client
         self.name_viber = name_viber
         self.channels = channels
@@ -118,23 +89,25 @@ class Context:
         self.old_text = old_text
 
         # Assign default attributes
-        self.ymax = ymax
-        self.xstart = xstart
+        self.search_board_mess_x_start = search_board_mess_x_start
         self.x_menu_left_padding = x_menu_left_padding
         self.y_menu_top_padding = y_menu_top_padding
         self.y_menu_minus_padding = y_menu_minus_padding
         self.width_menu = width_menu
         self.height_menu = height_menu
         self.height_item_menu = height_item_menu
-        self.height_search_board_mess = height_search_board_mess
         self.x_offset_out_mess = x_offset_out_mess
         self.template_board = template_board
         self.pause_read_messages_second = pause_read_messages_second
-        self.template_height = template_height
 
         self.y_mess = []
         self.search_phrases = search_phrases
-        self.width_search_board_mess = width_search_board_mess
+
+        self.search_board_mess_x_start = search_board_mess_x_start,
+        self.search_board_mess_x_end = search_board_mess_x_end,
+        self.search_board_mess_y_start = search_board_mess_y_start,
+        self.search_board_mess_y_end = search_board_mess_y_end,
+
 
     def display_info(self):
         """Method to display the bot's main information."""
@@ -146,25 +119,60 @@ async def init():
     old_text = load_previous_text()
 
     s = Context(bot_client, name_viber, channels, channel_names, old_text,
-                ymax=1000,
-                xstart=330,
                 x_menu_left_padding=40,
                 y_menu_top_padding=40,
                 y_menu_minus_padding=160,
                 width_menu=190,
                 height_menu=220,
                 height_item_menu=40,
-                height_search_board_mess=900,
                 x_offset_out_mess=400,
                 template_board="images/komentar.png",
-                pause_read_messages_second = 30,
-                template_height = get_image_height("images/komentar.png"),
+                pause_read_messages_second=30,
                 search_phrases={
                     "isText": "Скопировать",
                     "isImage": "Копировать"
                 },
-                width_search_board_mess=650
-    )
+                search_board_mess_x_start=60,
+                search_board_mess_x_end=1000,
+                search_board_mess_y_start=100,
+                search_board_mess_y_end=1000
+                )
+
+    # Создаем экземпляр и запускаем
+    log_and_print(f"Нажмить клавишу r щоб виділити область єкрана з сповіщеннями вайбєр, чи Enter щоб залишити старі")
+    while True:
+        if keyboard.is_pressed('enter'):
+            log_and_print("Нажата клавиша Enter")
+            s.search_board_mess_x_start = read_setting("search_board_mess_x_start")
+            s.search_board_mess_x_end = read_setting("search_board_mess_x_end")
+            s.search_board_mess_y_start = read_setting("search_board_mess_y_start")
+            s.search_board_mess_y_end = read_setting("search_board_mess_y_end")
+            break
+
+        elif keyboard.is_pressed('r'):
+            print("Нажата клавиша R")
+            screen_selector = ScreenRegionSelector()
+            screen_selector.run()
+
+            # После того как окно будет закрыто, получаем координаты выделенной области
+            selected_region = screen_selector.get_selected_region()
+            if selected_region:
+                start_x, start_y, end_x, end_y = selected_region
+                log_and_print(
+                    f"Координаты области с сообщениями для дальнейшего использования: ({start_x}, {start_y}) до ({end_x}, {end_y})")
+
+                s.search_board_mess_x_start = start_x
+                s.search_board_mess_x_end = end_x
+                s.search_board_mess_y_start = start_y
+                s.search_board_mess_y_end = end_y
+
+                write_setting("search_board_mess_x_start", start_x)
+                write_setting("search_board_mess_x_end", end_x)
+                write_setting("search_board_mess_y_start", start_y)
+                write_setting("search_board_mess_y_end", end_y)
+
+            break
+
     return s
 
 def fill_y_mess(window, s):
@@ -172,60 +180,38 @@ def fill_y_mess(window, s):
     window.set_focus()
     log_and_print(f"Старт fill_y_mess")
     scroll_with_mouse(window, count_scroll=16)
-    x, y, height, width = s.xstart, s.ymax - s.height_search_board_mess, s.height_search_board_mess, s.width_search_board_mess
+    height = s.search_board_mess_y_end - s.search_board_mess_y_start
+    width = s.search_board_mess_x_end - s.search_board_mess_x_start
+    x, y = s.search_board_mess_x_start, s.search_board_mess_y_start
+
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
 
     region = [x,y, width, height]
-    coordinates = capture_and_find_text_coordinates(region, "Прокомментировать")
-
-    s.y_mess = [coord[1] - s.y_menu_top_padding for coord in coordinates]
-
-    log_and_print(f"s.y_mess = {s.y_mess}")
-
-
-def fill_y_messOld(window, s):
-    s.y_mess = []
+    coordinates = capture_and_find_text_coordinates(region, ["Прокомментировать","Комментарий","Комментарии"])
     window.set_focus()
-    log_and_print(f"Старт fill_y_mess")
-    scroll_with_mouse(window, count_scroll=16)
-    x, y, height = s.xstart, s.ymax, s.height_search_board_mess
-    left_click(x + s.x_offset_out_mess, y)
-    log_and_print(f"x = {x} y = {y} height = {height}")
-    stop = False
-    while not stop:
-        window.set_focus()
-        #y = find_image_upward_with_highlight(x, y, s.ymax, height, s.template_board)
-        y = find_text_upward_with_highlight(x, y, s.ymax, height, 20, 142, "Прокомментировать")
-        log_and_print(f"s.y_menu_top_padding = {s.y_menu_top_padding}")
-        log_and_print(f"s.y = {y}")
-        if y:
-            s.y_mess.append(y - s.y_menu_top_padding)
-            log_and_print(f"Границя меседжів знайдена y = {y}")
-            y = y - s.template_height
-        else:
-            log_and_print(f"Не знайдена границя меседжів")
-            stop = True
+
+    s.y_mess = [coord[1] for coord in coordinates]
 
     log_and_print(f"s.y_mess = {s.y_mess}")
 
 async def send_text(window, s, menu_items, x, y):
     x2, y2, w, h = menu_items["isText"]
     x = x + x2 + int(w / 2)
-    y = y + y2 + int(h / 2)
-    # highlight_circle(x, y, duration=3, size=40, color="blue")
-    # time.sleep(30)
+    y = y + y2 +10
+    #show_position(x, y, duration=10, size=40, color="blue")
     left_click(x, y)
     cv2.waitKey(100)
     log_and_print(f"[send_text] Повідомлення скопиювовано в буфер обміну")
 
     textOrigin = pyperclip.paste()
+    textFind = remove_service_symbols_and_spaces(textOrigin)
     text = reformat_telegram_text(textOrigin)
     log_and_print(f"[send_text] textOrigin = {textOrigin}")
 
     if not text:
         log_and_print(f"[send_text] Не вдалося скопіювати меседж, буфєр обміну пустий")
     else:
-        if not is_subtext_present_at_threshold(s.old_text, textOrigin, threshold=20):
+        if not textFind in s.old_text:
             log_and_print(f"[send_text] Отправка нового текста в tg: {text}")
             for channel_name in s.channel_names:
                 await process_one_message(text, s.bot_client, channel_name, s.name_viber, None)
@@ -237,13 +223,11 @@ async def send_text(window, s, menu_items, x, y):
             log_and_print(f"[send_text] Нема нового меседжа")
 
 async def send_image(window, s, menu_items, x, y):
-    global history
 
     x2, y2, w, h = menu_items["isImage"]
     x = x + x2 + int(w / 2)
     y = y + y2 + int(h / 2)
-    # highlight_circle(x, y, duration=3, size=40, color="blue")
-    # time.sleep(30)
+    #show_position(x, y, duration=10, size=40, color="blue")
     left_click(x, y)
     cv2.waitKey(100)
     log_and_print(f"[send_image] Зображення скопиювовано в буфер обміну")
@@ -255,12 +239,12 @@ async def send_image(window, s, menu_items, x, y):
 
     hash = get_image_hash(img)
 
-    if history.contains(hash):
+    if hash in s.old_text:
         log_and_print(f"[send_image] Картинка уже была отправлена!")
         return
 
-    history.add_hash(hash)
-    log_and_print(f"[send_image] get_all_hashes {history.get_all_hashes()}")
+    save_current_text(hash)
+    s.old_text = load_previous_text()
 
     # Преобразуем изображение в поток байтов
     bio = BytesIO()
@@ -272,35 +256,42 @@ async def send_image(window, s, menu_items, x, y):
     for channel_name in s.channel_names:
         await process_one_message("", s.bot_client, channel_name, s.name_viber, bio)
 
-
 async def send_message(window, s, menu_items, x, y):
     window.set_focus()
+    #left_click(x, y)
+    #cv2.waitKey(10)
+
     if menu_items["isText"]:
         await send_text(window, s, menu_items, x, y)
     elif menu_items["isImage"]:
         await send_image(window, s, menu_items, x, y)
 
-
 async def send_messages_from_y_mess(window, s):
     window.set_focus()
-    x, y, height = s.xstart, s.ymax, s.height_search_board_mess
+    x, y_start, height = s.search_board_mess_x_start, s.search_board_mess_y_start, s.search_board_mess_x_end - s.search_board_mess_x_start
     region = []
-    for y in reversed(s.y_mess):
+    for y in s.y_mess:
         if y:
-            y = y - s.y_menu_top_padding
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
-            region = [x + s.x_menu_left_padding, y - 120, s.width_menu, s.height_menu + 120]
+            y = y_start + y - 20
+            window.set_focus()
+            #show_position(x, y+ 10, duration=10, size=10, color="blue")
+            #cv2.waitKey(3000)
+            #window.set_focus()
+            #left_click(x, y)
+            right_click(x, y)
 
-        window.set_focus()
-        right_click(x, y)
-        cv2.waitKey(100)
-        menu_items = capture_and_find_multiple_text_coordinates(region, s.search_phrases)
+            y = y - s.y_menu_top_padding - 100
+            x = x + 50
+            region = [x, y, s.width_menu, s.height_menu + 80]
+            cv2.waitKey(1000)
+            menu_items = capture_and_find_multiple_text_coordinates(region, s.search_phrases, visualize = False)
 
-        log_and_print(f"menu_items = {menu_items}")
+            log_and_print(f"menu_items = {menu_items}")
 
-        await send_message(window, s, menu_items, region[0], region[1])
+            await send_message(window, s, menu_items, region[0], region[1])
 
-        right_click(x + s.x_offset_out_mess, y)
+            right_click(x + s.x_offset_out_mess, y)
 
 async def main():
     try:
