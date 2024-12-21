@@ -4,12 +4,11 @@ from recognize_text import capture_and_find_multiple_text_coordinates, capture_a
 from log import log_and_print
 import pyperclip
 from find_message import load_previous_text, save_current_text, remove_service_symbols_and_spaces
-from pywinauto import Application, mouse
+from pywinauto import Application
 import ctypes
 import cv2
-from PIL import Image, ImageOps, ImageGrab
+from PIL import Image, ImageGrab
 from io import BytesIO
-from collections import deque
 import hashlib
 from ScreenRegionSelector import ScreenRegionSelector
 import keyboard
@@ -68,7 +67,6 @@ class Context:
                  height_item_menu=40,
                  x_offset_out_mess=400,
                  template_board="images/komentar.png",
-                 pause_read_messages_second = 10,
                  search_phrases = None,
                  search_board_mess_x_start=360,
                  search_board_mess_x_end=1000,
@@ -98,7 +96,6 @@ class Context:
         self.height_item_menu = height_item_menu
         self.x_offset_out_mess = x_offset_out_mess
         self.template_board = template_board
-        self.pause_read_messages_second = pause_read_messages_second
 
         self.y_mess = []
         self.search_phrases = search_phrases
@@ -127,7 +124,6 @@ async def init():
                 height_item_menu=40,
                 x_offset_out_mess=400,
                 template_board="images/komentar.png",
-                pause_read_messages_second=30,
                 search_phrases={
                     "isText": "Скопировать",
                     "isImage": "Копировать"
@@ -179,7 +175,7 @@ def fill_y_mess(window, s):
     s.y_mess = []
     window.set_focus()
     log_and_print(f"Старт fill_y_mess")
-    scroll_with_mouse(window, count_scroll=16)
+
     height = s.search_board_mess_y_end - s.search_board_mess_y_start
     width = s.search_board_mess_x_end - s.search_board_mess_x_start
     x, y = s.search_board_mess_x_start, s.search_board_mess_y_start
@@ -187,7 +183,7 @@ def fill_y_mess(window, s):
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
 
     region = [x,y, width, height]
-    coordinates = capture_and_find_text_coordinates(region, ["Прокомментировать","Комментарий","Комментарии"])
+    coordinates = capture_and_find_text_coordinates(region, read_setting("word_comment"), visualize = read_setting("visualize"))
     window.set_focus()
 
     s.y_mess = [coord[1] for coord in coordinates]
@@ -285,13 +281,12 @@ async def send_messages_from_y_mess(window, s):
             x = x + 50
             region = [x, y, s.width_menu, s.height_menu + 80]
             cv2.waitKey(1000)
-            menu_items = capture_and_find_multiple_text_coordinates(region, s.search_phrases, visualize = False)
+            menu_items = capture_and_find_multiple_text_coordinates(region, s.search_phrases, visualize = read_setting("visualize"))
 
             log_and_print(f"menu_items = {menu_items}")
 
             await send_message(window, s, menu_items, region[0], region[1])
 
-            right_click(x + s.x_offset_out_mess, y)
 
 async def main():
     try:
@@ -302,12 +297,32 @@ async def main():
         window.set_focus()
         hwnd = window.handle
 
+        scroll_with_mouse(window, count_scroll=read_setting("count_scroll"))
+
+        i = 0
+
         while True:
+            pause = 2
+            i = i + 1
             ctypes.windll.user32.LockWindowUpdate(hwnd)
+
+            if i == read_setting("count_repeat"):
+                scroll_with_mouse(window, count_scroll=read_setting("count_scroll"))
+                pause = read_setting("pause_read_messages_second")
+                i = 0
+            else:
+                scroll_with_mouse(window, count_scroll=1)
+
             fill_y_mess(window, s)
-            await send_messages_from_y_mess(window,s)
+            if len(s.y_mess) > 0:
+                await send_messages_from_y_mess(window,s)
+
             ctypes.windll.user32.LockWindowUpdate(0)
-            await asyncio.sleep(s.pause_read_messages_second)
+
+            right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
+
+            log_and_print(f"pause = {pause}")
+            await asyncio.sleep(pause)
 
     except Exception as e:
         print(f"An error occurred: {e}")

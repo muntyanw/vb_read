@@ -10,17 +10,24 @@ def clear_file(file_path):
     except Exception as e:
         print(f"Error clearing file '{file_path}': {e}")
 
-def read_setting(field_path):
-    """
-    Reads a specific field's value from a JSON settings file.
+def convert_to_utf8(old_file, new_file):
+    try:
+        with open(old_file, 'r', encoding='windows-1251') as f:
+            content = f.read()
 
-    :param field_path: Dot-separated path to the field (e.g., "capture_and_recognize.lang").
-    :return: Value of the specified field, or None if the field does not exist.
-    """
+        with open(new_file, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        print("Файл успешно преобразован и сохранён как", new_file)
+    except Exception as e:
+        print(f"Ошибка: {e}")
+
+def read_setting(field_path):
+
     file_path = "settings.json"
     try:
         # Open and load the JSON file
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='windows-1251') as file:
             settings = json.load(file)
 
         # Navigate to the desired field
@@ -45,7 +52,7 @@ def write_setting(field_path, new_value):
 
     try:
         # Open and load the JSON file
-        with open(file_path, 'r') as file:
+        with open(file_path, 'r', encoding='windows-1251') as file:
             settings = json.load(file)
 
         # Navigate to the desired field and set the new value
@@ -57,7 +64,7 @@ def write_setting(field_path, new_value):
         value[keys[-1]] = new_value  # Set the new value at the final key
 
         # Write the modified settings back to the file
-        with open(file_path, 'w') as file:
+        with open(file_path, 'w', encoding='windows-1251') as file:
             json.dump(settings, file, indent=4)
         log_and_print(f"[write_setting] Field '{field_path}' updated successfully. new_value = {new_value}")
 

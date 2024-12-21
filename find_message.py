@@ -1,6 +1,7 @@
 import os
 from log import log_and_print
 import re
+from utils import read_setting
 
 def load_previous_text(file_name='previous_text.txt'):
     log_and_print(f"Загрузка предыдущего текста из файла {file_name}")
@@ -22,7 +23,7 @@ def remove_service_symbols_and_spaces(text):
     cleaned_text = re.sub(r'[^A-Za-z0-9]', '', text)
     return cleaned_text
 
-def save_current_text(text, file_name='previous_text.txt', max_chars=400):
+def save_current_text(text, file_name='previous_text.txt', max_chars=read_setting("max_chars_member")):
     log_and_print(f"Adding current text to file {file_name} with a limit of {max_chars} characters.")
 
     try:

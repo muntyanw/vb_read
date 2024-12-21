@@ -117,7 +117,7 @@ def capture_and_find_multiple_text_coordinates(region, search_phrases, visualize
         log_and_print(f"[capture_and_find_text_coordinates] Изображение обработано успешно.")
 
         # Выполнение OCR с получением позиций
-        data = perform_ocr_with_positions(processed_image, lang='rus')
+        data = perform_ocr_with_positions(processed_image)
 
         # Визуализация результатов OCR (опционально)
         if visualize:
@@ -189,8 +189,10 @@ def preprocess_image(image_np):
 
     return cleaned
 
-def perform_ocr_with_positions(image, lang='rus'):
-    custom_config = r'--oem 3 --psm 6'
+def perform_ocr_with_positions(image):
+    custom_config = read_setting("capture_and_recognize.custom_config")
+    lang = read_setting("capture_and_recognize.lang")
+
     data = pytesseract.image_to_data(image, lang=lang, config=custom_config, output_type=Output.DICT)
 
     n_boxes = len(data['level'])
@@ -252,7 +254,7 @@ def capture_and_find_text_coordinates(region, search_words, preprocess=True, cas
             processed_image = screenshot_np
 
         # Выполнение OCR с получением позиций
-        ocr_results = perform_ocr_with_positions(processed_image, lang='rus')
+        ocr_results = perform_ocr_with_positions(processed_image)
 
         # Визуализация результатов OCR (опционально)
         if visualize:
@@ -263,7 +265,6 @@ def capture_and_find_text_coordinates(region, search_words, preprocess=True, cas
 
         # Проходим по всем распознанным словам
         for word in ocr_results:
-            log_and_print(f"word: {word['text']}")
             if not word['text']:
                 continue  # Пропускаем пустые строки
 
@@ -275,6 +276,8 @@ def capture_and_find_text_coordinates(region, search_words, preprocess=True, cas
                 else:
                     word_lower = word['text']
                     search_word_lower = search_word
+
+                log_and_print(f"word_lower = {word_lower} search_word_lower: {search_word_lower}")
 
                 if search_word_lower in word_lower:
                     x = word['left']
