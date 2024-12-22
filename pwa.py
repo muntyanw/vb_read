@@ -302,22 +302,26 @@ async def main():
         i = 0
 
         while True:
-            pause = 2
-            i = i + 1
-            ctypes.windll.user32.LockWindowUpdate(hwnd)
 
-            if i == read_setting("count_repeat"):
-                scroll_with_mouse(window, count_scroll=read_setting("count_scroll"))
-                pause = read_setting("pause_read_messages_second")
-                i = 0
-            else:
-                scroll_with_mouse(window, count_scroll=1)
+            scroll_with_mouse(window, count_scroll=int(read_setting("count_scroll")/2), direction="up")
 
-            fill_y_mess(window, s)
-            if len(s.y_mess) > 0:
-                await send_messages_from_y_mess(window,s)
+            count_repeat = read_setting("count_repeat")
+            for i in range(count_repeat):
+                pause = 2
+                i = i + 1
+                ctypes.windll.user32.LockWindowUpdate(hwnd)
 
-            ctypes.windll.user32.LockWindowUpdate(0)
+                if i == read_setting("count_repeat") - 1:
+                    scroll_with_mouse(window, count_scroll=read_setting("count_scroll"))
+                    pause = read_setting("pause_read_messages_second")
+                else:
+                    scroll_with_mouse(window, count_scroll=2)
+
+                fill_y_mess(window, s)
+                if len(s.y_mess) > 0:
+                    await send_messages_from_y_mess(window,s)
+
+                ctypes.windll.user32.LockWindowUpdate(0)
 
             right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
 

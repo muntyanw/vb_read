@@ -4,7 +4,7 @@ import asyncio
 from tg import send_message_to_tg_channel
 import re
 
-def scroll_with_mouse(window, count_scroll):
+def scroll_with_mouse(window, count_scroll, direction="down"):
     window.set_focus()
 
     # Находим панель с сообщениями
@@ -17,8 +17,12 @@ def scroll_with_mouse(window, count_scroll):
 
     # Прокручиваем вниз
     for _ in range(count_scroll):  # Повторяем несколько раз
-        mouse.scroll(coords=(center_x, center_y), wheel_dist=-1)  # Отрицательное значение для скроллинга вниз
-        print("Scrolled down with mouse wheel")
+        if direction == "down":
+            mouse.scroll(coords=(center_x, center_y), wheel_dist=-1)  # Отрицательное значение для скроллинга вниз
+            print("Scrolled down with mouse wheel")
+        else:
+            mouse.scroll(coords=(center_x, center_y), wheel_dist=1)
+            print("Scrolled up with mouse wheel")
 
 def right_click_on_panel(x_offset=0, y_offset=0):
     """
