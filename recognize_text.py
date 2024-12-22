@@ -3,9 +3,7 @@ import pyautogui
 import pytesseract
 from pytesseract import Output
 from utils import read_setting
-import cv2
 import numpy as np
-from PIL import Image
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 

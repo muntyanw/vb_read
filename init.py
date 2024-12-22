@@ -8,7 +8,7 @@ settings = None
 def load_json(file_path):
     log_and_print(f"Загрузка данных из JSON файла {file_path}.", 'info')
     try:
-        with open(file_path, 'r', encoding='windows-1251') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             data = json.load(file)
         log_and_print(f"Данные успешно загружены из {file_path}.", 'info')
         return data

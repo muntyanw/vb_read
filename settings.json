@@ -1,5 +1,5 @@
 {
-    "name_viber": "\u0420\u0435\u043a\u043b\u0430\u043c\u0430",
+    "name_viber": "Viber1",
     "capture_and_recognize": {
         "lang": "rus",
         "custom_config": "--oem 3 --psm 6"
@@ -11,14 +11,17 @@
     "visualize": 0,
     "count_scroll": 8,
     "word_comment": [
-        "\u041f\u0440\u043e\u043a\u043e\u043c\u043c\u0435\u043d\u0442\u0438\u0440\u043e\u0432\u0430\u0442\u044c",
-        "\u041a\u043e\u043c\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u0439",
-        "\u041a\u043e\u043c\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u0438",
-        "\u043a\u043e\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u0439",
-        "\u043a\u043e\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u044f",
-        "\u043a\u043e\u043c\u0435\u043d\u0442\u0430\u0440\u0438\u0435\u0432"
+        "Прокомментировать",
+        "Комментарии",
+        "комментарий"
     ],
     "max_chars_member": 800,
     "pause_read_messages_second": 30,
-    "count_repeat": 4
+    "count_repeat": 4,
+    "search_phrases": {
+        "isText": "Скопировать",
+        "isImage": "Копировать",
+        "isVideo": "Сохранить"
+    },
+    "path_files_downloads": "C:\\Users\\mvv\\Documents\\ViberDownloads\\"
 }

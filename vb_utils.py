@@ -75,16 +75,16 @@ def right_click(app, window_title, x=0, y=0):
     except Exception as e:
         print(f"Error during right-click: {e}")
 
-def right_click(x=0, y=0):
+def right_click(window, x=0, y=0):
     """
     Кликает правой кнопкой мыши
     """
-
+    window.set_focus()
     # Выполняем клик правой кнопкой мыши
     mouse.click(button="right", coords=(x, y))
     log_and_print(f"Right-clicked at ({x}, {y}) on the chat panel")
 
-def left_click(x=0, y=0):
+def left_click(window, x=0, y=0):
     """
     Кликает левой кнопкой мыши
     """
@@ -98,20 +98,25 @@ processed_messages = set()
 # Семафор для последовательной обработки сообщений
 processing_semaphore = asyncio.Semaphore(1)
 
-async def process_one_message(message_text, bot_client, channel_name, name_viber, image_path):
+async def process_one_message(message_text, bot_client, channel_name, name_viber, file_path):
 
     log_and_print(f"bot_client: {bot_client}", 'info')
     log_and_print(f"service_channel_name: {channel_name}", 'info')
     log_and_print(f"name_viber: {name_viber}", 'info')
-    # Добавляем ID сообщения в список обработанных
-    processed_messages.add(message_text)
+
+    if message_text:
+        # Добавляем ID сообщения в список обработанных
+        processed_messages.add(message_text)
+    elif file_path:
+        processed_messages.add(file_path)
+
 
     # Обрабатываем сообщение последовательно с использованием семафора
     async with processing_semaphore:
         try:
             log_and_print(f'Обработка сообщения: {message_text}', 'info')
 
-            await send_message_to_tg_channel(bot_client, channel_name, message_text, image_path)
+            await send_message_to_tg_channel(bot_client, channel_name, message_text, file_path)
 
         except Exception as e:
             log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')

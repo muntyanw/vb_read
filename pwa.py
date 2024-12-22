@@ -12,7 +12,9 @@ from io import BytesIO
 import hashlib
 from ScreenRegionSelector import ScreenRegionSelector
 import keyboard
-from utils import read_setting, write_setting
+from utils import read_setting, write_setting, get_latest_file
+import pyautogui
+import os
 
 # Константы WinAPI
 SWP_NOSIZE = 0x0001
@@ -66,7 +68,6 @@ class Context:
                  height_menu=220,
                  height_item_menu=40,
                  x_offset_out_mess=400,
-                 template_board="images/komentar.png",
                  search_phrases = None,
                  search_board_mess_x_start=360,
                  search_board_mess_x_end=1000,
@@ -95,7 +96,6 @@ class Context:
         self.height_menu = height_menu
         self.height_item_menu = height_item_menu
         self.x_offset_out_mess = x_offset_out_mess
-        self.template_board = template_board
 
         self.y_mess = []
         self.search_phrases = search_phrases
@@ -108,8 +108,7 @@ class Context:
 
     def display_info(self):
         """Method to display the bot's main information."""
-        return (f"Bot Name: {self.name_viber}, Channels: {len(self.channels)}, "
-                f"Template Board: {self.template_board}")
+        return (f"Bot Name: {self.name_viber}, Channels: {len(self.channels)}")
 
 async def init():
     bot_client, name_viber, channels, channel_names = await startTgClient()
@@ -123,11 +122,6 @@ async def init():
                 height_menu=220,
                 height_item_menu=40,
                 x_offset_out_mess=400,
-                template_board="images/komentar.png",
-                search_phrases={
-                    "isText": "Скопировать",
-                    "isImage": "Копировать"
-                },
                 search_board_mess_x_start=60,
                 search_board_mess_x_end=1000,
                 search_board_mess_y_start=100,
@@ -195,7 +189,7 @@ async def send_text(window, s, menu_items, x, y):
     x = x + x2 + int(w / 2)
     y = y + y2 +10
     #show_position(x, y, duration=10, size=40, color="blue")
-    left_click(x, y)
+    left_click(window, x, y)
     cv2.waitKey(100)
     log_and_print(f"[send_text] Повідомлення скопиювовано в буфер обміну")
 
@@ -224,7 +218,7 @@ async def send_image(window, s, menu_items, x, y):
     x = x + x2 + int(w / 2)
     y = y + y2 + int(h / 2)
     #show_position(x, y, duration=10, size=40, color="blue")
-    left_click(x, y)
+    left_click(window, x, y)
     cv2.waitKey(100)
     log_and_print(f"[send_image] Зображення скопиювовано в буфер обміну")
 
@@ -245,22 +239,100 @@ async def send_image(window, s, menu_items, x, y):
     # Преобразуем изображение в поток байтов
     bio = BytesIO()
     bio.name = hash + '.png'
-    img.save(bio, 'PNG')
+    file_path = os.getcwd() + "\\images\\" + bio.name
+
+    if not os.path.isfile(file_path):
+        img.save(file_path, 'PNG')
+
+    #img.save(bio, 'PNG')
+
     bio.seek(0)
 
     log_and_print(f"[send_message] Отправка нового имиджа в tg: {bio.name}")
     for channel_name in s.channel_names:
-        await process_one_message("", s.bot_client, channel_name, s.name_viber, bio)
+        await process_one_message("", s.bot_client, channel_name, s.name_viber, file_path)
+
+async def send_video(window, s, menu_items, x, y):
+    path_files_downloads = read_setting("path_files_downloads")
+
+    window.set_focus()
+
+    x2, y2, w, h = menu_items["isVideo"]
+    x = x + x2 + int(w / 2)
+    y = y + y2 + int(h / 2)
+    #show_position(x, y, duration=10, size=40, color="blue")
+    left_click(window, x, y)
+    cv2.waitKey(1000)
+
+    pyautogui.hotkey('ctrl', 'c')
+    cv2.waitKey(300)
+    file_name =  pyperclip.paste()
+    log_and_print(f"[send_video] Буфер обмена {file_name}")
+
+    textFind = remove_service_symbols_and_spaces(file_name)
+    if textFind in s.old_text:
+        log_and_print(f"[send_image] Файл уже был отправлен!")
+        pyautogui.press('tab', presses=4, interval=0.1)
+        # cv2.waitKey(1000)
+        pyautogui.press('enter')
+        cv2.waitKey(1000)
+        return
+
+    save_current_text(textFind)
+    s.old_text = load_previous_text()
+
+    file = path_files_downloads + file_name + ".mp4"
+    log_and_print(f"[send_video] file = {file}")
+
+    if os.path.isfile(file):
+        log_and_print(f"[send_message_to_tg_channel] Файл уже сохранен: {file}")
+        pyautogui.press('tab', presses=4, interval=0.1)
+        # cv2.waitKey(1000)
+        pyautogui.press('enter')
+        cv2.waitKey(1000)
+        return
+
+    pyperclip.copy(path_files_downloads)
+    pyautogui.press('tab', presses=6, interval=0.1)
+    #cv2.waitKey(1000)
+    pyautogui.press('enter')
+    #cv2.waitKey(1000)
+    pyautogui.hotkey('ctrl', 'v')
+    #cv2.waitKey(1000)
+    pyautogui.press('enter')
+    #cv2.waitKey(1000)
+    pyautogui.press('tab', presses=8, interval=0.1)
+    #cv2.waitKey(1000)
+    pyautogui.press('enter')
+
+    cv2.waitKey(1000)
+
+    #file = get_latest_file(path_files_downloads)
+
+    # if not file:
+    #     log_and_print(f"[send_image] Не смогли сохранить файл!")
+    #     return
+
+    #file_name = Path(file).stem
+
+    save_current_text(file_name)
+    s.old_text = load_previous_text()
+
+    log_and_print(f"[send_message] Отправка нового файла в tg: {file}")
+    for channel_name in s.channel_names:
+        await process_one_message("", s.bot_client, channel_name, s.name_viber, file)
 
 async def send_message(window, s, menu_items, x, y):
     window.set_focus()
-    #left_click(x, y)
+    #left_click(window, x, y)
     #cv2.waitKey(10)
 
     if menu_items["isText"]:
         await send_text(window, s, menu_items, x, y)
     elif menu_items["isImage"]:
         await send_image(window, s, menu_items, x, y)
+    elif menu_items["isVideo"]:
+        await send_video(window, s, menu_items, x, y)
 
 async def send_messages_from_y_mess(window, s):
     window.set_focus()
@@ -274,14 +346,14 @@ async def send_messages_from_y_mess(window, s):
             #show_position(x, y+ 10, duration=10, size=10, color="blue")
             #cv2.waitKey(3000)
             #window.set_focus()
-            #left_click(x, y)
-            right_click(x, y)
+            #left_click(window, x, y)
+            right_click(window, x, y)
 
             y = y - s.y_menu_top_padding - 100
             x = x + 50
             region = [x, y, s.width_menu, s.height_menu + 80]
             cv2.waitKey(1000)
-            menu_items = capture_and_find_multiple_text_coordinates(region, s.search_phrases, visualize = read_setting("visualize"))
+            menu_items = capture_and_find_multiple_text_coordinates(region, read_setting("search_phrases"), visualize = read_setting("visualize"))
 
             log_and_print(f"menu_items = {menu_items}")
 
@@ -292,14 +364,13 @@ async def main():
     try:
         s = await init()
 
-        app = Application(backend="uia").connect(title_re=".*Viber.*")
-        window = app.window(title_re=".*Viber.*")
+        app = Application(backend="uia").connect(title="Rakuten Viber")
+        window = app.window(title="Rakuten Viber")
+
         window.set_focus()
         hwnd = window.handle
 
         scroll_with_mouse(window, count_scroll=read_setting("count_scroll"))
-
-        i = 0
 
         while True:
 
@@ -323,10 +394,13 @@ async def main():
 
                 ctypes.windll.user32.LockWindowUpdate(0)
 
-            right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
+                log_and_print(f"pause = {pause}")
+                await asyncio.sleep(pause)
 
-            log_and_print(f"pause = {pause}")
-            await asyncio.sleep(pause)
+            right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
+
+            log_and_print(f"pause = {read_setting("pause_read_messages_second")}")
+            await asyncio.sleep(read_setting("pause_read_messages_second"))
 
     except Exception as e:
         print(f"An error occurred: {e}")

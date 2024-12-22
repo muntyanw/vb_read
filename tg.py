@@ -3,6 +3,9 @@ import asyncio
 from telethon.errors import RPCError
 from telethon import TelegramClient
 from init import init
+import os
+from utils import is_video_file, get_video_dimensions_cv2
+from telethon.tl.types import DocumentAttributeVideo, DocumentAttributeFilename
 
 # Глобальный флаг для предотвращения двойной реакции
 processed_messages = set()
@@ -12,19 +15,46 @@ processing_semaphore = asyncio.Semaphore(1)
 telegram_channel_name = None
 telegram_channel_id = None
 
-async def send_message_to_tg_channel(bot_client, channel_name, message_text, image_path=None):
+async def send_message_to_tg_channel(bot_client, channel_name, message_text, file_path=None):
     try:
 
         # Получаем объект канала
         channel_entity = await bot_client.get_entity(channel_name)
 
         # Отправка сообщения с изображением или только текста
-        if image_path:
-            await bot_client.send_file(
-                channel_entity,
-                image_path,
-                caption=message_text[:1024]  # Обрезаем подпись до допустимой длины
-            )
+        if file_path:
+            if not os.path.isfile(file_path):
+                log_and_print(f"[send_message_to_tg_channel] Файл не найден: {file_path}")
+                return
+
+            if is_video_file(file_path):
+                width, height, duration, fps = get_video_dimensions_cv2(file_path)
+                log_and_print(f"[send_message_to_tg_channel] Получили атрибуты видео width:{width} , height:{height}, duration:{duration}")
+                # Создание атрибутов для видео
+                video_attributes = [DocumentAttributeVideo(
+                    duration=duration,
+                    w=width,
+                    h=height,
+                    supports_streaming=True
+                )]
+
+                await bot_client.send_file(
+                    channel_entity,
+                    file_path,
+                    caption=message_text,
+                    album=True,
+                    reply_to=None,
+                    buttons=None,
+                    attributes=video_attributes,
+                    link_preview=True
+                )
+            else:
+                await bot_client.send_file(
+                    channel_entity,
+                    file_path,
+                    caption=message_text[:1024]
+                )
+
         else:
             await bot_client.send_message(
                 channel_entity,

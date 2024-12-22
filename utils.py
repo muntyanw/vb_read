@@ -1,33 +1,14 @@
 import json
 from log import log_and_print
-
-def clear_file(file_path):
-    """Clears the contents of the specified file."""
-    try:
-        with open(file_path, 'w') as file:
-            pass  # Opening in 'w' mode clears the file
-        print(f"File '{file_path}' has been cleared.")
-    except Exception as e:
-        print(f"Error clearing file '{file_path}': {e}")
-
-def convert_to_utf8(old_file, new_file):
-    try:
-        with open(old_file, 'r', encoding='windows-1251') as f:
-            content = f.read()
-
-        with open(new_file, 'w', encoding='utf-8') as f:
-            f.write(content)
-
-        print("Файл успешно преобразован и сохранён как", new_file)
-    except Exception as e:
-        print(f"Ошибка: {e}")
+import os
+import cv2
 
 def read_setting(field_path):
 
     file_path = "settings.json"
     try:
         # Open and load the JSON file
-        with open(file_path, 'r', encoding='windows-1251') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             settings = json.load(file)
 
         # Navigate to the desired field
@@ -52,7 +33,7 @@ def write_setting(field_path, new_value):
 
     try:
         # Open and load the JSON file
-        with open(file_path, 'r', encoding='windows-1251') as file:
+        with open(file_path, 'r', encoding='utf-8') as file:
             settings = json.load(file)
 
         # Navigate to the desired field and set the new value
@@ -64,7 +45,7 @@ def write_setting(field_path, new_value):
         value[keys[-1]] = new_value  # Set the new value at the final key
 
         # Write the modified settings back to the file
-        with open(file_path, 'w', encoding='windows-1251') as file:
+        with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(settings, file, indent=4)
         log_and_print(f"[write_setting] Field '{field_path}' updated successfully. new_value = {new_value}")
 
@@ -84,3 +65,41 @@ def load_json(file_path):
     except json.JSONDecodeError:
         log_and_print(f"Ошибка декодирования JSON в файле {file_path}.", 'error')
         return None
+
+def get_latest_file(download_folder):
+    try:
+        files = os.listdir(download_folder)
+        paths = [os.path.join(download_folder, fname) for fname in files]
+        latest_file = max(paths, key=os.path.getctime)
+        return latest_file
+    except Exception as e:
+        print(f"Ошибка при получении последнего файла: {e}")
+        return None
+
+
+def is_video_file(file_path):
+    """
+    Определяет, является ли файл видео по его расширению.
+
+    :param file_path: Путь к файлу.
+    :return: True, если файл является видео, иначе False.
+    """
+    # Список расширений видеофайлов
+    video_extensions = {".mp4", ".mkv", ".avi", ".mov", ".wmv", ".flv", ".webm", ".m4v"}
+
+    # Получаем расширение файла
+    file_extension = file_path.lower().split('.')[-1]
+
+    # Проверяем, есть ли расширение в списке видео
+    return f".{file_extension}" in video_extensions
+
+def get_video_dimensions_cv2(file_path):
+    cap = cv2.VideoCapture(file_path)
+    if not cap.isOpened():
+        return None, None, None, None
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fps = cap.get(cv2.CAP_PROP_FPS)
+    duration = cap.get(cv2.CAP_PROP_FRAME_COUNT) / fps if fps else None
+    cap.release()
+    return width, height, duration, fps
