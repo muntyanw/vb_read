@@ -5,12 +5,14 @@
         "custom_config": "--oem 3 --psm 6"
     },
     "search_board_mess_x_start": 355,
-    "search_board_mess_x_end": 487,
+    "search_board_mess_x_end": 488,
     "search_board_mess_y_start": 142,
-    "search_board_mess_y_end": 955,
+    "search_board_mess_y_end": 953,
     "visualize": 0,
-    "count_scroll": 8,
-    "word_comment": [
+    "count_scroll_up": 4,
+    "count_scroll_down": 3,
+    "count_repeat": 4,
+     "word_comment": [
         "Прокомментировать",
         "Комментарии",
         "комментарий"
@@ -23,5 +25,7 @@
         "isImage": "Копировать",
         "isVideo": "Сохранить"
     },
-    "path_files_downloads": "C:\\Users\\mvv\\Documents\\ViberDownloads\\"
+    "path_files_downloads": "C:\\Users\\mvv\\Documents\\ViberDownloads\\",
+    "comment_height": 20,
+    "comment_width": 142
 }

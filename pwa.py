@@ -1,6 +1,6 @@
 from tg import startTgClient
 from vb_utils import *
-from recognize_text import capture_and_find_multiple_text_coordinates, capture_and_find_text_coordinates
+from recognize_text import capture_and_find_multiple_text_coordinates, capture_and_find_text_coordinates, find_text_upward_with_highlight
 from log import log_and_print
 import pyperclip
 from find_message import load_previous_text, save_current_text, remove_service_symbols_and_spaces
@@ -12,9 +12,10 @@ from io import BytesIO
 import hashlib
 from ScreenRegionSelector import ScreenRegionSelector
 import keyboard
-from utils import read_setting, write_setting, get_latest_file
+from utils import read_setting, write_setting
 import pyautogui
 import os
+from paint import show_position
 
 # Константы WinAPI
 SWP_NOSIZE = 0x0001
@@ -23,6 +24,7 @@ SWP_NOACTIVATE = 0x0010
 SWP_DRAWFRAME = 0x0020
 
 s = {}
+count_y_mess_empty = 0
 
 def get_image_hash(image, size=(8, 8)):
     """
@@ -61,26 +63,16 @@ def get_image_hash(image, size=(8, 8)):
 
 class Context:
     def __init__(self, bot_client, name_viber, channels, channel_names, old_text,
-                 x_menu_left_padding=40,
-                 y_menu_top_padding=40,
-                 y_menu_minus_padding=160,
                  width_menu=190,
                  height_menu=220,
-                 height_item_menu=40,
+                 height_item_menu=20,
                  x_offset_out_mess=400,
-                 search_phrases = None,
                  search_board_mess_x_start=360,
                  search_board_mess_x_end=1000,
                  search_board_mess_y_start=100,
                  search_board_mess_y_end=1000,
                  ):
 
-        # Assign parameters to instance attributes
-        if search_phrases is None:
-            search_phrases = {
-                "isText": "Скопировать",
-                "isImage": "Копировать"
-            }
         self.bot_client = bot_client
         self.name_viber = name_viber
         self.channels = channels
@@ -89,16 +81,12 @@ class Context:
 
         # Assign default attributes
         self.search_board_mess_x_start = search_board_mess_x_start
-        self.x_menu_left_padding = x_menu_left_padding
-        self.y_menu_top_padding = y_menu_top_padding
-        self.y_menu_minus_padding = y_menu_minus_padding
         self.width_menu = width_menu
         self.height_menu = height_menu
         self.height_item_menu = height_item_menu
         self.x_offset_out_mess = x_offset_out_mess
 
         self.y_mess = []
-        self.search_phrases = search_phrases
 
         self.search_board_mess_x_start = search_board_mess_x_start,
         self.search_board_mess_x_end = search_board_mess_x_end,
@@ -115,12 +103,9 @@ async def init():
     old_text = load_previous_text()
 
     s = Context(bot_client, name_viber, channels, channel_names, old_text,
-                x_menu_left_padding=40,
-                y_menu_top_padding=40,
-                y_menu_minus_padding=160,
                 width_menu=190,
                 height_menu=220,
-                height_item_menu=40,
+                height_item_menu=20,
                 x_offset_out_mess=400,
                 search_board_mess_x_start=60,
                 search_board_mess_x_end=1000,
@@ -182,6 +167,40 @@ def fill_y_mess(window, s):
 
     s.y_mess = [coord[1] for coord in coordinates]
 
+    log_and_print(f"s.y_mess = {s.y_mess}")
+
+def fill_y_mess_care_find(window, s):
+    s.y_mess = []
+    window.set_focus()
+    log_and_print(f"Старт fill_y_mess ретельного пошуку")
+    x, y, height = s.search_board_mess_x_start, s.search_board_mess_y_end, s.search_board_mess_y_end - s.search_board_mess_y_start
+    left_click(x + s.x_offset_out_mess, y - 100)
+    log_and_print(f"x = {x} y = {y} height = {height}")
+
+    comment_height = read_setting("comment_height")
+    comment_width = read_setting("comment_width")
+
+    stop = False
+    while not stop:
+        window.set_focus()
+
+        y = find_text_upward_with_highlight(x, y, s.search_board_mess_y_end, height, comment_height, comment_width, read_setting("word_comment"))
+        log_and_print(f"y = {y}")
+        if y:
+            y_finded = y + int(comment_height / 2) - s.search_board_mess_y_start
+            s.y_mess.append(y_finded)
+
+            visualize = read_setting("visualize")
+            if visualize:
+                show_position(x, y_finded, duration=2, size=50, color="red")
+
+            log_and_print(f"Меседж знайдений y_finded = {y_finded}")
+            y = y - comment_height
+        else:
+            log_and_print(f"Меседж не знайдений")
+            stop = True
+
+    s.y_mess = reversed(s.y_mess)
     log_and_print(f"s.y_mess = {s.y_mess}")
 
 async def send_text(window, s, menu_items, x, y):
@@ -341,7 +360,7 @@ async def send_messages_from_y_mess(window, s):
     for y in s.y_mess:
         if y:
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
-            y = y_start + y - 20
+            y = y_start + y - s.height_item_menu
             window.set_focus()
             #show_position(x, y+ 10, duration=10, size=10, color="blue")
             #cv2.waitKey(3000)
@@ -349,9 +368,9 @@ async def send_messages_from_y_mess(window, s):
             #left_click(window, x, y)
             right_click(window, x, y)
 
-            y = y - s.y_menu_top_padding - 100
+            y = y  - s.height_item_menu * 10
             x = x + 50
-            region = [x, y, s.width_menu, s.height_menu + 80]
+            region = [x, y, s.width_menu, s.height_menu + s.height_item_menu * 4]
             cv2.waitKey(1000)
             menu_items = capture_and_find_multiple_text_coordinates(region, read_setting("search_phrases"), visualize = read_setting("visualize"))
 
@@ -359,10 +378,12 @@ async def send_messages_from_y_mess(window, s):
 
             await send_message(window, s, menu_items, region[0], region[1])
 
-
 async def main():
+    global count_y_mess_empty
     try:
         s = await init()
+
+        pause = 2
 
         app = Application(backend="uia").connect(title="Rakuten Viber")
         window = app.window(title="Rakuten Viber")
@@ -370,33 +391,42 @@ async def main():
         window.set_focus()
         hwnd = window.handle
 
-        scroll_with_mouse(window, count_scroll=read_setting("count_scroll"))
+        count_scroll_up = read_setting("count_scroll_up")
+        count_scroll_down = read_setting("count_scroll_down")
+
+        scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
 
         while True:
-
-            scroll_with_mouse(window, count_scroll=int(read_setting("count_scroll")/2), direction="up")
+            window.set_focus()
+            right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
 
             count_repeat = read_setting("count_repeat")
             for i in range(count_repeat):
-                pause = 2
-                i = i + 1
+
                 ctypes.windll.user32.LockWindowUpdate(hwnd)
 
-                if i == read_setting("count_repeat") - 1:
-                    scroll_with_mouse(window, count_scroll=read_setting("count_scroll"))
-                    pause = read_setting("pause_read_messages_second")
+                if count_y_mess_empty <= 10:
+                    fill_y_mess(window, s)
                 else:
-                    scroll_with_mouse(window, count_scroll=2)
+                    fill_y_mess_care_find(window, s)
 
-                fill_y_mess(window, s)
                 if len(s.y_mess) > 0:
                     await send_messages_from_y_mess(window,s)
+                    count_y_mess_empty = 0
+                else:
+                    count_y_mess_empty = count_y_mess_empty + 1
+                    log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
 
                 ctypes.windll.user32.LockWindowUpdate(0)
+
+
 
                 log_and_print(f"pause = {pause}")
                 await asyncio.sleep(pause)
 
+                scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
+
+            window.set_focus()
             right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
 
             log_and_print(f"pause = {read_setting("pause_read_messages_second")}")

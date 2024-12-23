@@ -76,7 +76,6 @@ def get_latest_file(download_folder):
         print(f"Ошибка при получении последнего файла: {e}")
         return None
 
-
 def is_video_file(file_path):
     """
     Определяет, является ли файл видео по его расширению.

@@ -4,11 +4,11 @@ import pytesseract
 from pytesseract import Output
 from utils import read_setting
 import numpy as np
+from find_message import remove_service_symbols_and_spaces
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 import cv2
-
 
 def preprocess_image(image_np):
     """
@@ -60,7 +60,7 @@ def filter_recognized_text(text):
         filtered_lines.append(line)  # Добавляем остальные строки
     return '\n'.join(filtered_lines)  # Собираем текст обратно
 
-def showImage(processed_image, region):
+def showImage(processed_image, ms):
     # Отображение обработанного изображения
     processed_array = np.array(processed_image)
     window_name = "Processed Image"
@@ -68,20 +68,23 @@ def showImage(processed_image, region):
     cv2.moveWindow(window_name, 10, 10)
     cv2.imshow(window_name, processed_array)
     cv2.waitKey(1)
-    cv2.waitKey(10000)
+    cv2.waitKey(ms)
     cv2.destroyAllWindows()
 
 def capture_and_recognize(region):
     log_and_print(f"[capture_and_recognize] region: {region}")
     """Capture and recognize text only when the image changes."""
     try:
-        cv2.destroyAllWindows()
         # Take a screenshot
-        screenshot = pyautogui.screenshot(region=region)
+        #screenshot = pyautogui.screenshot(region=region)
+        screenshot = take_screenshot(region)
         #showImage(screenshot, region)
         # Preprocess the image (if needed)
         processed_image = preprocess_image(screenshot) #
-        #showImage(processed_image, region)
+
+        visualize = read_setting("visualize")
+        if visualize:
+            showImage(processed_image, 1000)
         #cv2.waitKey(3000)
         # Perform OCR
         custom_config = read_setting("capture_and_recognize.custom_config")
@@ -289,4 +292,46 @@ def capture_and_find_text_coordinates(region, search_words, preprocess=True, cas
     except Exception as e:
         print(f"Ошибка в capture_and_find_text_coordinates: {e}")
         return []
+
+def find_text_upward_with_highlight(start_x, start_y, y_max, height, template_height, template_width, search_words):
+
+    step = int(template_height / 2)  # Шаг поиска
+
+    current_y = start_y
+    min_y = y_max - height
+
+    log_and_print(f"height = {height}, min_y = {min_y}")
+
+    while current_y >= min_y:
+        log_and_print(f"start_x = {start_x}, current_y = {current_y}, min_y = {min_y}")
+
+        # Снимаем скриншот текущей области
+        region = (start_x, current_y, template_width, template_height)
+
+        text = capture_and_recognize(region).lower()
+        word = (text.replace(">", "")
+                .replace("›", "")
+                .replace(" ", "")
+                .replace("»", "")
+                .replace("\n", "")
+                .replace("\r", "")
+                .replace("\t", "")
+                )
+        search_words_lower = [word.lower() for word in search_words]
+
+        log_and_print(f"word = {word} search_words_lower = {search_words_lower}")
+
+        if word:
+            # Если шаблон найден
+            if word in search_words_lower:
+                log_and_print(f"text знайдений")
+                found_y = current_y
+                return found_y
+
+        # Шаг вверх
+        current_y -= step
+        # time.sleep(3)
+
+    return None
+
 
