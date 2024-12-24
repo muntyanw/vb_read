@@ -172,10 +172,10 @@ def fill_y_mess(window, s):
 def fill_y_mess_care_find(window, s):
     s.y_mess = []
     window.set_focus()
-    log_and_print(f"Старт fill_y_mess ретельного пошуку")
+    log_and_print(f"[fill_y_mess_care_find] Старт fill_y_mess ретельного пошуку")
     x, y, height = s.search_board_mess_x_start, s.search_board_mess_y_end, s.search_board_mess_y_end - s.search_board_mess_y_start
     left_click(x + s.x_offset_out_mess, y - 100)
-    log_and_print(f"x = {x} y = {y} height = {height}")
+    log_and_print(f"[fill_y_mess_care_find] x = {x} y = {y} height = {height}")
 
     comment_height = read_setting("comment_height")
     comment_width = read_setting("comment_width")
@@ -194,16 +194,18 @@ def fill_y_mess_care_find(window, s):
             if visualize:
                 show_position(x, y_finded, duration=2, size=50, color="red")
 
-            log_and_print(f"Меседж знайдений y_finded = {y_finded}")
+            log_and_print(f"[fill_y_mess_care_find] Меседж знайдений y_finded = {y_finded}")
             y = y - comment_height
         else:
-            log_and_print(f"Меседж не знайдений")
+            log_and_print(f"[fill_y_mess_care_find] Меседж не знайдений")
             stop = True
 
-    s.y_mess = reversed(s.y_mess)
-    log_and_print(f"s.y_mess = {s.y_mess}")
+    log_and_print(f"[fill_y_mess_care_find] s.y_mess = {s.y_mess}")
+    s.y_mess.reverse()
+    log_and_print(f"[fill_y_mess_care_find] s.y_mess.reverse() = {s.y_mess}")
 
 async def send_text(window, s, menu_items, x, y):
+    global count_y_mess_empty
     x2, y2, w, h = menu_items["isText"]
     x = x + x2 + int(w / 2)
     y = y + y2 +10
@@ -230,9 +232,10 @@ async def send_text(window, s, menu_items, x, y):
 
         else:
             log_and_print(f"[send_text] Нема нового меседжа")
+            count_y_mess_empty = count_y_mess_empty + 1
 
 async def send_image(window, s, menu_items, x, y):
-
+    global count_y_mess_empty
     x2, y2, w, h = menu_items["isImage"]
     x = x + x2 + int(w / 2)
     y = y + y2 + int(h / 2)
@@ -250,6 +253,7 @@ async def send_image(window, s, menu_items, x, y):
 
     if hash in s.old_text:
         log_and_print(f"[send_image] Картинка уже была отправлена!")
+        count_y_mess_empty = count_y_mess_empty + 1
         return
 
     save_current_text(hash)
@@ -272,6 +276,7 @@ async def send_image(window, s, menu_items, x, y):
         await process_one_message("", s.bot_client, channel_name, s.name_viber, file_path)
 
 async def send_video(window, s, menu_items, x, y):
+    global count_y_mess_empty
     path_files_downloads = read_setting("path_files_downloads")
 
     window.set_focus()
@@ -290,6 +295,7 @@ async def send_video(window, s, menu_items, x, y):
 
     textFind = remove_service_symbols_and_spaces(file_name)
     if textFind in s.old_text:
+        count_y_mess_empty = count_y_mess_empty + 1
         log_and_print(f"[send_image] Файл уже был отправлен!")
         pyautogui.press('tab', presses=4, interval=0.1)
         # cv2.waitKey(1000)
@@ -405,22 +411,21 @@ async def main():
 
                 ctypes.windll.user32.LockWindowUpdate(hwnd)
 
-                if count_y_mess_empty <= 10:
+                if count_y_mess_empty <= 20:
                     fill_y_mess(window, s)
                 else:
                     fill_y_mess_care_find(window, s)
+                    count_y_mess_empty = 0
 
                 if len(s.y_mess) > 0:
                     await send_messages_from_y_mess(window,s)
-                    count_y_mess_empty = 0
+
                 else:
                     count_y_mess_empty = count_y_mess_empty + 1
-                    log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
 
                 ctypes.windll.user32.LockWindowUpdate(0)
 
-
-
+                log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
                 log_and_print(f"pause = {pause}")
                 await asyncio.sleep(pause)
 
