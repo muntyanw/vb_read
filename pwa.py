@@ -374,15 +374,17 @@ async def send_messages_from_y_mess(window, s):
             #left_click(window, x, y)
             right_click(window, x, y)
 
-            y = y  - s.height_item_menu * 10
             x = x + 50
-            region = [x, y, s.width_menu, s.height_menu + s.height_item_menu * 4]
+            region = [x, y -  read_setting("indent_up"), s.width_menu, s.height_menu + read_setting("indent_down")]
             cv2.waitKey(1000)
             menu_items = capture_and_find_multiple_text_coordinates(region, read_setting("search_phrases"), visualize = read_setting("visualize"))
 
             log_and_print(f"menu_items = {menu_items}")
 
             await send_message(window, s, menu_items, region[0], region[1])
+
+            right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess,
+                        s.search_board_mess_y_end - 100)
 
 async def main():
     global count_y_mess_empty
@@ -419,6 +421,8 @@ async def main():
 
                 if len(s.y_mess) > 0:
                     await send_messages_from_y_mess(window,s)
+
+
 
                 else:
                     count_y_mess_empty = count_y_mess_empty + 1

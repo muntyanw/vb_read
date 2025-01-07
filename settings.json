@@ -27,5 +27,8 @@
     },
     "path_files_downloads": "C:\\Users\\mvv\\Documents\\ViberDownloads\\",
     "comment_height": 20,
-    "comment_width": 142
+    "comment_width": 142,
+    "indent_up": 200,
+    "indent_down": 200
+
 }
