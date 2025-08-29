@@ -1,0 +1,14 @@
+pynput
+pyautogui
+pytesseract
+opencv-python
+telethon
+pillow
+pygetwindow
+mouseinfo
+pywinauto
+keyboard
+httpx
+pydantic
+#pip install -r requirements.txt
+

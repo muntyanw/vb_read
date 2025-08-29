@@ -1,6 +1,6 @@
 from tg import startTgClient
 from vb_utils import *
-from recognize_text import capture_and_find_multiple_text_coordinates, capture_and_find_text_coordinates, find_text_upward_with_highlight
+from recognize_text import capture_and_find_multiple_text_coordinates, find_text_upward_with_highlight
 from log import log_and_print
 import pyperclip
 from find_message import load_previous_text, save_current_text, remove_service_symbols_and_spaces
@@ -162,7 +162,8 @@ def fill_y_mess(window, s):
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
 
     region = [x,y, width, height]
-    coordinates = capture_and_find_text_coordinates(region, read_setting("word_comment"), visualize = read_setting("visualize"))
+    #coordinates = capture_and_find_text_coordinates(region, read_setting("word_comment"), visualize = read_setting("visualize"))
+    coordinates = capture_and_find_image_boundary_coordinates(region, read_setting("image_border_down"), visualize = read_setting("visualize"))
     window.set_focus()
 
     s.y_mess = [coord[1] for coord in coordinates]
@@ -181,7 +182,7 @@ def fill_y_mess_care_find(window, s):
     comment_width = read_setting("comment_width")
 
     stop = False
-    while not stop:
+    while True:
         window.set_focus()
 
         y = find_text_upward_with_highlight(x, y, s.search_board_mess_y_end, height, comment_height, comment_width, read_setting("word_comment"))
@@ -198,7 +199,7 @@ def fill_y_mess_care_find(window, s):
             y = y - comment_height
         else:
             log_and_print(f"[fill_y_mess_care_find] Меседж не знайдений")
-            stop = True
+            break
 
     log_and_print(f"[fill_y_mess_care_find] s.y_mess = {s.y_mess}")
     s.y_mess.reverse()
@@ -225,7 +226,7 @@ async def send_text(window, s, menu_items, x, y):
         if not textFind in s.old_text:
             log_and_print(f"[send_text] Отправка нового текста в tg: {text}")
             for channel_name in s.channel_names:
-                await process_one_message(text, s.bot_client, channel_name, s.name_viber, None)
+                await process_one_message_dispatcher(text, s.name_viber, None)
 
             save_current_text(textOrigin)
             s.old_text = load_previous_text()
@@ -273,7 +274,7 @@ async def send_image(window, s, menu_items, x, y):
 
     log_and_print(f"[send_message] Отправка нового имиджа в tg: {bio.name}")
     for channel_name in s.channel_names:
-        await process_one_message("", s.bot_client, channel_name, s.name_viber, file_path)
+        await process_one_message_dispatcher("", s.name_viber, file_path)
 
 async def send_video(window, s, menu_items, x, y):
     global count_y_mess_empty
@@ -345,7 +346,7 @@ async def send_video(window, s, menu_items, x, y):
 
     log_and_print(f"[send_message] Отправка нового файла в tg: {file}")
     for channel_name in s.channel_names:
-        await process_one_message("", s.bot_client, channel_name, s.name_viber, file)
+        await process_one_message_dispatcher("", s.name_viber, file)
 
 async def send_message(window, s, menu_items, x, y):
     window.set_focus()
@@ -421,9 +422,6 @@ async def main():
 
                 if len(s.y_mess) > 0:
                     await send_messages_from_y_mess(window,s)
-
-
-
                 else:
                     count_y_mess_empty = count_y_mess_empty + 1
 

@@ -1,11 +1,262 @@
 [
     {
+        "label": "argparse",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "argparse",
+        "description": "argparse",
+        "detail": "argparse",
+        "documentation": {}
+    },
+    {
+        "label": "glob",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "glob",
+        "description": "glob",
+        "detail": "glob",
+        "documentation": {}
+    },
+    {
         "label": "os",
         "kind": 6,
         "isExtraImport": true,
         "importPath": "os",
         "description": "os",
         "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "shutil",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "shutil",
+        "description": "shutil",
+        "detail": "shutil",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "sysconfig",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sysconfig",
+        "description": "sysconfig",
+        "detail": "sysconfig",
+        "documentation": {}
+    },
+    {
+        "label": "tempfile",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tempfile",
+        "description": "tempfile",
+        "detail": "tempfile",
+        "documentation": {}
+    },
+    {
+        "label": "winreg",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "winreg",
+        "description": "winreg",
+        "detail": "winreg",
+        "documentation": {}
+    },
+    {
+        "label": "site",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "site",
+        "description": "site",
+        "detail": "site",
+        "documentation": {}
+    },
+    {
+        "label": "subprocess",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "subprocess",
+        "description": "subprocess",
+        "detail": "subprocess",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Union",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Union",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Union",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "httpx",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "httpx",
+        "description": "httpx",
+        "detail": "httpx",
+        "documentation": {}
+    },
+    {
+        "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "send_for_analysis",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "DispatchResult",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "send_for_analysis",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
     {
@@ -138,6 +389,22 @@
         "documentation": {}
     },
     {
+        "label": "showImage",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "take_screenshot",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
         "label": "is_video_file",
         "importPath": "utils",
         "description": "utils",
@@ -147,6 +414,30 @@
     },
     {
         "label": "get_video_dimensions_cv2",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "take_screenshot",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "preprocess_image",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "show_screen_with_region",
         "importPath": "utils",
         "description": "utils",
         "isExtraImport": true,
@@ -169,14 +460,6 @@
         "importPath": "logging",
         "description": "logging",
         "detail": "logging",
-        "documentation": {}
-    },
-    {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
-        "isExtraImport": true,
-        "detail": "datetime",
         "documentation": {}
     },
     {
@@ -257,14 +540,6 @@
     },
     {
         "label": "capture_and_find_multiple_text_coordinates",
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "isExtraImport": true,
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
-        "label": "capture_and_find_text_coordinates",
         "importPath": "recognize_text",
         "description": "recognize_text",
         "isExtraImport": true,
@@ -355,14 +630,6 @@
     },
     {
         "label": "save_current_text",
-        "importPath": "find_message",
-        "description": "find_message",
-        "isExtraImport": true,
-        "detail": "find_message",
-        "documentation": {}
-    },
-    {
-        "label": "remove_service_symbols_and_spaces",
         "importPath": "find_message",
         "description": "find_message",
         "isExtraImport": true,
@@ -478,24 +745,6 @@
         "documentation": {}
     },
     {
-        "label": "sys",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "sys",
-        "description": "sys",
-        "detail": "sys",
-        "documentation": {}
-    },
-    {
-        "label": "asyncio",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "asyncio",
-        "description": "asyncio",
-        "detail": "asyncio",
-        "documentation": {}
-    },
-    {
         "label": "RPCError",
         "importPath": "telethon.errors",
         "description": "telethon.errors",
@@ -575,6 +824,321 @@
         "description": "vb",
         "isExtraImport": true,
         "detail": "vb",
+        "documentation": {}
+    },
+    {
+        "label": "Tee",
+        "kind": 6,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "class Tee:\n    def __init__(self, file):\n        self.f = file\n    def write(self, what):\n        if self.f is not None:\n            try:\n                self.f.write(what.replace(\"\\n\", \"\\r\\n\"))\n            except OSError:\n                pass\n        tee_f.write(what)",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "get_root_hkey",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def get_root_hkey():\n    try:\n        winreg.OpenKey(\n            winreg.HKEY_LOCAL_MACHINE, root_key_name, 0, winreg.KEY_CREATE_SUB_KEY\n        )\n        return winreg.HKEY_LOCAL_MACHINE\n    except OSError:\n        # Either not exist, or no permissions to create subkey means\n        # must be HKCU\n        return winreg.HKEY_CURRENT_USER",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "create_shortcut",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def create_shortcut(\n    path, description, filename, arguments=\"\", workdir=\"\", iconpath=\"\", iconindex=0\n):\n    import pythoncom\n    from win32com.shell import shell\n    ilink = pythoncom.CoCreateInstance(\n        shell.CLSID_ShellLink,\n        None,\n        pythoncom.CLSCTX_INPROC_SERVER,\n        shell.IID_IShellLink,",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "get_special_folder_path",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def get_special_folder_path(path_name):\n    from win32com.shell import shell, shellcon\n    for maybe in \"\"\"\n        CSIDL_COMMON_STARTMENU CSIDL_STARTMENU CSIDL_COMMON_APPDATA\n        CSIDL_LOCAL_APPDATA CSIDL_APPDATA CSIDL_COMMON_DESKTOPDIRECTORY\n        CSIDL_DESKTOPDIRECTORY CSIDL_COMMON_STARTUP CSIDL_STARTUP\n        CSIDL_COMMON_PROGRAMS CSIDL_PROGRAMS CSIDL_PROGRAM_FILES_COMMON\n        CSIDL_PROGRAM_FILES CSIDL_FONTS\"\"\".split():\n        if maybe == path_name:\n            csidl = getattr(shellcon, maybe)",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "CopyTo",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def CopyTo(desc, src, dest):\n    import win32api\n    import win32con\n    while 1:\n        try:\n            win32api.CopyFile(src, dest, 0)\n            return\n        except win32api.error as details:\n            if details.winerror == 5:  # access denied - user not admin.\n                raise",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "LoadSystemModule",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def LoadSystemModule(lib_dir, modname):\n    # See if this is a debug build.\n    import importlib.machinery\n    import importlib.util\n    suffix = \"_d\" if \"_d.pyd\" in importlib.machinery.EXTENSION_SUFFIXES else \"\"\n    filename = \"%s%d%d%s.dll\" % (\n        modname,\n        sys.version_info.major,\n        sys.version_info.minor,\n        suffix,",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "SetPyKeyVal",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def SetPyKeyVal(key_name, value_name, value):\n    root_hkey = get_root_hkey()\n    root_key = winreg.OpenKey(root_hkey, root_key_name)\n    try:\n        my_key = winreg.CreateKey(root_key, key_name)\n        try:\n            winreg.SetValueEx(my_key, value_name, 0, winreg.REG_SZ, value)\n            if verbose:\n                print(f\"-> {root_key_name}\\\\{key_name}[{value_name}]={value!r}\")\n        finally:",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "UnsetPyKeyVal",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def UnsetPyKeyVal(key_name, value_name, delete_key=False):\n    root_hkey = get_root_hkey()\n    root_key = winreg.OpenKey(root_hkey, root_key_name)\n    try:\n        my_key = winreg.OpenKey(root_key, key_name, 0, winreg.KEY_SET_VALUE)\n        try:\n            winreg.DeleteValue(my_key, value_name)\n            if verbose:\n                print(f\"-> DELETE {root_key_name}\\\\{key_name}[{value_name}]\")\n        finally:",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "RegisterCOMObjects",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def RegisterCOMObjects(register=True):\n    import win32com.server.register\n    if register:\n        func = win32com.server.register.RegisterClasses\n    else:\n        func = win32com.server.register.UnregisterClasses\n    flags = {}\n    if not verbose:\n        flags[\"quiet\"] = 1\n    for module, klass_name in com_modules:",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "RegisterHelpFile",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def RegisterHelpFile(register=True, lib_dir=None):\n    if lib_dir is None:\n        lib_dir = sysconfig.get_paths()[\"platlib\"]\n    if register:\n        # Register the .chm help file.\n        chm_file = os.path.join(lib_dir, \"PyWin32.chm\")\n        if os.path.isfile(chm_file):\n            # This isn't recursive, so if 'Help' doesn't exist, we croak\n            SetPyKeyVal(\"Help\", None, None)\n            SetPyKeyVal(\"Help\\\\Pythonwin Reference\", None, chm_file)",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "RegisterPythonwin",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def RegisterPythonwin(register=True, lib_dir=None):\n    \"\"\"Add (or remove) Pythonwin to context menu for python scripts.\n    ??? Should probably also add Edit command for pys files also.\n    Also need to remove these keys on uninstall, but there's no function\n    to add registry entries to uninstall log ???\n    \"\"\"\n    import os\n    if lib_dir is None:\n        lib_dir = sysconfig.get_paths()[\"platlib\"]\n    classes_root = get_root_hkey()",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "get_shortcuts_folder",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def get_shortcuts_folder():\n    if get_root_hkey() == winreg.HKEY_LOCAL_MACHINE:\n        try:\n            fldr = get_special_folder_path(\"CSIDL_COMMON_PROGRAMS\")\n        except OSError:\n            # No CSIDL_COMMON_PROGRAMS on this platform\n            fldr = get_special_folder_path(\"CSIDL_PROGRAMS\")\n    else:\n        # non-admin install - always goes in this user's start menu.\n        fldr = get_special_folder_path(\"CSIDL_PROGRAMS\")",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "get_system_dir",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def get_system_dir():\n    import win32api  # we assume this exists.\n    try:\n        import pythoncom\n        import win32process\n        from win32com.shell import shell, shellcon\n        try:\n            if win32process.IsWow64Process():\n                return shell.SHGetSpecialFolderPath(0, shellcon.CSIDL_SYSTEMX86)\n            return shell.SHGetSpecialFolderPath(0, shellcon.CSIDL_SYSTEM)",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "fixup_dbi",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def fixup_dbi():\n    # We used to have a dbi.pyd with our .pyd files, but now have a .py file.\n    # If the user didn't uninstall, they will find the .pyd which will cause\n    # problems - so handle that.\n    import win32api\n    import win32con\n    pyd_name = os.path.join(os.path.dirname(win32api.__file__), \"dbi.pyd\")\n    pyd_d_name = os.path.join(os.path.dirname(win32api.__file__), \"dbi_d.pyd\")\n    py_name = os.path.join(os.path.dirname(win32con.__file__), \"dbi.py\")\n    for this_pyd in (pyd_name, pyd_d_name):",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "install",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def install(lib_dir):\n    import traceback\n    # The .pth file is now installed as a regular file.\n    # Create the .pth file in the site-packages dir, and use only relative paths\n    # We used to write a .pth directly to sys.prefix - clobber it.\n    if os.path.isfile(os.path.join(sys.prefix, \"pywin32.pth\")):\n        os.unlink(os.path.join(sys.prefix, \"pywin32.pth\"))\n    # The .pth may be new and therefore not loaded in this session.\n    # Setup the paths just in case.\n    for name in \"win32 win32\\\\lib Pythonwin\".split():",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "uninstall",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def uninstall(lib_dir):\n    # First ensure our system modules are loaded from pywin32_system, so\n    # we can remove the ones we copied...\n    LoadSystemModule(lib_dir, \"pywintypes\")\n    LoadSystemModule(lib_dir, \"pythoncom\")\n    try:\n        RegisterCOMObjects(False)\n    except Exception as why:\n        print(f\"Failed to unregister COM objects: {why}\")\n    try:",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "verify_destination",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def verify_destination(location: str) -> str:\n    location = os.path.abspath(location)\n    if not os.path.isdir(location):\n        raise argparse.ArgumentTypeError(\n            f'Path \"{location}\" is not an existing directory!'\n        )\n    return location\ndef main():\n    parser = argparse.ArgumentParser(\n        formatter_class=argparse.RawDescriptionHelpFormatter,",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "def main():\n    parser = argparse.ArgumentParser(\n        formatter_class=argparse.RawDescriptionHelpFormatter,\n        description=\"\"\"A post-install script for the pywin32 extensions.\n    * Typical usage:\n    > python -m pywin32_postinstall -install\n    * or (shorter but you don't have control over which python environment is used)\n    > pywin32_postinstall -install\n    You need to execute this script, with a '-install' parameter,\n    to ensure the environment is setup correctly to install COM objects, services, etc.",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "tee_f",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "tee_f = open(\n    os.path.join(\n        tempfile.gettempdir(),  # Send output somewhere so it can be found if necessary...\n        \"pywin32_postinstall.log\",\n    ),\n    \"w\",\n)\nclass Tee:\n    def __init__(self, file):\n        self.f = file",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "sys.stderr",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "sys.stderr = Tee(sys.stderr)\nsys.stdout = Tee(sys.stdout)\ncom_modules = [\n    # module_name,                      class_names\n    (\"win32com.servers.interp\", \"Interpreter\"),\n    (\"win32com.servers.dictionary\", \"DictionaryPolicy\"),\n    (\"win32com.axscript.client.pyscript\", \"PyScript\"),\n]\n# Is this a 'silent' install - ie, avoid all dialogs.\n# Different than 'verbose'",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "sys.stdout",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "sys.stdout = Tee(sys.stdout)\ncom_modules = [\n    # module_name,                      class_names\n    (\"win32com.servers.interp\", \"Interpreter\"),\n    (\"win32com.servers.dictionary\", \"DictionaryPolicy\"),\n    (\"win32com.axscript.client.pyscript\", \"PyScript\"),\n]\n# Is this a 'silent' install - ie, avoid all dialogs.\n# Different than 'verbose'\nsilent = 0",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "com_modules",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "com_modules = [\n    # module_name,                      class_names\n    (\"win32com.servers.interp\", \"Interpreter\"),\n    (\"win32com.servers.dictionary\", \"DictionaryPolicy\"),\n    (\"win32com.axscript.client.pyscript\", \"PyScript\"),\n]\n# Is this a 'silent' install - ie, avoid all dialogs.\n# Different than 'verbose'\nsilent = 0\n# Verbosity of output messages.",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "silent",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "silent = 0\n# Verbosity of output messages.\nverbose = 1\nroot_key_name = \"Software\\\\Python\\\\PythonCore\\\\\" + sys.winver\ndef get_root_hkey():\n    try:\n        winreg.OpenKey(\n            winreg.HKEY_LOCAL_MACHINE, root_key_name, 0, winreg.KEY_CREATE_SUB_KEY\n        )\n        return winreg.HKEY_LOCAL_MACHINE",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "verbose",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "verbose = 1\nroot_key_name = \"Software\\\\Python\\\\PythonCore\\\\\" + sys.winver\ndef get_root_hkey():\n    try:\n        winreg.OpenKey(\n            winreg.HKEY_LOCAL_MACHINE, root_key_name, 0, winreg.KEY_CREATE_SUB_KEY\n        )\n        return winreg.HKEY_LOCAL_MACHINE\n    except OSError:\n        # Either not exist, or no permissions to create subkey means",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "root_key_name",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_postinstall",
+        "description": ".venv.Scripts.pywin32_postinstall",
+        "peekOfCode": "root_key_name = \"Software\\\\Python\\\\PythonCore\\\\\" + sys.winver\ndef get_root_hkey():\n    try:\n        winreg.OpenKey(\n            winreg.HKEY_LOCAL_MACHINE, root_key_name, 0, winreg.KEY_CREATE_SUB_KEY\n        )\n        return winreg.HKEY_LOCAL_MACHINE\n    except OSError:\n        # Either not exist, or no permissions to create subkey means\n        # must be HKCU",
+        "detail": ".venv.Scripts.pywin32_postinstall",
+        "documentation": {}
+    },
+    {
+        "label": "run_test",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_testall",
+        "description": ".venv.Scripts.pywin32_testall",
+        "peekOfCode": "def run_test(script, cmdline_extras):\n    dirname, scriptname = os.path.split(script)\n    # some tests prefer to be run from their directory.\n    cmd = [sys.executable, \"-u\", scriptname] + cmdline_extras\n    print(\"--- Running '%s' ---\" % script)\n    sys.stdout.flush()\n    result = subprocess.run(cmd, check=False, cwd=dirname)\n    print(f\"*** Test script '{script}' exited with {result.returncode}\")\n    sys.stdout.flush()\n    if result.returncode:",
+        "detail": ".venv.Scripts.pywin32_testall",
+        "documentation": {}
+    },
+    {
+        "label": "find_and_run",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_testall",
+        "description": ".venv.Scripts.pywin32_testall",
+        "peekOfCode": "def find_and_run(possible_locations, extras):\n    for maybe in possible_locations:\n        if os.path.isfile(maybe):\n            run_test(maybe, extras)\n            break\n    else:\n        raise RuntimeError(\n            \"Failed to locate a test script in one of %s\" % possible_locations\n        )\ndef main():",
+        "detail": ".venv.Scripts.pywin32_testall",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": ".venv.Scripts.pywin32_testall",
+        "description": ".venv.Scripts.pywin32_testall",
+        "peekOfCode": "def main():\n    import argparse\n    code_directories = [project_root] + site_packages\n    parser = argparse.ArgumentParser(\n        description=\"A script to trigger tests in all subprojects of PyWin32.\"\n    )\n    parser.add_argument(\n        \"-no-user-interaction\",\n        default=False,\n        action=\"store_true\",",
+        "detail": ".venv.Scripts.pywin32_testall",
+        "documentation": {}
+    },
+    {
+        "label": "project_root",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_testall",
+        "description": ".venv.Scripts.pywin32_testall",
+        "peekOfCode": "project_root = os.path.dirname(os.path.dirname(os.path.dirname(__file__)))\nsite_packages = [site.getusersitepackages()] + site.getsitepackages()\nfailures = []\n# Run a test using subprocess and wait for the result.\n# If we get an returncode != 0, we know that there was an error, but we don't\n# abort immediately - we run as many tests as we can.\ndef run_test(script, cmdline_extras):\n    dirname, scriptname = os.path.split(script)\n    # some tests prefer to be run from their directory.\n    cmd = [sys.executable, \"-u\", scriptname] + cmdline_extras",
+        "detail": ".venv.Scripts.pywin32_testall",
+        "documentation": {}
+    },
+    {
+        "label": "site_packages",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_testall",
+        "description": ".venv.Scripts.pywin32_testall",
+        "peekOfCode": "site_packages = [site.getusersitepackages()] + site.getsitepackages()\nfailures = []\n# Run a test using subprocess and wait for the result.\n# If we get an returncode != 0, we know that there was an error, but we don't\n# abort immediately - we run as many tests as we can.\ndef run_test(script, cmdline_extras):\n    dirname, scriptname = os.path.split(script)\n    # some tests prefer to be run from their directory.\n    cmd = [sys.executable, \"-u\", scriptname] + cmdline_extras\n    print(\"--- Running '%s' ---\" % script)",
+        "detail": ".venv.Scripts.pywin32_testall",
+        "documentation": {}
+    },
+    {
+        "label": "failures",
+        "kind": 5,
+        "importPath": ".venv.Scripts.pywin32_testall",
+        "description": ".venv.Scripts.pywin32_testall",
+        "peekOfCode": "failures = []\n# Run a test using subprocess and wait for the result.\n# If we get an returncode != 0, we know that there was an error, but we don't\n# abort immediately - we run as many tests as we can.\ndef run_test(script, cmdline_extras):\n    dirname, scriptname = os.path.split(script)\n    # some tests prefer to be run from their directory.\n    cmd = [sys.executable, \"-u\", scriptname] + cmdline_extras\n    print(\"--- Running '%s' ---\" % script)\n    sys.stdout.flush()",
+        "detail": ".venv.Scripts.pywin32_testall",
+        "documentation": {}
+    },
+    {
+        "label": "DispatchError",
+        "kind": 6,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "class DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    decision: Dict[str, Any]\n    actions: list\nasync def send_for_analysis(\n    *,\n    message_id: str,",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "DispatchResult",
+        "kind": 6,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "class DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    decision: Dict[str, Any]\n    actions: list\nasync def send_for_analysis(\n    *,\n    message_id: str,\n    text: str,\n    chat_id: Optional[str] = None,",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "DISPATCH_URL",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "DISPATCH_URL = os.getenv(\"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\")\nDISPATCH_API_KEY = os.getenv(\"DISPATCH_API_KEY\", \"66fBbZsL72\")\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    decision: Dict[str, Any]\n    actions: list\nasync def send_for_analysis(",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "DISPATCH_API_KEY",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\"DISPATCH_API_KEY\", \"66fBbZsL72\")\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    decision: Dict[str, Any]\n    actions: list\nasync def send_for_analysis(\n    *,",
+        "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
     {
@@ -807,7 +1371,7 @@
         "kind": 2,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    region = [x,y, width, height]\n    coordinates = capture_and_find_text_coordinates(region, read_setting(\"word_comment\"), visualize = read_setting(\"visualize\"))",
+        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    region = [x,y, width, height]\n    #coordinates = capture_and_find_text_coordinates(region, read_setting(\"word_comment\"), visualize = read_setting(\"visualize\"))",
         "detail": "pwa",
         "documentation": {}
     },
@@ -875,29 +1439,11 @@
         "documentation": {}
     },
     {
-        "label": "preprocess_image",
-        "kind": 2,
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "peekOfCode": "def preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого\n    \"\"\"\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")\n    # Конвертируем из RGB в BGR",
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
         "label": "filter_recognized_text",
         "kind": 2,
         "importPath": "recognize_text",
         "description": "recognize_text",
         "peekOfCode": "def filter_recognized_text(text):\n    \"\"\"\n    Filters out lines that are shorter than 6 characters and contain colons.\n    \"\"\"\n    lines = text.split('\\n')  # Разбиваем текст на строки\n    filtered_lines = []\n    for line in lines:\n        stripped_line = line.strip()  # Убираем пробелы в начале и конце строки\n        if len(stripped_line) < 6 and ':' in stripped_line:\n            continue  # Пропускаем строки, если их длина < 6 и они содержат двоеточие",
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
-        "label": "showImage",
-        "kind": 2,
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "peekOfCode": "def showImage(processed_image, ms):\n    # Отображение обработанного изображения\n    processed_array = np.array(processed_image)\n    window_name = \"Processed Image\"\n    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)\n    cv2.moveWindow(window_name, 10, 10)\n    cv2.imshow(window_name, processed_array)\n    cv2.waitKey(1)\n    cv2.waitKey(ms)\n    cv2.destroyAllWindows()",
         "detail": "recognize_text",
         "documentation": {}
     },
@@ -916,15 +1462,6 @@
         "importPath": "recognize_text",
         "description": "recognize_text",
         "peekOfCode": "def capture_and_find_multiple_text_coordinates(region, search_phrases, visualize = False):\n    log_and_print(f\"[capture_and_find_multiple_text_coordinates] region: {region}, search_phrases: {search_phrases}\")\n    try:\n        cv2.destroyAllWindows()\n        # Захват скриншота\n        screenshot_np = take_screenshot(region)\n        log_and_print(f\"[capture_and_find_text_coordinates] Скриншот захвачен успешно.\")\n        # Предварительная обработка изображения\n        processed_image = preprocess_image(screenshot_np)\n        log_and_print(f\"[capture_and_find_text_coordinates] Изображение обработано успешно.\")",
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
-        "label": "take_screenshot",
-        "kind": 2,
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "peekOfCode": "def take_screenshot(region):\n    screenshot = pyautogui.screenshot(region=region)\n    image_np = np.array(screenshot)\n    return image_np\ndef preprocess_image(image_np):\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")\n    # Конвертируем из RGB в BGR\n    image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)",
         "detail": "recognize_text",
         "documentation": {}
     },
@@ -978,7 +1515,7 @@
         "kind": 5,
         "importPath": "recognize_text",
         "description": "recognize_text",
-        "peekOfCode": "pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'\nimport cv2\ndef preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого\n    \"\"\"\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:",
+        "peekOfCode": "pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'\nimport cv2\ndef filter_recognized_text(text):\n    \"\"\"\n    Filters out lines that are shorter than 6 characters and contain colons.\n    \"\"\"\n    lines = text.split('\\n')  # Разбиваем текст на строки\n    filtered_lines = []\n    for line in lines:\n        stripped_line = line.strip()  # Убираем пробелы в начале и конце строки",
         "detail": "recognize_text",
         "documentation": {}
     },
@@ -1064,6 +1601,15 @@
         "documentation": {}
     },
     {
+        "label": "preprocess_image",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого\n    \"\"\"\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")\n    # Конвертируем из RGB в BGR",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
         "label": "read_setting",
         "kind": 2,
         "importPath": "utils",
@@ -1114,6 +1660,51 @@
         "importPath": "utils",
         "description": "utils",
         "peekOfCode": "def get_video_dimensions_cv2(file_path):\n    cap = cv2.VideoCapture(file_path)\n    if not cap.isOpened():\n        return None, None, None, None\n    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))\n    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))\n    fps = cap.get(cv2.CAP_PROP_FPS)\n    duration = cap.get(cv2.CAP_PROP_FRAME_COUNT) / fps if fps else None\n    cap.release()\n    return width, height, duration, fps",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "showImage",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def showImage(processed_image, ms):\n    # Отображение обработанного изображения\n    processed_array = np.array(processed_image)\n    window_name = \"Processed Image\"\n    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)\n    cv2.moveWindow(window_name, 10, 10)\n    cv2.imshow(window_name, processed_array)\n    cv2.waitKey(1)\n    cv2.waitKey(ms)\n    cv2.destroyAllWindows()",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "draw_match_overlay",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def draw_match_overlay(\n    img, x, y, w, h, *,\n    idx=None, score=None, y_boundary=None,\n    show_zoom=True, zoom_scale=2, zoom_size_min=120\n):\n    H, W = img.shape[:2]\n    bgr = img if img.ndim == 3 else cv2.cvtColor(img, cv2.COLOR_GRAY2BGR)\n    # 1) Bounding box (high contrast + anti-aliased)\n    cv2.rectangle(bgr, (x, y), (x+w, y+h), (0, 255, 0), 2, lineType=cv2.LINE_AA)\n    # 2) Top-left crosshair",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "take_screenshot",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def take_screenshot(region):\n    screenshot = pyautogui.screenshot(region=region)\n    image_np = np.array(screenshot)\n    return image_np\nimport cv2\nimport numpy as np\ndef _safe_show(img_bgr, delay_ms: int = 1000, win_name: str = \"Screen with region\"):\n    \"\"\"Use your showImage if available; otherwise fallback to cv2.imshow.\"\"\"\n    try:\n        showImage(img_bgr, delay_ms)  # your helper",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "show_screen_with_region",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def show_screen_with_region(\n    region,                      # (x, y, w, h) in screen coordinates\n    delay_ms: int = 1000,\n    border_color = (0, 255, 0),  # BGR\n    thickness: int = 3,\n    dim_background: bool = True  # darken non-selected area\n):\n    \"\"\"\n    Capture full screen, draw a rectangle around `region`, and display.\n    Region is highlighted on the *full-screen* image so you see where it is.",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "ImageLike",
+        "kind": 5,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "ImageLike = Union[str, np.ndarray]\ndef preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого\n    \"\"\"\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")",
         "detail": "utils",
         "documentation": {}
     },
@@ -1181,11 +1772,38 @@
         "documentation": {}
     },
     {
+        "label": "find_message_bottom_by_image",
+        "kind": 2,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "def find_message_bottom_by_image(\n    screenshot: ImageLike,\n    search_image: ImageLike,                        # <-- вместо search_words\n    search_roi: Optional[Tuple[int, int, int, int]] = None,  # (x,y,w,h) як і раніше\n    threshold: float = 0.83,                        # мін. кореляція для прийняття збігу\n    scales: Tuple[float, ...] = tuple(np.linspace(0.85, 1.15, 9)),  # мульти-скейл\n    return_debug: bool = False,\n) -> Dict[str, Union[int, float, Tuple[int,int,int,int], np.ndarray]]:\n    \"\"\"\n    Знаходить нижню межу повідомлення у Viber за шаблоном (search_image).",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_find_image_boundary_coordinates",
+        "kind": 2,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "def capture_and_find_image_boundary_coordinates(\n    region,\n    search_image: ImageLike,\n    preprocess: bool = True,\n    visualize: bool = False,\n    threshold: float = 0.83\n) -> List[Tuple[int, int, int, int]]:\n    \"\"\"\n    Capture screenshot of `region`, find all matches of `search_image` (template),\n    and return rectangles [(x, y, w, h)] in screenshot-local coordinates.",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "ImageLike",
+        "kind": 5,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "ImageLike = Union[str, np.ndarray] \ndef scroll_with_mouse(window, count_scroll, direction=\"down\"):\n    window.set_focus()\n    # Находим панель с сообщениями\n    chat_pane = window.child_window(control_type=\"Pane\", found_index=0)\n    # Получаем координаты панели\n    rect = chat_pane.rectangle()\n    center_x = (rect.left + rect.right) // 2\n    center_y = (rect.top + rect.bottom) // 2\n    # Прокручиваем вниз",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
         "label": "processed_messages",
         "kind": 5,
         "importPath": "vb_utils",
         "description": "vb_utils",
-        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\nasync def process_one_message(message_text, bot_client, channel_name, name_viber, file_path):\n    log_and_print(f\"bot_client: {bot_client}\", 'info')\n    log_and_print(f\"service_channel_name: {channel_name}\", 'info')\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)",
+        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\nasync def process_one_message_telegramm(message_text, bot_client, channel_name, name_viber, file_path):\n    log_and_print(f\"bot_client: {bot_client}\", 'info')\n    log_and_print(f\"service_channel_name: {channel_name}\", 'info')\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)",
         "detail": "vb_utils",
         "documentation": {}
     },
@@ -1194,7 +1812,7 @@
         "kind": 5,
         "importPath": "vb_utils",
         "description": "vb_utils",
-        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\nasync def process_one_message(message_text, bot_client, channel_name, name_viber, file_path):\n    log_and_print(f\"bot_client: {bot_client}\", 'info')\n    log_and_print(f\"service_channel_name: {channel_name}\", 'info')\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)\n    elif file_path:\n        processed_messages.add(file_path)",
+        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\nasync def process_one_message_telegramm(message_text, bot_client, channel_name, name_viber, file_path):\n    log_and_print(f\"bot_client: {bot_client}\", 'info')\n    log_and_print(f\"service_channel_name: {channel_name}\", 'info')\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)\n    elif file_path:\n        processed_messages.add(file_path)",
         "detail": "vb_utils",
         "documentation": {}
     }

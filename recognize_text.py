@@ -1,51 +1,13 @@
 from log import log_and_print
-import pyautogui
 import pytesseract
 from pytesseract import Output
-from utils import read_setting
+from utils import read_setting, showImage, take_screenshot
 import numpy as np
-from find_message import remove_service_symbols_and_spaces
+
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
 import cv2
-
-def preprocess_image(image_np):
-    """
-    Преобразует изображение для улучшения качества OCR.
-
-    :param image_np: Изображение в формате NumPy массива (RGB)
-    :return: Обработанное изображение в оттенках серого
-    """
-    # Проверяем размерность массива
-    if len(image_np.shape) != 3 or image_np.shape[2] != 3:
-        raise ValueError("Изображение должно быть цветным (3 канала).")
-
-    # Конвертируем из RGB в BGR
-    image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
-
-    # Конвертируем в оттенки серого
-    gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)
-
-    # Улучшаем контрастность с помощью CLAHE
-    clahe = cv2.createCLAHE(clipLimit=3.0, tileGridSize=(8, 8))  # Увеличен clipLimit для большего усиления контраста
-    enhanced = clahe.apply(gray)
-
-    # Адаптивная бинаризация с измененными параметрами
-    thresh = cv2.adaptiveThreshold(enhanced, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                   cv2.THRESH_BINARY_INV, 15, 10)  # Используем инверсию и меньший блок
-
-    # Морфологическое закрытие для заполнения пробелов внутри букв
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (2, 2))
-    closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel, iterations=1)
-
-    # Удаление небольших шумов с помощью морфологического открытия
-    opened = cv2.morphologyEx(closed, cv2.MORPH_OPEN, kernel, iterations=1)
-
-    # Опционально: применение билинейного фильтра для сглаживания краев
-    # opened = cv2.bilateralFilter(opened, 9, 75, 75)
-
-    return opened
 
 def filter_recognized_text(text):
     """
@@ -59,17 +21,6 @@ def filter_recognized_text(text):
             continue  # Пропускаем строки, если их длина < 6 и они содержат двоеточие
         filtered_lines.append(line)  # Добавляем остальные строки
     return '\n'.join(filtered_lines)  # Собираем текст обратно
-
-def showImage(processed_image, ms):
-    # Отображение обработанного изображения
-    processed_array = np.array(processed_image)
-    window_name = "Processed Image"
-    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
-    cv2.moveWindow(window_name, 10, 10)
-    cv2.imshow(window_name, processed_array)
-    cv2.waitKey(1)
-    cv2.waitKey(ms)
-    cv2.destroyAllWindows()
 
 def capture_and_recognize(region):
     log_and_print(f"[capture_and_recognize] region: {region}")
@@ -159,11 +110,6 @@ def capture_and_find_multiple_text_coordinates(region, search_phrases, visualize
     except Exception as e:
         log_and_print(f"Error during capture and coordinate recognition: {e}")
         return {key: None for key in search_phrases}
-
-def take_screenshot(region):
-    screenshot = pyautogui.screenshot(region=region)
-    image_np = np.array(screenshot)
-    return image_np
 
 def preprocess_image(image_np):
     # Проверяем размерность массива
@@ -292,7 +238,7 @@ def capture_and_find_text_coordinates(region, search_words, preprocess=True, cas
     except Exception as e:
         print(f"Ошибка в capture_and_find_text_coordinates: {e}")
         return []
-
+ 
 def find_text_upward_with_highlight(start_x, start_y, y_max, height, template_height, template_width, search_words):
 
     step = int(template_height / 2)  # Шаг поиска

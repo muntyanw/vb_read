@@ -1,0 +1,14 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "ms-python.vscode-pylance",
+    "charliermarsh.ruff",
+    "ms-python.black-formatter",
+    "littlefoxteam.vscode-python-test-adapter",
+    "ms-toolsai.jupyter",
+    "donjayamanne.python-environment-manager",
+    "formulahendry.code-runner",
+    "eamodio.gitlens",
+    "usernamehw.errorlens"
+  ]
+}
