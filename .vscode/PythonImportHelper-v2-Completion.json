@@ -1,0 +1,1201 @@
+[
+    {
+        "label": "os",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "os",
+        "description": "os",
+        "detail": "os",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "write_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "is_video_file",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "get_video_dimensions_cv2",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "ctypes",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "ctypes",
+        "description": "ctypes",
+        "detail": "ctypes",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "cv2",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "cv2",
+        "description": "cv2",
+        "detail": "cv2",
+        "documentation": {}
+    },
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "ImageGrab",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "Image",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "ImageGrab",
+        "importPath": "PIL",
+        "description": "PIL",
+        "isExtraImport": true,
+        "detail": "PIL",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_recognize",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_find_multiple_text_coordinates",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_find_text_coordinates",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "find_text_upward_with_highlight",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_recognize",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "tkinter",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "tkinter",
+        "description": "tkinter",
+        "detail": "tkinter",
+        "documentation": {}
+    },
+    {
+        "label": "startTgClient",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "send_message_to_tg_channel",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "startTgClient",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "send_message_to_tg_channel",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "isExtraImport": true,
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "pyperclip",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pyperclip",
+        "description": "pyperclip",
+        "detail": "pyperclip",
+        "documentation": {}
+    },
+    {
+        "label": "load_previous_text",
+        "importPath": "find_message",
+        "description": "find_message",
+        "isExtraImport": true,
+        "detail": "find_message",
+        "documentation": {}
+    },
+    {
+        "label": "save_current_text",
+        "importPath": "find_message",
+        "description": "find_message",
+        "isExtraImport": true,
+        "detail": "find_message",
+        "documentation": {}
+    },
+    {
+        "label": "remove_service_symbols_and_spaces",
+        "importPath": "find_message",
+        "description": "find_message",
+        "isExtraImport": true,
+        "detail": "find_message",
+        "documentation": {}
+    },
+    {
+        "label": "remove_service_symbols_and_spaces",
+        "importPath": "find_message",
+        "description": "find_message",
+        "isExtraImport": true,
+        "detail": "find_message",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "find_message",
+        "description": "find_message",
+        "isExtraImport": true,
+        "detail": "find_message",
+        "documentation": {}
+    },
+    {
+        "label": "Application",
+        "importPath": "pywinauto",
+        "description": "pywinauto",
+        "isExtraImport": true,
+        "detail": "pywinauto",
+        "documentation": {}
+    },
+    {
+        "label": "Application",
+        "importPath": "pywinauto",
+        "description": "pywinauto",
+        "isExtraImport": true,
+        "detail": "pywinauto",
+        "documentation": {}
+    },
+    {
+        "label": "mouse",
+        "importPath": "pywinauto",
+        "description": "pywinauto",
+        "isExtraImport": true,
+        "detail": "pywinauto",
+        "documentation": {}
+    },
+    {
+        "label": "BytesIO",
+        "importPath": "io",
+        "description": "io",
+        "isExtraImport": true,
+        "detail": "io",
+        "documentation": {}
+    },
+    {
+        "label": "hashlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "hashlib",
+        "description": "hashlib",
+        "detail": "hashlib",
+        "documentation": {}
+    },
+    {
+        "label": "ScreenRegionSelector",
+        "importPath": "ScreenRegionSelector",
+        "description": "ScreenRegionSelector",
+        "isExtraImport": true,
+        "detail": "ScreenRegionSelector",
+        "documentation": {}
+    },
+    {
+        "label": "keyboard",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "keyboard",
+        "description": "keyboard",
+        "detail": "keyboard",
+        "documentation": {}
+    },
+    {
+        "label": "pyautogui",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pyautogui",
+        "description": "pyautogui",
+        "detail": "pyautogui",
+        "documentation": {}
+    },
+    {
+        "label": "show_position",
+        "importPath": "paint",
+        "description": "paint",
+        "isExtraImport": true,
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "pytesseract",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pytesseract",
+        "description": "pytesseract",
+        "detail": "pytesseract",
+        "documentation": {}
+    },
+    {
+        "label": "Output",
+        "importPath": "pytesseract",
+        "description": "pytesseract",
+        "isExtraImport": true,
+        "detail": "pytesseract",
+        "documentation": {}
+    },
+    {
+        "label": "sys",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "sys",
+        "description": "sys",
+        "detail": "sys",
+        "documentation": {}
+    },
+    {
+        "label": "asyncio",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "asyncio",
+        "description": "asyncio",
+        "detail": "asyncio",
+        "documentation": {}
+    },
+    {
+        "label": "RPCError",
+        "importPath": "telethon.errors",
+        "description": "telethon.errors",
+        "isExtraImport": true,
+        "detail": "telethon.errors",
+        "documentation": {}
+    },
+    {
+        "label": "TelegramClient",
+        "importPath": "telethon",
+        "description": "telethon",
+        "isExtraImport": true,
+        "detail": "telethon",
+        "documentation": {}
+    },
+    {
+        "label": "init",
+        "importPath": "init",
+        "description": "init",
+        "isExtraImport": true,
+        "detail": "init",
+        "documentation": {}
+    },
+    {
+        "label": "DocumentAttributeVideo",
+        "importPath": "telethon.tl.types",
+        "description": "telethon.tl.types",
+        "isExtraImport": true,
+        "detail": "telethon.tl.types",
+        "documentation": {}
+    },
+    {
+        "label": "DocumentAttributeFilename",
+        "importPath": "telethon.tl.types",
+        "description": "telethon.tl.types",
+        "isExtraImport": true,
+        "detail": "telethon.tl.types",
+        "documentation": {}
+    },
+    {
+        "label": "signal",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "signal",
+        "description": "signal",
+        "detail": "signal",
+        "documentation": {}
+    },
+    {
+        "label": "keyboard",
+        "importPath": "pynput",
+        "description": "pynput",
+        "isExtraImport": true,
+        "detail": "pynput",
+        "documentation": {}
+    },
+    {
+        "label": "threading",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "threading",
+        "description": "threading",
+        "detail": "threading",
+        "documentation": {}
+    },
+    {
+        "label": "*",
+        "importPath": "screen_region",
+        "description": "screen_region",
+        "isExtraImport": true,
+        "detail": "screen_region",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "importPath": "vb",
+        "description": "vb",
+        "isExtraImport": true,
+        "detail": "vb",
+        "documentation": {}
+    },
+    {
+        "label": "load_previous_text",
+        "kind": 2,
+        "importPath": "find_message",
+        "description": "find_message",
+        "peekOfCode": "def load_previous_text(file_name='previous_text.txt'):\n    log_and_print(f\"Загрузка предыдущего текста из файла {file_name}\")\n    if os.path.exists(file_name):\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:\n                text = f.read()\n            log_and_print(f\"Предыдущий текст успешно загружен text = {text}\")\n            return text\n        except Exception as e:\n            log_and_print(f\"Ошибка при чтении файла {file_name}: {e}\")",
+        "detail": "find_message",
+        "documentation": {}
+    },
+    {
+        "label": "remove_service_symbols_and_spaces",
+        "kind": 2,
+        "importPath": "find_message",
+        "description": "find_message",
+        "peekOfCode": "def remove_service_symbols_and_spaces(text):\n    # This will remove all non-alphanumeric characters and spaces\n    cleaned_text = re.sub(r'[^A-Za-z0-9]', '', text)\n    return cleaned_text\ndef save_current_text(text, file_name='previous_text.txt', max_chars=read_setting(\"max_chars_member\")):\n    log_and_print(f\"Adding current text to file {file_name} with a limit of {max_chars} characters.\")\n    try:\n        # Read existing content if the file exists\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:",
+        "detail": "find_message",
+        "documentation": {}
+    },
+    {
+        "label": "save_current_text",
+        "kind": 2,
+        "importPath": "find_message",
+        "description": "find_message",
+        "peekOfCode": "def save_current_text(text, file_name='previous_text.txt', max_chars=read_setting(\"max_chars_member\")):\n    log_and_print(f\"Adding current text to file {file_name} with a limit of {max_chars} characters.\")\n    try:\n        # Read existing content if the file exists\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:\n                existing_content = f.read().strip()\n        except FileNotFoundError:\n            existing_content = \"\"\n        # Clean the new text",
+        "detail": "find_message",
+        "documentation": {}
+    },
+    {
+        "label": "load_json",
+        "kind": 2,
+        "importPath": "init",
+        "description": "init",
+        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')\n        return None",
+        "detail": "init",
+        "documentation": {}
+    },
+    {
+        "label": "init",
+        "kind": 2,
+        "importPath": "init",
+        "description": "init",
+        "peekOfCode": "def init():\n    global tg_creds\n    global tg_channels\n    global settings\n    creds = load_json('creds.json')\n    tg_creds = creds.get('tg_creds', {})\n    log_and_print(f\"tg_creds {tg_creds}.\", 'info')\n    tg_channels = load_json('tg_channels.json')\n    log_and_print(f\"tg_channels {tg_channels}.\", 'info')\n    settings = load_json('settings.json')",
+        "detail": "init",
+        "documentation": {}
+    },
+    {
+        "label": "tg_creds",
+        "kind": 5,
+        "importPath": "init",
+        "description": "init",
+        "peekOfCode": "tg_creds = None\ntg_channels = None\nsettings = None\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data",
+        "detail": "init",
+        "documentation": {}
+    },
+    {
+        "label": "tg_channels",
+        "kind": 5,
+        "importPath": "init",
+        "description": "init",
+        "peekOfCode": "tg_channels = None\nsettings = None\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:",
+        "detail": "init",
+        "documentation": {}
+    },
+    {
+        "label": "settings",
+        "kind": 5,
+        "importPath": "init",
+        "description": "init",
+        "peekOfCode": "settings = None\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')",
+        "detail": "init",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "kind": 2,
+        "importPath": "log",
+        "description": "log",
+        "peekOfCode": "def log_and_print(message, level='info'):\n    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')\n    print(f\"[{current_time}] {message}\")\n    # if level == 'info':\n    #     logging.info(message)\n    # elif level == 'warning':\n    #     log_and_print(message)\n    # elif level == 'error':\n    #     log_and_print(message)",
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "RECT",
+        "kind": 6,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "class RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),\n                (\"top\", ctypes.c_long),\n                (\"right\", ctypes.c_long),\n                (\"bottom\", ctypes.c_long)]\ndef create_colorref(red, green, blue):\n    \"\"\"\n    Преобразует RGB в COLORREF.\n    \"\"\"\n    return (blue << 16) | (green << 8) | red",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "create_colorref",
+        "kind": 2,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "def create_colorref(red, green, blue):\n    \"\"\"\n    Преобразует RGB в COLORREF.\n    \"\"\"\n    return (blue << 16) | (green << 8) | red\ndef show_position(x, y, duration=2, size=50, color=\"red\"):\n    \"\"\"\n    Показывает положение на экране с использованием Tkinter.\n    :param x: Координата X для позиционирования окна.\n    :param y: Координата Y для позиционирования окна.",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "show_position",
+        "kind": 2,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "def show_position(x, y, duration=2, size=50, color=\"red\"):\n    \"\"\"\n    Показывает положение на экране с использованием Tkinter.\n    :param x: Координата X для позиционирования окна.\n    :param y: Координата Y для позиционирования окна.\n    :param duration: Длительность показа окна в секундах.\n    :param size: Размер окна (ширина и высота).\n    :param color: Цвет фона окна.\n    \"\"\"\n    root = tk.Tk()",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "get_image_height",
+        "kind": 2,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "def get_image_height(file_path):\n    \"\"\"\n    Determines the height of an image file.\n    Args:\n        file_path (str): Path to the image file.\n    Returns:\n        int: Height of the image in pixels.\n    \"\"\"\n    try:\n        # Open the image file",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "SW_SHOW",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "SW_SHOW = 5\nWS_POPUP = 0x80000000\nWS_VISIBLE = 0x10000000\nWS_EX_TOPMOST = 0x00000008\nWS_EX_LAYERED = 0x00080000\nLWA_COLORKEY = 0x00000001\nHWND_TOPMOST = -1\nSWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "WS_POPUP",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "WS_POPUP = 0x80000000\nWS_VISIBLE = 0x10000000\nWS_EX_TOPMOST = 0x00000008\nWS_EX_LAYERED = 0x00080000\nLWA_COLORKEY = 0x00000001\nHWND_TOPMOST = -1\nSWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "WS_VISIBLE",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "WS_VISIBLE = 0x10000000\nWS_EX_TOPMOST = 0x00000008\nWS_EX_LAYERED = 0x00080000\nLWA_COLORKEY = 0x00000001\nHWND_TOPMOST = -1\nSWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "WS_EX_TOPMOST",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "WS_EX_TOPMOST = 0x00000008\nWS_EX_LAYERED = 0x00080000\nLWA_COLORKEY = 0x00000001\nHWND_TOPMOST = -1\nSWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),\n                (\"top\", ctypes.c_long),",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "WS_EX_LAYERED",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "WS_EX_LAYERED = 0x00080000\nLWA_COLORKEY = 0x00000001\nHWND_TOPMOST = -1\nSWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),\n                (\"top\", ctypes.c_long),\n                (\"right\", ctypes.c_long),",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "LWA_COLORKEY",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "LWA_COLORKEY = 0x00000001\nHWND_TOPMOST = -1\nSWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),\n                (\"top\", ctypes.c_long),\n                (\"right\", ctypes.c_long),\n                (\"bottom\", ctypes.c_long)]",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "HWND_TOPMOST",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "HWND_TOPMOST = -1\nSWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),\n                (\"top\", ctypes.c_long),\n                (\"right\", ctypes.c_long),\n                (\"bottom\", ctypes.c_long)]\ndef create_colorref(red, green, blue):",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "SWP_NOSIZE",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "SWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),\n                (\"top\", ctypes.c_long),\n                (\"right\", ctypes.c_long),\n                (\"bottom\", ctypes.c_long)]\ndef create_colorref(red, green, blue):\n    \"\"\"",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "SWP_NOMOVE",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "SWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),\n                (\"top\", ctypes.c_long),\n                (\"right\", ctypes.c_long),\n                (\"bottom\", ctypes.c_long)]\ndef create_colorref(red, green, blue):\n    \"\"\"\n    Преобразует RGB в COLORREF.",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "SWP_NOACTIVATE",
+        "kind": 5,
+        "importPath": "paint",
+        "description": "paint",
+        "peekOfCode": "SWP_NOACTIVATE = 0x0010\nclass RECT(ctypes.Structure):\n    _fields_ = [(\"left\", ctypes.c_long),\n                (\"top\", ctypes.c_long),\n                (\"right\", ctypes.c_long),\n                (\"bottom\", ctypes.c_long)]\ndef create_colorref(red, green, blue):\n    \"\"\"\n    Преобразует RGB в COLORREF.\n    \"\"\"",
+        "detail": "paint",
+        "documentation": {}
+    },
+    {
+        "label": "Context",
+        "kind": 6,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "class Context:\n    def __init__(self, bot_client, name_viber, channels, channel_names, old_text,\n                 width_menu=190,\n                 height_menu=220,\n                 height_item_menu=20,\n                 x_offset_out_mess=400,\n                 search_board_mess_x_start=360,\n                 search_board_mess_x_end=1000,\n                 search_board_mess_y_start=100,\n                 search_board_mess_y_end=1000,",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "get_image_hash",
+        "kind": 2,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "def get_image_hash(image, size=(8, 8)):\n    \"\"\"\n    Возвращает хэш для изображения, снижая его разрешение до size\n    и переводя в градации серого. Подходит для быстрого сравнения изображений.\n    Параметры:\n    - image: объект PIL.Image или любой формат, который PIL может прочитать\n      (BytesIO, путь к файлу)\n    - size: кортеж (ширина, высота) для уменьшения изображения\n    Возвращает:\n    - строку с хэшем (hex-формат)",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "fill_y_mess",
+        "kind": 2,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    region = [x,y, width, height]\n    coordinates = capture_and_find_text_coordinates(region, read_setting(\"word_comment\"), visualize = read_setting(\"visualize\"))",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "fill_y_mess_care_find",
+        "kind": 2,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "def fill_y_mess_care_find(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"[fill_y_mess_care_find] Старт fill_y_mess ретельного пошуку\")\n    x, y, height = s.search_board_mess_x_start, s.search_board_mess_y_end, s.search_board_mess_y_end - s.search_board_mess_y_start\n    left_click(x + s.x_offset_out_mess, y - 100)\n    log_and_print(f\"[fill_y_mess_care_find] x = {x} y = {y} height = {height}\")\n    comment_height = read_setting(\"comment_height\")\n    comment_width = read_setting(\"comment_width\")\n    stop = False",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "SWP_NOSIZE",
+        "kind": 5,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "SWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nSWP_DRAWFRAME = 0x0020\ns = {}\ncount_y_mess_empty = 0\ndef get_image_hash(image, size=(8, 8)):\n    \"\"\"\n    Возвращает хэш для изображения, снижая его разрешение до size\n    и переводя в градации серого. Подходит для быстрого сравнения изображений.",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "SWP_NOMOVE",
+        "kind": 5,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "SWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nSWP_DRAWFRAME = 0x0020\ns = {}\ncount_y_mess_empty = 0\ndef get_image_hash(image, size=(8, 8)):\n    \"\"\"\n    Возвращает хэш для изображения, снижая его разрешение до size\n    и переводя в градации серого. Подходит для быстрого сравнения изображений.\n    Параметры:",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "SWP_NOACTIVATE",
+        "kind": 5,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "SWP_NOACTIVATE = 0x0010\nSWP_DRAWFRAME = 0x0020\ns = {}\ncount_y_mess_empty = 0\ndef get_image_hash(image, size=(8, 8)):\n    \"\"\"\n    Возвращает хэш для изображения, снижая его разрешение до size\n    и переводя в градации серого. Подходит для быстрого сравнения изображений.\n    Параметры:\n    - image: объект PIL.Image или любой формат, который PIL может прочитать",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "SWP_DRAWFRAME",
+        "kind": 5,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "SWP_DRAWFRAME = 0x0020\ns = {}\ncount_y_mess_empty = 0\ndef get_image_hash(image, size=(8, 8)):\n    \"\"\"\n    Возвращает хэш для изображения, снижая его разрешение до size\n    и переводя в градации серого. Подходит для быстрого сравнения изображений.\n    Параметры:\n    - image: объект PIL.Image или любой формат, который PIL может прочитать\n      (BytesIO, путь к файлу)",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "s",
+        "kind": 5,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "s = {}\ncount_y_mess_empty = 0\ndef get_image_hash(image, size=(8, 8)):\n    \"\"\"\n    Возвращает хэш для изображения, снижая его разрешение до size\n    и переводя в градации серого. Подходит для быстрого сравнения изображений.\n    Параметры:\n    - image: объект PIL.Image или любой формат, который PIL может прочитать\n      (BytesIO, путь к файлу)\n    - size: кортеж (ширина, высота) для уменьшения изображения",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "count_y_mess_empty",
+        "kind": 5,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "count_y_mess_empty = 0\ndef get_image_hash(image, size=(8, 8)):\n    \"\"\"\n    Возвращает хэш для изображения, снижая его разрешение до size\n    и переводя в градации серого. Подходит для быстрого сравнения изображений.\n    Параметры:\n    - image: объект PIL.Image или любой формат, который PIL может прочитать\n      (BytesIO, путь к файлу)\n    - size: кортеж (ширина, высота) для уменьшения изображения\n    Возвращает:",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "preprocess_image",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого\n    \"\"\"\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")\n    # Конвертируем из RGB в BGR",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "filter_recognized_text",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def filter_recognized_text(text):\n    \"\"\"\n    Filters out lines that are shorter than 6 characters and contain colons.\n    \"\"\"\n    lines = text.split('\\n')  # Разбиваем текст на строки\n    filtered_lines = []\n    for line in lines:\n        stripped_line = line.strip()  # Убираем пробелы в начале и конце строки\n        if len(stripped_line) < 6 and ':' in stripped_line:\n            continue  # Пропускаем строки, если их длина < 6 и они содержат двоеточие",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "showImage",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def showImage(processed_image, ms):\n    # Отображение обработанного изображения\n    processed_array = np.array(processed_image)\n    window_name = \"Processed Image\"\n    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)\n    cv2.moveWindow(window_name, 10, 10)\n    cv2.imshow(window_name, processed_array)\n    cv2.waitKey(1)\n    cv2.waitKey(ms)\n    cv2.destroyAllWindows()",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_recognize",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def capture_and_recognize(region):\n    log_and_print(f\"[capture_and_recognize] region: {region}\")\n    \"\"\"Capture and recognize text only when the image changes.\"\"\"\n    try:\n        # Take a screenshot\n        #screenshot = pyautogui.screenshot(region=region)\n        screenshot = take_screenshot(region)\n        #showImage(screenshot, region)\n        # Preprocess the image (if needed)\n        processed_image = preprocess_image(screenshot) #",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_find_multiple_text_coordinates",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def capture_and_find_multiple_text_coordinates(region, search_phrases, visualize = False):\n    log_and_print(f\"[capture_and_find_multiple_text_coordinates] region: {region}, search_phrases: {search_phrases}\")\n    try:\n        cv2.destroyAllWindows()\n        # Захват скриншота\n        screenshot_np = take_screenshot(region)\n        log_and_print(f\"[capture_and_find_text_coordinates] Скриншот захвачен успешно.\")\n        # Предварительная обработка изображения\n        processed_image = preprocess_image(screenshot_np)\n        log_and_print(f\"[capture_and_find_text_coordinates] Изображение обработано успешно.\")",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "take_screenshot",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def take_screenshot(region):\n    screenshot = pyautogui.screenshot(region=region)\n    image_np = np.array(screenshot)\n    return image_np\ndef preprocess_image(image_np):\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")\n    # Конвертируем из RGB в BGR\n    image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "preprocess_image",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def preprocess_image(image_np):\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")\n    # Конвертируем из RGB в BGR\n    image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)\n    # Конвертируем в оттенки серого\n    gray = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2GRAY)\n    # Улучшаем контрастность с помощью CLAHE (Contrast Limited Adaptive Histogram Equalization)\n    clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "perform_ocr_with_positions",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def perform_ocr_with_positions(image):\n    custom_config = read_setting(\"capture_and_recognize.custom_config\")\n    lang = read_setting(\"capture_and_recognize.lang\")\n    data = pytesseract.image_to_data(image, lang=lang, config=custom_config, output_type=Output.DICT)\n    n_boxes = len(data['level'])\n    words_with_positions = []\n    for i in range(n_boxes):\n        if int(data['conf'][i]) > 60 and data['text'][i].strip() != \"\":\n            word_info = {\n                'text': data['text'][i],",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "visualize_ocr_results",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def visualize_ocr_results(image, ocr_data):\n    \"\"\"\n    Отображает распознанные слова с их позициями на изображении.\n    :param image: Обработанное изображение (оттенки серого)\n    :param ocr_data: Список слов с их позициями\n    \"\"\"\n    # Конвертируем обратно в BGR для отображения цветных рамок\n    image_bgr = cv2.cvtColor(image, cv2.COLOR_GRAY2BGR)\n    for word in ocr_data:\n        # Рисуем прямоугольник вокруг слова",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_find_text_coordinates",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def capture_and_find_text_coordinates(region, search_words, preprocess=True, case_sensitive=False, visualize = False):\n    try:\n        # Захват скриншота\n        screenshot_np = take_screenshot(region)\n        log_and_print(f\"[capture_and_find_text_coordinates] Скриншот захвачен успешно.\")\n        if preprocess :\n            # Предварительная обработка изображения\n            processed_image = preprocess_image(screenshot_np)\n            log_and_print(f\"[capture_and_find_text_coordinates] Изображение обработано успешно.\")\n        else:",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "find_text_upward_with_highlight",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def find_text_upward_with_highlight(start_x, start_y, y_max, height, template_height, template_width, search_words):\n    step = int(template_height / 2)  # Шаг поиска\n    current_y = start_y\n    min_y = y_max - height\n    log_and_print(f\"height = {height}, min_y = {min_y}\")\n    while current_y >= min_y:\n        log_and_print(f\"start_x = {start_x}, current_y = {current_y}, min_y = {min_y}\")\n        # Снимаем скриншот текущей области\n        region = (start_x, current_y, template_width, template_height)\n        text = capture_and_recognize(region).lower()",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "pytesseract.pytesseract.tesseract_cmd",
+        "kind": 5,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'\nimport cv2\ndef preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого\n    \"\"\"\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "ScreenRegionSelector",
+        "kind": 6,
+        "importPath": "ScreenRegionSelector",
+        "description": "ScreenRegionSelector",
+        "peekOfCode": "class ScreenRegionSelector:\n    def __init__(self):\n        self.root = tk.Tk()\n        # Полноэкранное окно и полупрозрачность\n        self.root.attributes(\"-fullscreen\", True)  # Окно на весь экран\n        self.root.attributes(\"-alpha\", 0.5)  # Полупрозрачность\n        self.root.config(cursor=\"crosshair\")  # Курсор в виде крестика\n        # Окно всегда поверх других окон\n        self.root.attributes(\"-topmost\", True)\n        self.canvas = tk.Canvas(self.root, cursor=\"crosshair\")",
+        "detail": "ScreenRegionSelector",
+        "documentation": {}
+    },
+    {
+        "label": "read_region_from_json",
+        "kind": 2,
+        "importPath": "screen_region",
+        "description": "screen_region",
+        "peekOfCode": "def read_region_from_json(json_file='region.json'):\n    log_and_print(f\"Чтение области экрана из файла {json_file}\")\n    try:\n        with open(json_file, 'r') as f:\n            data = json.load(f)\n        left = data['left']\n        top = data['top']\n        width = data['width']\n        height = data['height']\n        log_and_print(f\"Считанная область из JSON: left={left}, top={top}, width={width}, height={height}\")",
+        "detail": "screen_region",
+        "documentation": {}
+    },
+    {
+        "label": "save_region_to_json",
+        "kind": 2,
+        "importPath": "screen_region",
+        "description": "screen_region",
+        "peekOfCode": "def save_region_to_json(left, top, width, height, json_file='region.json'):\n    log_and_print(f\"Сохранение области экрана в файл {json_file}\")\n    try:\n        data = {'left': left, 'top': top, 'width': width, 'height': height}\n        with open(json_file, 'w') as f:\n            json.dump(data, f)\n        log_and_print(f\"Новая область сохранена в файл {json_file}\")\n    except Exception as e:\n        log_and_print(f\"Ошибка при сохранении области экрана в файл {json_file}: {e}\")\ndef draw_rectangle_on_screen(left, top, width, height):",
+        "detail": "screen_region",
+        "documentation": {}
+    },
+    {
+        "label": "draw_rectangle_on_screen",
+        "kind": 2,
+        "importPath": "screen_region",
+        "description": "screen_region",
+        "peekOfCode": "def draw_rectangle_on_screen(left, top, width, height):\n    log_and_print(\"Рисование прямоугольника на экране\")\n    try:\n        root = tk.Tk()\n        root.overrideredirect(True)\n        root.geometry(f\"{width}x{height}+{left}+{top}\")\n        root.lift()\n        root.wm_attributes(\"-topmost\", True)\n        # Попытка установить прозрачность окна\n        try:",
+        "detail": "screen_region",
+        "documentation": {}
+    },
+    {
+        "label": "select_region",
+        "kind": 2,
+        "importPath": "screen_region",
+        "description": "screen_region",
+        "peekOfCode": "def select_region():\n    # Функция для выбора области экрана с помощью мыши\n    log_and_print(\"Пожалуйста, выберите новую область экрана\")\n    root = tk.Tk()\n    root.attributes(\"-topmost\", True)\n    root.attributes(\"-fullscreen\", True)\n    root.attributes(\"-alpha\", 0.2)\n    root.configure(background='black')\n    canvas = tk.Canvas(root, cursor=\"crosshair\", bg='black')\n    canvas.pack(fill=tk.BOTH, expand=True)",
+        "detail": "screen_region",
+        "documentation": {}
+    },
+    {
+        "label": "processed_messages",
+        "kind": 5,
+        "importPath": "tg",
+        "description": "tg",
+        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ntelegram_channel_name = None\ntelegram_channel_id = None\nasync def send_message_to_tg_channel(bot_client, channel_name, message_text, file_path=None):\n    try:\n        # Получаем объект канала\n        channel_entity = await bot_client.get_entity(channel_name)\n        # Отправка сообщения с изображением или только текста",
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "processing_semaphore",
+        "kind": 5,
+        "importPath": "tg",
+        "description": "tg",
+        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\ntelegram_channel_name = None\ntelegram_channel_id = None\nasync def send_message_to_tg_channel(bot_client, channel_name, message_text, file_path=None):\n    try:\n        # Получаем объект канала\n        channel_entity = await bot_client.get_entity(channel_name)\n        # Отправка сообщения с изображением или только текста\n        if file_path:\n            if not os.path.isfile(file_path):",
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "telegram_channel_name",
+        "kind": 5,
+        "importPath": "tg",
+        "description": "tg",
+        "peekOfCode": "telegram_channel_name = None\ntelegram_channel_id = None\nasync def send_message_to_tg_channel(bot_client, channel_name, message_text, file_path=None):\n    try:\n        # Получаем объект канала\n        channel_entity = await bot_client.get_entity(channel_name)\n        # Отправка сообщения с изображением или только текста\n        if file_path:\n            if not os.path.isfile(file_path):\n                log_and_print(f\"[send_message_to_tg_channel] Файл не найден: {file_path}\")",
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "telegram_channel_id",
+        "kind": 5,
+        "importPath": "tg",
+        "description": "tg",
+        "peekOfCode": "telegram_channel_id = None\nasync def send_message_to_tg_channel(bot_client, channel_name, message_text, file_path=None):\n    try:\n        # Получаем объект канала\n        channel_entity = await bot_client.get_entity(channel_name)\n        # Отправка сообщения с изображением или только текста\n        if file_path:\n            if not os.path.isfile(file_path):\n                log_and_print(f\"[send_message_to_tg_channel] Файл не найден: {file_path}\")\n                return",
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def read_setting(field_path):\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8') as file:\n            settings = json.load(file)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "write_setting",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def write_setting(field_path, new_value):\n    \"\"\"\n    Writes a new value to a specific field in a JSON settings file.\n    :param field_path: Dot-separated path to the field (e.g., \"capture_and_recognize.lang\").\n    :param new_value: The new value to set for the specified field.\n    \"\"\"\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8') as file:",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "load_json",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')\n        return None",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "get_latest_file",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def get_latest_file(download_folder):\n    try:\n        files = os.listdir(download_folder)\n        paths = [os.path.join(download_folder, fname) for fname in files]\n        latest_file = max(paths, key=os.path.getctime)\n        return latest_file\n    except Exception as e:\n        print(f\"Ошибка при получении последнего файла: {e}\")\n        return None\ndef is_video_file(file_path):",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "is_video_file",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def is_video_file(file_path):\n    \"\"\"\n    Определяет, является ли файл видео по его расширению.\n    :param file_path: Путь к файлу.\n    :return: True, если файл является видео, иначе False.\n    \"\"\"\n    # Список расширений видеофайлов\n    video_extensions = {\".mp4\", \".mkv\", \".avi\", \".mov\", \".wmv\", \".flv\", \".webm\", \".m4v\"}\n    # Получаем расширение файла\n    file_extension = file_path.lower().split('.')[-1]",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "get_video_dimensions_cv2",
+        "kind": 2,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "def get_video_dimensions_cv2(file_path):\n    cap = cv2.VideoCapture(file_path)\n    if not cap.isOpened():\n        return None, None, None, None\n    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))\n    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))\n    fps = cap.get(cv2.CAP_PROP_FPS)\n    duration = cap.get(cv2.CAP_PROP_FRAME_COUNT) / fps if fps else None\n    cap.release()\n    return width, height, duration, fps",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "old_text",
+        "kind": 5,
+        "importPath": "vb",
+        "description": "vb",
+        "peekOfCode": "old_text = \"\"\nasync def main():\n    global bot_client\n    new_text = \"\"\n    log_and_print(\"Запуск программы\")\n    # Load initial region from JSON\n    left, top, width, height = read_region_from_json()\n    region = [left, top, width, height]\n    log_and_print(f\"Область для захвата: {region}\")\n    # Draw the initial rectangle on screen",
+        "detail": "vb",
+        "documentation": {}
+    },
+    {
+        "label": "scroll_with_mouse",
+        "kind": 2,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "def scroll_with_mouse(window, count_scroll, direction=\"down\"):\n    window.set_focus()\n    # Находим панель с сообщениями\n    chat_pane = window.child_window(control_type=\"Pane\", found_index=0)\n    # Получаем координаты панели\n    rect = chat_pane.rectangle()\n    center_x = (rect.left + rect.right) // 2\n    center_y = (rect.top + rect.bottom) // 2\n    # Прокручиваем вниз\n    for _ in range(count_scroll):  # Повторяем несколько раз",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "right_click_on_panel",
+        "kind": 2,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "def right_click_on_panel(x_offset=0, y_offset=0):\n    \"\"\"\n    Кликает правой кнопкой мыши на панели с сообщениями Viber.\n    :param x_offset: Смещение по X относительно центра панели.\n    :param y_offset: Смещение по Y относительно центра панели.\n    \"\"\"\n    # Подключаемся к Viber\n    app = Application(backend=\"uia\").connect(title_re=\".*Viber.*\")\n    window = app.window(title_re=\".*Viber.*\")\n    window.set_focus()",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "right_click",
+        "kind": 2,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "def right_click(app, window_title, x=0, y=0):\n    \"\"\"\n    Устанавливает фокус на окно, а затем кликает правой кнопкой мыши по указанным координатам.\n    Args:\n        app: экземпляр pywinauto.Application\n        window_title: название окна\n        x: координата X для клика\n        y: координата Y для клика\n    \"\"\"\n    try:",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "right_click",
+        "kind": 2,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "def right_click(window, x=0, y=0):\n    \"\"\"\n    Кликает правой кнопкой мыши\n    \"\"\"\n    window.set_focus()\n    # Выполняем клик правой кнопкой мыши\n    mouse.click(button=\"right\", coords=(x, y))\n    log_and_print(f\"Right-clicked at ({x}, {y}) on the chat panel\")\ndef left_click(window, x=0, y=0):\n    \"\"\"",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "left_click",
+        "kind": 2,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "def left_click(window, x=0, y=0):\n    \"\"\"\n    Кликает левой кнопкой мыши\n    \"\"\"\n    # Выполняем клик левой кнопкой мыши\n    mouse.click(button=\"left\", coords=(x, y))\n    log_and_print(f\"Left-clicked at ({x}, {y}) on the chat panel\")\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "reformat_telegram_text",
+        "kind": 2,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "def reformat_telegram_text(input_text):\n    \"\"\"\n    Takes a text, finds all text enclosed in single asterisks (*),\n    and replaces them with double asterisks (**) for Telegram formatting.\n    Args:\n        input_text (str): The input text.\n    Returns:\n        str: The modified text with updated formatting.\n    \"\"\"\n    # Regular expression to find text enclosed in single asterisks",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "processed_messages",
+        "kind": 5,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\nasync def process_one_message(message_text, bot_client, channel_name, name_viber, file_path):\n    log_and_print(f\"bot_client: {bot_client}\", 'info')\n    log_and_print(f\"service_channel_name: {channel_name}\", 'info')\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)",
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "processing_semaphore",
+        "kind": 5,
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\nasync def process_one_message(message_text, bot_client, channel_name, name_viber, file_path):\n    log_and_print(f\"bot_client: {bot_client}\", 'info')\n    log_and_print(f\"service_channel_name: {channel_name}\", 'info')\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)\n    elif file_path:\n        processed_messages.add(file_path)",
+        "detail": "vb_utils",
+        "documentation": {}
+    }
+]
