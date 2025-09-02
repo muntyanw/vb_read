@@ -10,5 +10,10 @@ pywinauto
 keyboard
 httpx
 pydantic
+pywin32
+matplotlib
+mss
+pyyaml
+
 #pip install -r requirements.txt
 

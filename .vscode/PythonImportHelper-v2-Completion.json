@@ -90,6 +90,234 @@
         "documentation": {}
     },
     {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "annotations",
+        "importPath": "__future__",
+        "description": "__future__",
+        "isExtraImport": true,
+        "detail": "__future__",
+        "documentation": {}
+    },
+    {
+        "label": "random",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "random",
+        "description": "random",
+        "detail": "random",
+        "documentation": {}
+    },
+    {
+        "label": "time",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "time",
+        "description": "time",
+        "detail": "time",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "datetime",
+        "description": "datetime",
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "date",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "re",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "re",
+        "description": "re",
+        "detail": "re",
+        "documentation": {}
+    },
+    {
+        "label": "cv2",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "cv2",
+        "description": "cv2",
+        "detail": "cv2",
+        "documentation": {}
+    },
+    {
+        "label": "numpy",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "numpy",
+        "description": "numpy",
+        "detail": "numpy",
+        "documentation": {}
+    },
+    {
+        "label": "pyautogui",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pyautogui",
+        "description": "pyautogui",
+        "detail": "pyautogui",
+        "documentation": {}
+    },
+    {
+        "label": "pytesseract",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "pytesseract",
+        "description": "pytesseract",
+        "detail": "pytesseract",
+        "documentation": {}
+    },
+    {
+        "label": "Output",
+        "importPath": "pytesseract",
+        "description": "pytesseract",
+        "isExtraImport": true,
+        "detail": "pytesseract",
+        "documentation": {}
+    },
+    {
+        "label": "Output",
+        "importPath": "pytesseract",
+        "description": "pytesseract",
+        "isExtraImport": true,
+        "detail": "pytesseract",
+        "documentation": {}
+    },
+    {
+        "label": "matplotlib.pyplot",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "matplotlib.pyplot",
+        "description": "matplotlib.pyplot",
+        "detail": "matplotlib.pyplot",
+        "documentation": {}
+    },
+    {
+        "label": "mss",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "mss",
+        "description": "mss",
+        "detail": "mss",
+        "documentation": {}
+    },
+    {
+        "label": "mss.tools",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "mss.tools",
+        "description": "mss.tools",
+        "detail": "mss.tools",
+        "documentation": {}
+    },
+    {
+        "label": "ctypes",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "ctypes",
+        "description": "ctypes",
+        "detail": "ctypes",
+        "documentation": {}
+    },
+    {
+        "label": "Final",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Iterable",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "Optional",
         "importPath": "typing",
         "description": "typing",
@@ -114,7 +342,39 @@
         "documentation": {}
     },
     {
+        "label": "Any",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Dict",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "Union",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Tuple",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Optional",
         "importPath": "typing",
         "description": "typing",
         "isExtraImport": true,
@@ -162,27 +422,105 @@
         "documentation": {}
     },
     {
-        "label": "List",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "SequenceMatcher",
+        "importPath": "difflib",
+        "description": "difflib",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "difflib",
         "documentation": {}
     },
     {
-        "label": "Tuple",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "platform",
+        "kind": 6,
         "isExtraImport": true,
-        "detail": "typing",
+        "importPath": "platform",
+        "description": "platform",
+        "detail": "platform",
         "documentation": {}
     },
     {
-        "label": "Union",
-        "importPath": "typing",
-        "description": "typing",
+        "label": "TEMPLATE_DIR",
+        "importPath": "project_config",
+        "description": "project_config",
         "isExtraImport": true,
-        "detail": "typing",
+        "detail": "project_config",
+        "documentation": {}
+    },
+    {
+        "label": "MONITOR_WIDTH",
+        "importPath": "project_config",
+        "description": "project_config",
+        "isExtraImport": true,
+        "detail": "project_config",
+        "documentation": {}
+    },
+    {
+        "label": "MONITOR_HEIGHT",
+        "importPath": "project_config",
+        "description": "project_config",
+        "isExtraImport": true,
+        "detail": "project_config",
+        "documentation": {}
+    },
+    {
+        "label": "MONITOR_INDEX",
+        "importPath": "project_config",
+        "description": "project_config",
+        "isExtraImport": true,
+        "detail": "project_config",
+        "documentation": {}
+    },
+    {
+        "label": "TESSDATA_PREFIX",
+        "importPath": "project_config",
+        "description": "project_config",
+        "isExtraImport": true,
+        "detail": "project_config",
+        "documentation": {}
+    },
+    {
+        "label": "win32gui",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "win32gui",
+        "description": "win32gui",
+        "detail": "win32gui",
+        "documentation": {}
+    },
+    {
+        "label": "win32con",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "win32con",
+        "description": "win32con",
+        "detail": "win32con",
+        "documentation": {}
+    },
+    {
+        "label": "win32api",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "win32api",
+        "description": "win32api",
+        "detail": "win32api",
+        "documentation": {}
+    },
+    {
+        "label": "win32process",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "win32process",
+        "description": "win32process",
+        "detail": "win32process",
+        "documentation": {}
+    },
+    {
+        "label": "logging",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "logging",
+        "description": "logging",
+        "detail": "logging",
         "documentation": {}
     },
     {
@@ -212,59 +550,51 @@
         "documentation": {}
     },
     {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
+        "label": "load_previous_text",
+        "importPath": "find_message",
+        "description": "find_message",
         "isExtraImport": true,
-        "detail": "datetime",
+        "detail": "find_message",
         "documentation": {}
     },
     {
-        "label": "timezone",
-        "importPath": "datetime",
-        "description": "datetime",
+        "label": "save_current_text",
+        "importPath": "find_message",
+        "description": "find_message",
         "isExtraImport": true,
-        "detail": "datetime",
+        "detail": "find_message",
         "documentation": {}
     },
     {
-        "label": "datetime",
-        "importPath": "datetime",
-        "description": "datetime",
+        "label": "load_previous_text",
+        "importPath": "find_message",
+        "description": "find_message",
         "isExtraImport": true,
-        "detail": "datetime",
+        "detail": "find_message",
         "documentation": {}
     },
     {
-        "label": "send_for_analysis",
-        "importPath": "dispatcher.dispatch_client",
-        "description": "dispatcher.dispatch_client",
+        "label": "save_current_text",
+        "importPath": "find_message",
+        "description": "find_message",
         "isExtraImport": true,
-        "detail": "dispatcher.dispatch_client",
+        "detail": "find_message",
         "documentation": {}
     },
     {
-        "label": "DispatchResult",
-        "importPath": "dispatcher.dispatch_client",
-        "description": "dispatcher.dispatch_client",
+        "label": "remove_service_symbols_and_spaces",
+        "importPath": "find_message",
+        "description": "find_message",
         "isExtraImport": true,
-        "detail": "dispatcher.dispatch_client",
+        "detail": "find_message",
         "documentation": {}
     },
     {
-        "label": "send_for_analysis",
-        "importPath": "dispatcher.dispatch_client",
-        "description": "dispatcher.dispatch_client",
+        "label": "*",
+        "importPath": "find_message",
+        "description": "find_message",
         "isExtraImport": true,
-        "detail": "dispatcher.dispatch_client",
-        "documentation": {}
-    },
-    {
-        "label": "log_and_print",
-        "importPath": "log",
-        "description": "log",
-        "isExtraImport": true,
-        "detail": "log",
+        "detail": "find_message",
         "documentation": {}
     },
     {
@@ -348,12 +678,52 @@
         "documentation": {}
     },
     {
-        "label": "re",
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "gui_driver",
+        "importPath": "core",
+        "description": "core",
+        "isExtraImport": true,
+        "detail": "core",
+        "documentation": {}
+    },
+    {
+        "label": "gui_driver",
+        "importPath": "core",
+        "description": "core",
+        "isExtraImport": true,
+        "detail": "core",
+        "documentation": {}
+    },
+    {
+        "label": "pyperclip",
         "kind": 6,
         "isExtraImport": true,
-        "importPath": "re",
-        "description": "re",
-        "detail": "re",
+        "importPath": "pyperclip",
+        "description": "pyperclip",
+        "detail": "pyperclip",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
         "documentation": {}
     },
     {
@@ -421,14 +791,6 @@
         "documentation": {}
     },
     {
-        "label": "take_screenshot",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
         "label": "preprocess_image",
         "importPath": "utils",
         "description": "utils",
@@ -437,11 +799,60 @@
         "documentation": {}
     },
     {
-        "label": "show_screen_with_region",
+        "label": "show_overlay_win32_hole",
         "importPath": "utils",
         "description": "utils",
         "isExtraImport": true,
         "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "showImage",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "take_screenshot",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "hashlib",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "hashlib",
+        "description": "hashlib",
+        "detail": "hashlib",
+        "documentation": {}
+    },
+    {
+        "label": "send_for_analysis",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "DispatchResult",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "send_messages_from_y_mess",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
     {
@@ -451,51 +862,6 @@
         "importPath": "json",
         "description": "json",
         "detail": "json",
-        "documentation": {}
-    },
-    {
-        "label": "logging",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "logging",
-        "description": "logging",
-        "detail": "logging",
-        "documentation": {}
-    },
-    {
-        "label": "ctypes",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "ctypes",
-        "description": "ctypes",
-        "detail": "ctypes",
-        "documentation": {}
-    },
-    {
-        "label": "time",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "time",
-        "description": "time",
-        "detail": "time",
-        "documentation": {}
-    },
-    {
-        "label": "cv2",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "cv2",
-        "description": "cv2",
-        "detail": "cv2",
-        "documentation": {}
-    },
-    {
-        "label": "numpy",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "numpy",
-        "description": "numpy",
-        "detail": "numpy",
         "documentation": {}
     },
     {
@@ -572,19 +938,12 @@
         "documentation": {}
     },
     {
-        "label": "startTgClient",
-        "importPath": "tg",
-        "description": "tg",
+        "label": "yaml",
+        "kind": 6,
         "isExtraImport": true,
-        "detail": "tg",
-        "documentation": {}
-    },
-    {
-        "label": "send_message_to_tg_channel",
-        "importPath": "tg",
-        "description": "tg",
-        "isExtraImport": true,
-        "detail": "tg",
+        "importPath": "yaml",
+        "description": "yaml",
+        "detail": "yaml",
         "documentation": {}
     },
     {
@@ -597,6 +956,14 @@
     },
     {
         "label": "send_message_to_tg_channel",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "startTgClient",
         "importPath": "tg",
         "description": "tg",
         "isExtraImport": true,
@@ -612,44 +979,12 @@
         "documentation": {}
     },
     {
-        "label": "pyperclip",
+        "label": "pywinauto",
         "kind": 6,
         "isExtraImport": true,
-        "importPath": "pyperclip",
-        "description": "pyperclip",
-        "detail": "pyperclip",
-        "documentation": {}
-    },
-    {
-        "label": "load_previous_text",
-        "importPath": "find_message",
-        "description": "find_message",
-        "isExtraImport": true,
-        "detail": "find_message",
-        "documentation": {}
-    },
-    {
-        "label": "save_current_text",
-        "importPath": "find_message",
-        "description": "find_message",
-        "isExtraImport": true,
-        "detail": "find_message",
-        "documentation": {}
-    },
-    {
-        "label": "remove_service_symbols_and_spaces",
-        "importPath": "find_message",
-        "description": "find_message",
-        "isExtraImport": true,
-        "detail": "find_message",
-        "documentation": {}
-    },
-    {
-        "label": "*",
-        "importPath": "find_message",
-        "description": "find_message",
-        "isExtraImport": true,
-        "detail": "find_message",
+        "importPath": "pywinauto",
+        "description": "pywinauto",
+        "detail": "pywinauto",
         "documentation": {}
     },
     {
@@ -685,15 +1020,6 @@
         "documentation": {}
     },
     {
-        "label": "hashlib",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "hashlib",
-        "description": "hashlib",
-        "detail": "hashlib",
-        "documentation": {}
-    },
-    {
         "label": "ScreenRegionSelector",
         "importPath": "ScreenRegionSelector",
         "description": "ScreenRegionSelector",
@@ -711,37 +1037,11 @@
         "documentation": {}
     },
     {
-        "label": "pyautogui",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "pyautogui",
-        "description": "pyautogui",
-        "detail": "pyautogui",
-        "documentation": {}
-    },
-    {
         "label": "show_position",
         "importPath": "paint",
         "description": "paint",
         "isExtraImport": true,
         "detail": "paint",
-        "documentation": {}
-    },
-    {
-        "label": "pytesseract",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "pytesseract",
-        "description": "pytesseract",
-        "detail": "pytesseract",
-        "documentation": {}
-    },
-    {
-        "label": "Output",
-        "importPath": "pytesseract",
-        "description": "pytesseract",
-        "isExtraImport": true,
-        "detail": "pytesseract",
         "documentation": {}
     },
     {
@@ -782,6 +1082,15 @@
         "description": "telethon.tl.types",
         "isExtraImport": true,
         "detail": "telethon.tl.types",
+        "documentation": {}
+    },
+    {
+        "label": "win32api,",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "win32api.",
+        "description": "win32api.",
+        "detail": "win32api.",
         "documentation": {}
     },
     {
@@ -1106,11 +1415,425 @@
         "documentation": {}
     },
     {
+        "label": "pause",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def pause(amount):\n    LOGGER.debug(f\"pause {amount} second\")\n    time.sleep(amount)\ndef _get_monitor_region(scope) -> dict:\n    if scope != None:\n        left, bottom, right, top = scope\n        monitor_region = {\n            \"top\": bottom,\n            \"left\": MON_X + left,\n            \"width\" :right - left,",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "arrays_fuzzy_equal",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def arrays_fuzzy_equal(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:\n    \"\"\"\n    Считает два массива «равными», если они одинаковой длины, и для каждой позиции i:\n      отношение похожести (SequenceMatcher) на строках w[i] и q[i] ≥ threshold.\n    Пустые строки считаются непохожими на непустые (только обе пустые → похожесть = 1.0).\n    :param window:      первый список строк\n    :param query_words: второй список строк\n    :param threshold:   минимальный порог похожести (по умолчанию 0.7)\n    :return: True, если все парные строковые элементы похожи ≥ threshold\n    \"\"\"",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "arrays_fuzzy_equal_as_one_str",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def arrays_fuzzy_equal_as_one_str(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:\n    \"\"\"\n    Преобразует два массива в строки и сравнивает их\n    :param window:      первый список строк\n    :param query_words: второй список строк\n    :param threshold:   минимальный порог похожести (по умолчанию 0.7)\n    :return: True, если все парные строковые элементы похожи ≥ threshold\n    \"\"\"\n    if len(window) != len(query_words):\n        return False",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "launch_chrome",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def launch_chrome(profile_dir: Path, url: str = \"https://e-consul.gov.ua/messages\") -> subprocess.Popen:\n    \"\"\"\n    The function `launch_chrome` launches Chrome with specified profile directory, window size, and\n    position on the screen.\n    :param profile_dir: The `profile_dir` parameter in the `launch_chrome` function is expected to be a\n    `Path` object representing the directory where Chrome will store user profile data. This directory\n    will be used as the user data directory for the Chrome instance being launched\n    :type profile_dir: Path\n    :param url: The `url` parameter in the `launch_chrome` function is a string that represents the URL\n    of the website you want to open in the Chrome browser. In the provided code snippet, the default URL",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "detect_checkbox_type_from_frame",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def detect_checkbox_type_from_frame(scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False) -> str:\n    \"\"\"\n        frame_bgr: кадр экрана (numpy.ndarray в формате BGR)\n        empty_template_path: путь до шаблона пустого квадратика\n        checked_template_path: путь до шаблона квадратика с галочкой\n        threshold: минимальное значение совпадения (0.0–1.0)\n        Вернёт:\n        - \"empty\", если на экране найден пустой квадратик\n        - \"checked\", если найден квадратик с галочкой",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "detect_image_from_frame",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def detect_image_from_frame(image_names: list[str], scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False,\n                threshold: float = 0.8) -> str:\n    frame_bgr = screen(scope)\n    # Конвертируем скрин в оттенки серого\n    gray_frame = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)\n    max_weight = -10000\n    check_image = \"\"\n    for image_name in image_names:\n        templ = cv2.imread(TEMPLATE_DIR / image_name, cv2.IMREAD_GRAYSCALE)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "find_image",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def find_image(name: str, timeout: float = 8.0, \n                confidence: float = 0.7,\n                scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False, \n                multiscale: bool = False) -> (tuple[int, int] | None):\n    \"\"\"\n    Найти PNG-шаблон на экране.\n    \"\"\"\n    path = TEMPLATE_DIR / name\n    if not path.exists():",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "click_image",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,\n                scope: tuple[int, int, int, int] = None,\n                plus_y: int = 0,\n                plus_x: int = 0,\n                is_debug: bool = False,\n                multiscale: bool = False,\n                count_click: int = 1) -> bool:\n    \"\"\"\n    Найти PNG-шаблон на экране (в пределах целевого монитора) и кликнуть его центр.\n    Возвращает True, если кликнули, False если не найдено за timeout секунд.",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "type_text",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def type_text(text: str, interval: Tuple[float, float] = (0.05, 0.12)) -> None:\n    \"\"\"\n    Печатать строку с небольшим случайным интервалом между символами.\n    \"\"\"\n    for ch in text:\n        pag.typewrite(ch)\n        time.sleep(random.uniform(*interval))\ndef take_screenshot() -> Path:\n    \"\"\"\n    Сделать PNG скрин целевого MONITOR_INDEX с помощью MSS и вернуть Path.",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "take_screenshot",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def take_screenshot() -> Path:\n    \"\"\"\n    Сделать PNG скрин целевого MONITOR_INDEX с помощью MSS и вернуть Path.\n    \"\"\"\n    import tempfile, datetime as dt\n    ts = dt.datetime.utcnow().isoformat().replace(\":\", \"-\")\n    output_path = Path(tempfile.gettempdir()) / f\"scr_{ts}.png\"\n    with mss.mss() as sct:\n        # Снимаем именно ту область, что описывает монитора:\n        monitor_region = {\"top\": MON_Y, \"left\": MON_X, \"width\": MON_W, \"height\": MON_H}",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "show_image",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def show_image(img) -> None:\n    # Показать изображение через matplotlib\n    plt.figure(figsize=(8, 5))\n    plt.imshow(img)\n    plt.axis('off')\n    plt.title(\"Tesseract Input: Full-Screen Screenshot\")\n    plt.show()\n# ---------------------------------------------------------------------------\n# Internal helpers\n# ---------------------------------------------------------------------------",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "scroll",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def scroll(amount: int = 100) -> None:\n        pag.scroll(amount) \n        time.sleep(0.01) \n# Optional DirectX backend for crisp, DPI-accurate capture on Windows\ntry:\n    import dxcam  # pip install dxcam\nexcept Exception:\n    dxcam = None\n_DPI_AWARE_SET = False\n_DXCAM_HANDLE = None",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "screen",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def screen(\n    scope: Optional[Tuple[int, int, int, int]] = None,\n    is_debug: bool = False,\n    process_for_read: bool = True,\n):\n    \"\"\"\n    Capture a screen region with the highest practical fidelity for OCR when process_for_read=True.\n    - When process_for_read=True:\n        * Make process DPI-aware (Windows) and prefer DirectX capture (dxcam) for crisp pixels.\n        * Fall back to MSS if dxcam is unavailable.",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "draw_click_circle",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def draw_click_circle(x, y, radius=20, duration=0.2):\n    class_name = \"ClickCircleClass\"\n    def wnd_proc(hwnd, msg, wparam, lparam):\n        if msg == win32con.WM_PAINT:\n            hdc, ps = win32gui.BeginPaint(hwnd)\n            brush = win32gui.CreateSolidBrush(win32api.RGB(0, 0, 255))\n            win32gui.SelectObject(hdc, brush)\n            win32gui.Ellipse(hdc, 0, 0, radius * 2, radius * 2)\n            win32gui.EndPaint(hwnd, ps)\n            return 0",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "human_move_and_click",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def human_move_and_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение\n    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.\n    \"\"\"\n    _human_move(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")\n        draw_click_circle(x,y)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "human_move_and_right_click",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def human_move_and_right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение\n    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.\n    \"\"\"\n    _human_move(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")\n        draw_click_circle(x,y,duration=0.4)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "human_move_and_click_diff",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def human_move_and_click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение\n    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.\n    \"\"\"\n    x, y = human_move_diff(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")\n        draw_click_circle(x,y)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "human_move",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def human_move(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    _human_move(x, y, duration)\ndef human_move_diff(diff_x: int, diff_y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x, y = pag.position()\n    x = x + diff_x\n    y = y + diff_y\n    _human_move(x, y, duration)\n    return x, y\ndef click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "human_move_diff",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def human_move_diff(diff_x: int, diff_y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x, y = pag.position()\n    x = x + diff_x\n    y = y + diff_y\n    _human_move(x, y, duration)\n    return x, y\ndef click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):\n    if x == None:\n        x, y = pag.position()\n    else:",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "click",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):\n    if x == None:\n        x, y = pag.position()\n    else:\n        x = MON_X + x\n    human_move_and_click(x, y) \ndef right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "right_click",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.\n    Вход: pts — список точек (x, y), t от 0.0 до 1.0.",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "click_diff",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.\n    Вход: pts — список точек (x, y), t от 0.0 до 1.0.\n    Выход: координаты точки на кривой Безье.\n    \"\"\"\n    pts_arr = np.array(pts, dtype=float)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "draw_monitor_region_on_screen",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def draw_monitor_region_on_screen(color: tuple[int,int,int] = (0, 0, 255), thickness: int = 4) -> None:\n    \"\"\"\n    Нарисовать на рабочем столе (на самой поверхности экрана) полупрозрачный (через XOR)\n    или сплошной (через GDI Rectangle) контур области MON_X, MON_Y, MON_W, MON_H.\n    Параметры:\n    ---------\n    color : BGR-цвет рамки, например (0, 0, 255) для красного (как OpenCV).\n    thickness : толщина линии рамки в пикселях.\n    При запуске этой функции вы увидите чёткую рамку на экране. Она отрисуется поверх всего,\n    но исчезнет при следующем обновлении окна или при следующем вызове (в зависимости от режима).",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "replace_similar_chars",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def replace_similar_chars(word: str) -> str:\n    char_map = {\n        'e': 'е',  # англ e → укр е\n        'E': 'Е',  # англ E → укр Е\n        'i': 'і',  # англ i → укр і (по необходимости)\n        'I': 'І',  # англ I → укр І\n        'a': 'а',  # англ a → укр а\n        'A': 'А',  # англ A → укр А\n        'o': 'о',  # англ o → укр о\n        'O': 'О',  # англ O → укр О",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "read_text",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def read_text(\n    lang: str,\n    scope: tuple[int, int, int, int] = None,\n    is_debug: bool = False\n) -> bool:\n    \"\"\"\n    OCR-based read text\n    \"\"\"\n    scr_bgr = screen(scope, is_debug = is_debug)\n    os.environ['TESSDATA_PREFIX'] = os.path.normpath(TESSDATA_PREFIX)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "get_first_date",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def get_first_date(text_list) -> date:\n    date_pattern = r'\\b\\d{2}\\.\\d{2}\\.\\d{4}\\b'\n    for text in text_list:\n        match = re.search(date_pattern, text)\n        if match:\n            date_str = match.group()\n            return _dt.strptime(date_str, '%d.%m.%Y').date()\n    return None\ndef read_first_date(\n    lang: str,",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "read_first_date",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def read_first_date(\n    lang: str,\n    scope: tuple[int, int, int, int] = None,\n    is_debug: bool = False\n) -> date:\n    \"\"\"\n    OCR-based read text\n    \"\"\"\n    texts = read_text(lang, scope, is_debug)\n    dt = get_first_date(texts)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "click_text",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def click_text(\n    query: str|Iterable[str],\n    lang: str,\n    count_attempt_find: int = 1,\n    pause_attempt: int = 2,\n    scope: tuple[int, int, int, int] = None,\n    plus_y: int = 0,\n    is_debug: bool = False,\n    threshold: float = 0.7,\n    occurrence: int = 1,",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "find_text",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def find_text(\n    query: str,\n    lang: str,\n    count: int = 1,\n    pause_attempt: int = 2,\n    scope: tuple[int, int, int, int] | None = None,\n    plus_y: int = 0,\n    is_debug: bool = False,\n    occurrence: int = 1,  # <--- новый параметр: номер совпадения\n) -> tuple[int, int] | None:",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "init_tesseract",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def init_tesseract(tess_root=r\"C:\\Program Files\\Tesseract-OCR\", lang_check=(\"eng\",\"rus\")):\n    tess_root = os.path.normpath(tess_root)\n    tess_exe  = os.path.join(tess_root, \"tesseract.exe\")\n    tessdata  = os.path.join(tess_root, \"tessdata\")\n    # 1) базовые проверки\n    if not os.path.isfile(tess_exe):\n        raise FileNotFoundError(f\"tesseract.exe not found: {tess_exe}\")\n    if not os.path.isdir(tessdata):\n        raise FileNotFoundError(f\"tessdata folder not found: {tessdata}\")\n    # 2) сбросить кривую настройку, если была",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "find_text_any",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def find_text_any(\n    queries: Iterable[str],\n    lang: str,\n    count: int = 1,\n    pause_attempt_sec: int = 2,\n    scope: tuple[int, int, int, int] | None = None,\n    is_debug: bool = False,\n    occurrence: int = 1,\n    threshold: float = 0.7,\n    font_scale: float = 0.7,",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "cursor_move_to",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def cursor_move_to(\n    x: int = 500,\n    y: int = 500\n) -> None:\n    x = MON_X + x\n    LOGGER.debug(\"Cursor moved to global (%d,%d)\", x, y)                    \n    human_move_and_click(x, y)\ndef contrlScroll(amount:int):\n    time.sleep(1)\n    pag.keyDown('ctrl')",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "contrlScroll",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def contrlScroll(amount:int):\n    time.sleep(1)\n    pag.keyDown('ctrl')\n    time.sleep(0.1)\n    pag.scroll(amount)\n    time.sleep(1)\n    # Отпускаем Ctrl\n    pag.keyUp('ctrl')\n    time.sleep(1) \ndef remove_green_background(src_bgr: np.ndarray) -> np.ndarray:",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "remove_green_background",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def remove_green_background(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    Превращает зелёные блоки в чисто-белый фон, оставляя текст (и всё остальное) нетронутым.\n    Возвращает BGR-изображение, где «зелёное» стало (255,255,255).\n    \"\"\"\n    # 1. Переводим в пространство HSV, чтобы легко отфильтровать зелёный\n    hsv = cv2.cvtColor(src_bgr, cv2.COLOR_BGR2HSV)\n    # 2. Задаём диапазон «зелёного»\n    #    Нижний и верхний порог границ H, S, V — можно подкорректировать под ваш оттенок\n    lower_green = np.array([40,  40,  40])   # например: H≈60°, но OpenCV: H от 0 до 179",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "sharpen_filter",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def sharpen_filter(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    Применяет к BGR-изображению простой фильтр резкости.\n    Возвращает «резче» BGR-изображение.\n    \"\"\"\n    # Определяем kernel\n    kernel = np.array([\n        [ 0, -1,  0],\n        [-1,  5, -1],\n        [ 0, -1,  0]",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "unsharp_mask",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def unsharp_mask(src_bgr: np.ndarray, \n                 blur_ksize: tuple[int, int] = (9, 9), \n                 sigma: float = 10.0, \n                 amount: float = 1.5, \n                 threshold: int = 0) -> np.ndarray:\n    \"\"\"\n    Параметры:\n    - blur_ksize: размер ядра для GaussianBlur (должен быть нечётным, напр. (9,9)).\n    - sigma: отклонение по Гауссу (чем больше, тем сильнее сглаживание).\n    - amount: во сколько раз усиливается «маска резкости».",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "preprocess_for_ocr",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def preprocess_for_ocr(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    1) Удаляет зелёный фон (вызывая remove_green_background)\n    2) Конвертирует в серый + CLAHE (локальное выравнивание гистограммы)\n    3) Адаптивную бинаризацию (чёрно-белое)\n    \"\"\"\n    # 1) Убираем зелёный фон\n    no_green = unsharp_mask(remove_green_background(src_bgr))\n    # 2) В оттенки серого\n    gray = cv2.cvtColor(no_green, cv2.COLOR_BGR2GRAY)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "find_first_free_slot_in_day_week",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def find_first_free_slot_in_day_week(scope: tuple[int,int,int,int],\n                                     is_debug: bool = False\n                                    ) -> tuple[int,int] | None:\n    # 1) Захват экрана + конверсия BGRA→BGR→HSV\n    with mss.mss() as sct:\n        mon = _get_monitor_region(scope)\n        img = sct.grab(mon)\n        bgr = np.array(img)[..., :3]\n        hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)\n    if is_debug:",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "reload_page",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def reload_page():\n    LOGGER.debug(\"reload page\")\n    click(92,50)\n    pause(2)\n    human_move_diff(0, 70)\ndef get_current_layout() -> int:\n    \"\"\"\n    Получает текущий язык ввода активного окна.\n    Возвращает low word layout code (например, 0x409 для EN-US).\n    \"\"\"",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "get_current_layout",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def get_current_layout() -> int:\n    \"\"\"\n    Получает текущий язык ввода активного окна.\n    Возвращает low word layout code (например, 0x409 для EN-US).\n    \"\"\"\n    hwnd = win32gui.GetForegroundWindow()\n    thread_id, _ = win32process.GetWindowThreadProcessId(hwnd)\n    layout = win32api.GetKeyboardLayout(thread_id)\n    return layout & 0xFFFF\ndef ensure_layout(target: str = \"en\", max_attempts: int = 5) -> bool:",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "ensure_layout",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def ensure_layout(target: str = \"en\", max_attempts: int = 5) -> bool:\n    \"\"\"\n    Гарантирует, что раскладка клавиатуры установлена в нужный язык.\n    Поддерживает 'en' (английский) и 'ru' (русский).\n    Возвращает True, если удалось установить раскладку, иначе False.\n    \"\"\"\n    lang_codes = {\n        \"en\": 0x0409,  # English (US)\n        \"ru\": 0x0419,  # Russian\n        # можно добавить другие",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "main",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def main():\n    init_tesseract()\nif __name__ == \"__main__\":\n    main()",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "LOGGER",
+        "kind": 5,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "LOGGER = logging.getLogger(__name__) \npag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»\n# ---------------------------------------------------------------------------\n# Constants: ищем монитор с разрешением необходимым для работы\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\nwith mss.mss() as sct:\n    monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран\n    # monitors[1] — первый физический экран; monitors[2] — второй и т.д.\n    # Мы ожидаем MONITOR_INDEX 1-based",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "pag.FAILSAFE",
+        "kind": 5,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "pag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»\n# ---------------------------------------------------------------------------\n# Constants: ищем монитор с разрешением необходимым для работы\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\nwith mss.mss() as sct:\n    monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран\n    # monitors[1] — первый физический экран; monitors[2] — второй и т.д.\n    # Мы ожидаем MONITOR_INDEX 1-based\n    if 1 <= MONITOR_INDEX < len(monitors):",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "_DPI_AWARE_SET",
+        "kind": 5,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "_DPI_AWARE_SET = False\n_DXCAM_HANDLE = None\ndef _ensure_dpi_awareness_once() -> None:\n    \"\"\"Make the process DPI-aware (Windows). No-op elsewhere.\"\"\"\n    global _DPI_AWARE_SET\n    if _DPI_AWARE_SET:\n        return\n    if platform.system() == \"Windows\":\n        import ctypes\n        try:",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "_DXCAM_HANDLE",
+        "kind": 5,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "_DXCAM_HANDLE = None\ndef _ensure_dpi_awareness_once() -> None:\n    \"\"\"Make the process DPI-aware (Windows). No-op elsewhere.\"\"\"\n    global _DPI_AWARE_SET\n    if _DPI_AWARE_SET:\n        return\n    if platform.system() == \"Windows\":\n        import ctypes\n        try:\n            # Per-monitor v2 (Windows 10+)",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
         "label": "DispatchError",
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    decision: Dict[str, Any]\n    actions: list\nasync def send_for_analysis(\n    *,\n    message_id: str,",
+        "peekOfCode": "class DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1119,7 +1842,16 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    decision: Dict[str, Any]\n    actions: list\nasync def send_for_analysis(\n    *,\n    message_id: str,\n    text: str,\n    chat_id: Optional[str] = None,",
+        "peekOfCode": "class DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "sendViberMessDispatherToСarrier",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y)\n    if not gd.click_text([\"Переслать\",], \n            count_attempt_find=2,\n            pause_attempt = 4,\n            lang=\"rus\", \n            scope=(x - 100, y - 100, x+550, y+650),\n            is_debug=is_debug):\n                log_and_print(\"Not find menu item Переслать\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1128,7 +1860,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_URL = os.getenv(\"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\")\nDISPATCH_API_KEY = os.getenv(\"DISPATCH_API_KEY\", \"66fBbZsL72\")\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    decision: Dict[str, Any]\n    actions: list\nasync def send_for_analysis(",
+        "peekOfCode": "DISPATCH_URL = os.getenv(\"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\")\nDISPATCH_API_KEY = os.getenv(\"DISPATCH_API_KEY\", \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\")\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1137,7 +1869,34 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\"DISPATCH_API_KEY\", \"66fBbZsL72\")\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    decision: Dict[str, Any]\n    actions: list\nasync def send_for_analysis(\n    *,",
+        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\"DISPATCH_API_KEY\", \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\")\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "processed_messages",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "processing_semaphore",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "count_y_mess_empty",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "count_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")\n    log_and_print(f\"name_viber: {name_viber}\", 'info')",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1164,7 +1923,7 @@
         "kind": 2,
         "importPath": "find_message",
         "description": "find_message",
-        "peekOfCode": "def save_current_text(text, file_name='previous_text.txt', max_chars=read_setting(\"max_chars_member\")):\n    log_and_print(f\"Adding current text to file {file_name} with a limit of {max_chars} characters.\")\n    try:\n        # Read existing content if the file exists\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:\n                existing_content = f.read().strip()\n        except FileNotFoundError:\n            existing_content = \"\"\n        # Clean the new text",
+        "peekOfCode": "def save_current_text(text, file_name='previous_text.txt', max_chars=read_setting(\"max_chars_member\")):\n    log_and_print(f\"Adding current text to file {file_name} with a limit of {max_chars} characters.\")\n    try:\n        # Read existing content if the file exists\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:\n                existing_content = f.read().strip()\n        except FileNotFoundError:\n            existing_content = \"\"\n        # Combine the existing and new cleaned text",
         "detail": "find_message",
         "documentation": {}
     },
@@ -1218,7 +1977,7 @@
         "kind": 2,
         "importPath": "log",
         "description": "log",
-        "peekOfCode": "def log_and_print(message, level='info'):\n    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')\n    print(f\"[{current_time}] {message}\")\n    # if level == 'info':\n    #     logging.info(message)\n    # elif level == 'warning':\n    #     log_and_print(message)\n    # elif level == 'error':\n    #     log_and_print(message)",
+        "peekOfCode": "def log_and_print(message, level='info'):\n    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')\n    print(f\"[{current_time}] {message}\")\n    if level == 'info':\n        logging.info(message)\n    elif level == 'warning':\n        logging.warning(message)\n    elif level == 'error':\n        logging.error(message)\n    elif level == 'debug':",
         "detail": "log",
         "documentation": {}
     },
@@ -1349,6 +2108,24 @@
         "documentation": {}
     },
     {
+        "label": "resource_path",
+        "kind": 2,
+        "importPath": "project_config",
+        "description": "project_config",
+        "peekOfCode": "def resource_path(filename: str) -> Path:\n    \"\"\"\n    Возвращает абсолютный путь к ресурсу, который работает как в .py, так и в .exe (PyInstaller).\n    \"\"\"\n    if hasattr(sys, \"_MEIPASS\"):\n        # если исполняется как .exe\n        return Path(sys._MEIPASS) / filename\n    else:\n        # обычный путь при запуске из .py\n        return Path(__file__).resolve().parent / filename",
+        "detail": "project_config",
+        "documentation": {}
+    },
+    {
+        "label": "_SETTINGS_PATH",
+        "kind": 5,
+        "importPath": "project_config",
+        "description": "project_config",
+        "peekOfCode": "_SETTINGS_PATH = resource_path(\"settings.yaml\")\n# -------------------------------------------------------------------\n# 2) Загружаем YAML-данные при импорте (одно чтение)\n# -------------------------------------------------------------------\ntry:\n    with _SETTINGS_PATH.open(\"rt\", encoding=\"utf-8\") as _fh:\n        _RAW_SETTINGS: Dict[str, Any] = yaml.safe_load(_fh) or {}\nexcept FileNotFoundError:\n    raise RuntimeError(f\"settings.yaml not found at {_SETTINGS_PATH}\")\n# -------------------------------------------------------------------",
+        "detail": "project_config",
+        "documentation": {}
+    },
+    {
         "label": "Context",
         "kind": 6,
         "importPath": "pwa",
@@ -1371,7 +2148,7 @@
         "kind": 2,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    region = [x,y, width, height]\n    #coordinates = capture_and_find_text_coordinates(region, read_setting(\"word_comment\"), visualize = read_setting(\"visualize\"))",
+        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = capture_and_find_image_boundary_coordinates(\n        (x, y, 70, height), ",
         "detail": "pwa",
         "documentation": {}
     },
@@ -1380,7 +2157,7 @@
         "kind": 2,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "def fill_y_mess_care_find(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"[fill_y_mess_care_find] Старт fill_y_mess ретельного пошуку\")\n    x, y, height = s.search_board_mess_x_start, s.search_board_mess_y_end, s.search_board_mess_y_end - s.search_board_mess_y_start\n    left_click(x + s.x_offset_out_mess, y - 100)\n    log_and_print(f\"[fill_y_mess_care_find] x = {x} y = {y} height = {height}\")\n    comment_height = read_setting(\"comment_height\")\n    comment_width = read_setting(\"comment_width\")\n    stop = False",
+        "peekOfCode": "def fill_y_mess_care_find(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"[fill_y_mess_care_find] Старт fill_y_mess ретельного пошуку\")\n    x, y, height = s.search_board_mess_x_start, s.search_board_mess_y_end, s.search_board_mess_y_end - s.search_board_mess_y_start\n    left_click(x + s.x_offset_out_mess, y - 100)\n    log_and_print(f\"[fill_y_mess_care_find] x = {x} y = {y} height = {height}\")\n    comment_height = read_setting(\"comment_height\")\n    comment_width = read_setting(\"comment_width\")\n    stop = False",
         "detail": "pwa",
         "documentation": {}
     },
@@ -1686,16 +2463,25 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def take_screenshot(region):\n    screenshot = pyautogui.screenshot(region=region)\n    image_np = np.array(screenshot)\n    return image_np\nimport cv2\nimport numpy as np\ndef _safe_show(img_bgr, delay_ms: int = 1000, win_name: str = \"Screen with region\"):\n    \"\"\"Use your showImage if available; otherwise fallback to cv2.imshow.\"\"\"\n    try:\n        showImage(img_bgr, delay_ms)  # your helper",
+        "peekOfCode": "def take_screenshot(region):\n    screenshot = pyautogui.screenshot(region=region)\n    image_np = np.array(screenshot)\n    return image_np\ndef show_overlay_win32_hole(\n    region,                  # (x, y, w, h) - экранные координаты\n    delay_ms=1500,\n    *,\n    alpha=120,               # 0..255 — затемнение фона\n    border_color=(0, 255, 0),# BGR",
         "detail": "utils",
         "documentation": {}
     },
     {
-        "label": "show_screen_with_region",
+        "label": "show_overlay_win32_hole",
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def show_screen_with_region(\n    region,                      # (x, y, w, h) in screen coordinates\n    delay_ms: int = 1000,\n    border_color = (0, 255, 0),  # BGR\n    thickness: int = 3,\n    dim_background: bool = True  # darken non-selected area\n):\n    \"\"\"\n    Capture full screen, draw a rectangle around `region`, and display.\n    Region is highlighted on the *full-screen* image so you see where it is.",
+        "peekOfCode": "def show_overlay_win32_hole(\n    region,                  # (x, y, w, h) - экранные координаты\n    delay_ms=1500,\n    *,\n    alpha=120,               # 0..255 — затемнение фона\n    border_color=(0, 255, 0),# BGR\n    border_width=3,\n    click_through=False,     # True -> клики проходят сквозь оверлей\n    caption=None,            # подпись (опционально)\n):",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "os.environ[\"QT_LOGGING_RULES\"]",
+        "kind": 5,
+        "importPath": "utils",
+        "description": "utils",
+        "peekOfCode": "os.environ[\"QT_LOGGING_RULES\"] = \"qt.qpa.windows.debug=false\"\nfrom typing import Tuple, Optional\nimport time\nimport win32api, win32con, win32gui\nImageLike = Union[str, np.ndarray]\ndef preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого",
         "detail": "utils",
         "documentation": {}
     },
@@ -1745,29 +2531,11 @@
         "documentation": {}
     },
     {
-        "label": "right_click",
-        "kind": 2,
-        "importPath": "vb_utils",
-        "description": "vb_utils",
-        "peekOfCode": "def right_click(window, x=0, y=0):\n    \"\"\"\n    Кликает правой кнопкой мыши\n    \"\"\"\n    window.set_focus()\n    # Выполняем клик правой кнопкой мыши\n    mouse.click(button=\"right\", coords=(x, y))\n    log_and_print(f\"Right-clicked at ({x}, {y}) on the chat panel\")\ndef left_click(window, x=0, y=0):\n    \"\"\"",
-        "detail": "vb_utils",
-        "documentation": {}
-    },
-    {
         "label": "left_click",
         "kind": 2,
         "importPath": "vb_utils",
         "description": "vb_utils",
-        "peekOfCode": "def left_click(window, x=0, y=0):\n    \"\"\"\n    Кликает левой кнопкой мыши\n    \"\"\"\n    # Выполняем клик левой кнопкой мыши\n    mouse.click(button=\"left\", coords=(x, y))\n    log_and_print(f\"Left-clicked at ({x}, {y}) on the chat panel\")\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений",
-        "detail": "vb_utils",
-        "documentation": {}
-    },
-    {
-        "label": "reformat_telegram_text",
-        "kind": 2,
-        "importPath": "vb_utils",
-        "description": "vb_utils",
-        "peekOfCode": "def reformat_telegram_text(input_text):\n    \"\"\"\n    Takes a text, finds all text enclosed in single asterisks (*),\n    and replaces them with double asterisks (**) for Telegram formatting.\n    Args:\n        input_text (str): The input text.\n    Returns:\n        str: The modified text with updated formatting.\n    \"\"\"\n    # Regular expression to find text enclosed in single asterisks",
+        "peekOfCode": "def left_click(window, x=0, y=0):\n    \"\"\"\n    Кликает левой кнопкой мыши\n    \"\"\"\n    # Выполняем клик левой кнопкой мыши\n    mouse.click(button=\"left\", coords=(x, y))\n    log_and_print(f\"Left-clicked at ({x}, {y}) on the chat panel\")\ndef _load_bgr(img: ImageLike) -> np.ndarray:\n    \"\"\"Завантажує зображення з файлу або прийнятого масиву у BGR.\"\"\"\n    if isinstance(img, str):",
         "detail": "vb_utils",
         "documentation": {}
     },
@@ -1785,7 +2553,7 @@
         "kind": 2,
         "importPath": "vb_utils",
         "description": "vb_utils",
-        "peekOfCode": "def capture_and_find_image_boundary_coordinates(\n    region,\n    search_image: ImageLike,\n    preprocess: bool = True,\n    visualize: bool = False,\n    threshold: float = 0.83\n) -> List[Tuple[int, int, int, int]]:\n    \"\"\"\n    Capture screenshot of `region`, find all matches of `search_image` (template),\n    and return rectangles [(x, y, w, h)] in screenshot-local coordinates.",
+        "peekOfCode": "def capture_and_find_image_boundary_coordinates(\n    region,\n    search_images: List[ImageLike],\n    preprocess: bool = False,\n    visualize: bool = False,\n    threshold: float = 0.83\n) -> List[Tuple[int, int, int, int]]:\n    \"\"\"\n    Capture screenshot of `region`, find all matches for ANY template from `search_images`,\n    and return rectangles [(x, y, w, h)] in screenshot-local coordinates.",
         "detail": "vb_utils",
         "documentation": {}
     },
@@ -1795,24 +2563,6 @@
         "importPath": "vb_utils",
         "description": "vb_utils",
         "peekOfCode": "ImageLike = Union[str, np.ndarray] \ndef scroll_with_mouse(window, count_scroll, direction=\"down\"):\n    window.set_focus()\n    # Находим панель с сообщениями\n    chat_pane = window.child_window(control_type=\"Pane\", found_index=0)\n    # Получаем координаты панели\n    rect = chat_pane.rectangle()\n    center_x = (rect.left + rect.right) // 2\n    center_y = (rect.top + rect.bottom) // 2\n    # Прокручиваем вниз",
-        "detail": "vb_utils",
-        "documentation": {}
-    },
-    {
-        "label": "processed_messages",
-        "kind": 5,
-        "importPath": "vb_utils",
-        "description": "vb_utils",
-        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\nasync def process_one_message_telegramm(message_text, bot_client, channel_name, name_viber, file_path):\n    log_and_print(f\"bot_client: {bot_client}\", 'info')\n    log_and_print(f\"service_channel_name: {channel_name}\", 'info')\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)",
-        "detail": "vb_utils",
-        "documentation": {}
-    },
-    {
-        "label": "processing_semaphore",
-        "kind": 5,
-        "importPath": "vb_utils",
-        "description": "vb_utils",
-        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\nasync def process_one_message_telegramm(message_text, bot_client, channel_name, name_viber, file_path):\n    log_and_print(f\"bot_client: {bot_client}\", 'info')\n    log_and_print(f\"service_channel_name: {channel_name}\", 'info')\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)\n    elif file_path:\n        processed_messages.add(file_path)",
         "detail": "vb_utils",
         "documentation": {}
     }

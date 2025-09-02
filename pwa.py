@@ -13,9 +13,12 @@ import hashlib
 from ScreenRegionSelector import ScreenRegionSelector
 import keyboard
 from utils import read_setting, write_setting
-import pyautogui
+import pyautogui as pag
 import os
 from paint import show_position
+from core import gui_driver as gd
+from dispatcher.dispatch_client import send_messages_from_y_mess
+import asyncio
 
 # Константы WinAPI
 SWP_NOSIZE = 0x0001
@@ -161,9 +164,13 @@ def fill_y_mess(window, s):
 
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
 
-    region = [x,y, width, height]
-    #coordinates = capture_and_find_text_coordinates(region, read_setting("word_comment"), visualize = read_setting("visualize"))
-    coordinates = capture_and_find_image_boundary_coordinates(region, read_setting("image_border_down"), visualize = read_setting("visualize"))
+    coordinates = capture_and_find_image_boundary_coordinates(
+        (x, y, 70, height), 
+        [
+            read_setting("image_border_down"),
+            read_setting("image_border_down2")
+        ],
+        visualize = read_setting("visualize"))
     window.set_focus()
 
     s.y_mess = [coord[1] for coord in coordinates]
@@ -173,7 +180,7 @@ def fill_y_mess(window, s):
 def fill_y_mess_care_find(window, s):
     s.y_mess = []
     window.set_focus()
-    log_and_print(f"[fill_y_mess_care_find] Старт fill_y_mess ретельного пошуку")
+    log_and_print("[fill_y_mess_care_find] Старт fill_y_mess ретельного пошуку")
     x, y, height = s.search_board_mess_x_start, s.search_board_mess_y_end, s.search_board_mess_y_end - s.search_board_mess_y_start
     left_click(x + s.x_offset_out_mess, y - 100)
     log_and_print(f"[fill_y_mess_care_find] x = {x} y = {y} height = {height}")
@@ -204,36 +211,6 @@ def fill_y_mess_care_find(window, s):
     log_and_print(f"[fill_y_mess_care_find] s.y_mess = {s.y_mess}")
     s.y_mess.reverse()
     log_and_print(f"[fill_y_mess_care_find] s.y_mess.reverse() = {s.y_mess}")
-
-async def send_text(window, s, menu_items, x, y):
-    global count_y_mess_empty
-    x2, y2, w, h = menu_items["isText"]
-    x = x + x2 + int(w / 2)
-    y = y + y2 +10
-    #show_position(x, y, duration=10, size=40, color="blue")
-    left_click(window, x, y)
-    cv2.waitKey(100)
-    log_and_print(f"[send_text] Повідомлення скопиювовано в буфер обміну")
-
-    textOrigin = pyperclip.paste()
-    textFind = remove_service_symbols_and_spaces(textOrigin)
-    text = reformat_telegram_text(textOrigin)
-    log_and_print(f"[send_text] textOrigin = {textOrigin}")
-
-    if not text:
-        log_and_print(f"[send_text] Не вдалося скопіювати меседж, буфєр обміну пустий")
-    else:
-        if not textFind in s.old_text:
-            log_and_print(f"[send_text] Отправка нового текста в tg: {text}")
-            for channel_name in s.channel_names:
-                await process_one_message_dispatcher(text, s.name_viber, None)
-
-            save_current_text(textOrigin)
-            s.old_text = load_previous_text()
-
-        else:
-            log_and_print(f"[send_text] Нема нового меседжа")
-            count_y_mess_empty = count_y_mess_empty + 1
 
 async def send_image(window, s, menu_items, x, y):
     global count_y_mess_empty
@@ -289,7 +266,7 @@ async def send_video(window, s, menu_items, x, y):
     left_click(window, x, y)
     cv2.waitKey(1000)
 
-    pyautogui.hotkey('ctrl', 'c')
+    pag.hotkey('ctrl', 'c')
     cv2.waitKey(300)
     file_name =  pyperclip.paste()
     log_and_print(f"[send_video] Буфер обмена {file_name}")
@@ -298,9 +275,9 @@ async def send_video(window, s, menu_items, x, y):
     if textFind in s.old_text:
         count_y_mess_empty = count_y_mess_empty + 1
         log_and_print(f"[send_image] Файл уже был отправлен!")
-        pyautogui.press('tab', presses=4, interval=0.1)
+        pag.press('tab', presses=4, interval=0.1)
         # cv2.waitKey(1000)
-        pyautogui.press('enter')
+        pag.press('enter')
         cv2.waitKey(1000)
         return
 
@@ -312,24 +289,24 @@ async def send_video(window, s, menu_items, x, y):
 
     if os.path.isfile(file):
         log_and_print(f"[send_message_to_tg_channel] Файл уже сохранен: {file}")
-        pyautogui.press('tab', presses=4, interval=0.1)
+        pag.press('tab', presses=4, interval=0.1)
         # cv2.waitKey(1000)
-        pyautogui.press('enter')
+        pag.press('enter')
         cv2.waitKey(1000)
         return
 
     pyperclip.copy(path_files_downloads)
-    pyautogui.press('tab', presses=6, interval=0.1)
+    pag.press('tab', presses=6, interval=0.1)
     #cv2.waitKey(1000)
-    pyautogui.press('enter')
+    pag.press('enter')
     #cv2.waitKey(1000)
-    pyautogui.hotkey('ctrl', 'v')
+    pag.hotkey('ctrl', 'v')
     #cv2.waitKey(1000)
-    pyautogui.press('enter')
+    pag.press('enter')
     #cv2.waitKey(1000)
-    pyautogui.press('tab', presses=8, interval=0.1)
+    pag.press('tab', presses=8, interval=0.1)
     #cv2.waitKey(1000)
-    pyautogui.press('enter')
+    pag.press('enter')
 
     cv2.waitKey(1000)
 
@@ -352,40 +329,16 @@ async def send_message(window, s, menu_items, x, y):
     window.set_focus()
     #left_click(window, x, y)
     #cv2.waitKey(10)
+    resp = None
 
     if menu_items["isText"]:
-        await send_text(window, s, menu_items, x, y)
+        resp = await send_text(window, s, menu_items, x, y)
     elif menu_items["isImage"]:
-        await send_image(window, s, menu_items, x, y)
+        resp = await send_image(window, s, menu_items, x, y)
     elif menu_items["isVideo"]:
-        await send_video(window, s, menu_items, x, y)
-
-async def send_messages_from_y_mess(window, s):
-    window.set_focus()
-    x, y_start, height = s.search_board_mess_x_start, s.search_board_mess_y_start, s.search_board_mess_x_end - s.search_board_mess_x_start
-    region = []
-    for y in s.y_mess:
-        if y:
-            log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
-            y = y_start + y - s.height_item_menu
-            window.set_focus()
-            #show_position(x, y+ 10, duration=10, size=10, color="blue")
-            #cv2.waitKey(3000)
-            #window.set_focus()
-            #left_click(window, x, y)
-            right_click(window, x, y)
-
-            x = x + 50
-            region = [x, y -  read_setting("indent_up"), s.width_menu, s.height_menu + read_setting("indent_down")]
-            cv2.waitKey(1000)
-            menu_items = capture_and_find_multiple_text_coordinates(region, read_setting("search_phrases"), visualize = read_setting("visualize"))
-
-            log_and_print(f"menu_items = {menu_items}")
-
-            await send_message(window, s, menu_items, region[0], region[1])
-
-            right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess,
-                        s.search_board_mess_y_end - 100)
+        resp = await send_video(window, s, menu_items, x, y)
+        
+    return resp
 
 async def main():
     global count_y_mess_empty
@@ -399,6 +352,20 @@ async def main():
 
         window.set_focus()
         hwnd = window.handle
+        
+        
+        if not gd.click_image("ukrbus.png", 
+                          scope=(0, 300, 120, 700), 
+                          confidence=0.7,
+                          count_click=1,
+                          multiscale = True,
+                          #plus_y=30,
+                          is_debug=False):
+            
+            log_and_print("Not find name carrier UkrBusTravel")
+            return False
+
+        gd.pause(0.5)
 
         count_scroll_up = read_setting("count_scroll_up")
         count_scroll_down = read_setting("count_scroll_down")
@@ -413,28 +380,34 @@ async def main():
             for i in range(count_repeat):
 
                 ctypes.windll.user32.LockWindowUpdate(hwnd)
+                was_send = True
+                while was_send:
+                    was_send = False
+                    if count_y_mess_empty <= 20:
+                        fill_y_mess(window, s)
 
-                if count_y_mess_empty <= 20:
-                    fill_y_mess(window, s)
-                else:
-                    fill_y_mess_care_find(window, s)
-                    count_y_mess_empty = 0
-
-                if len(s.y_mess) > 0:
-                    await send_messages_from_y_mess(window,s)
-                else:
-                    count_y_mess_empty = count_y_mess_empty + 1
+                    if len(s.y_mess) > 0:
+                        was_send = await send_messages_from_y_mess(window,s)
+                        if was_send:
+                            scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
+                    else:
+                        count_y_mess_empty = count_y_mess_empty + 1
 
                 ctypes.windll.user32.LockWindowUpdate(0)
 
                 log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
                 log_and_print(f"pause = {pause}")
                 await asyncio.sleep(pause)
+                
+                pag.keyDown('esq')
+                gd.pause(0.4)
+                pag.keyUp('esq')
+                gd.pause(0.4)
 
                 scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
 
             window.set_focus()
-            right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
+            right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess + 60, s.search_board_mess_y_end - 100)
 
             log_and_print(f"pause = {read_setting("pause_read_messages_second")}")
             await asyncio.sleep(read_setting("pause_read_messages_second"))

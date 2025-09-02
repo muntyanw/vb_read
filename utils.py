@@ -5,6 +5,13 @@ import cv2
 import numpy as np
 import pyautogui
 from typing import Union
+import ctypes
+
+os.environ["QT_LOGGING_RULES"] = "qt.qpa.windows.debug=false"
+
+from typing import Tuple, Optional
+import time
+import win32api, win32con, win32gui
 
 ImageLike = Union[str, np.ndarray]
 
@@ -213,73 +220,138 @@ def take_screenshot(region):
     image_np = np.array(screenshot)
     return image_np
 
-import cv2
-import numpy as np
-
-def _safe_show(img_bgr, delay_ms: int = 1000, win_name: str = "Screen with region"):
-    """Use your showImage if available; otherwise fallback to cv2.imshow."""
-    try:
-        showImage(img_bgr, delay_ms)  # your helper
-    except Exception:
-        cv2.imshow(win_name, img_bgr)
-        cv2.waitKey(delay_ms)
-        try:
-            cv2.destroyWindow(win_name)
-        except Exception:
-            pass
-
-def show_screen_with_region(
-    region,                      # (x, y, w, h) in screen coordinates
-    delay_ms: int = 1000,
-    border_color = (0, 255, 0),  # BGR
-    thickness: int = 3,
-    dim_background: bool = True  # darken non-selected area
+def show_overlay_win32_hole(
+    region,                  # (x, y, w, h) - экранные координаты
+    delay_ms=1500,
+    *,
+    alpha=120,               # 0..255 — затемнение фона
+    border_color=(0, 255, 0),# BGR
+    border_width=3,
+    click_through=False,     # True -> клики проходят сквозь оверлей
+    caption=None,            # подпись (опционально)
 ):
     """
-    Capture full screen, draw a rectangle around `region`, and display.
-    Region is highlighted on the *full-screen* image so you see where it is.
+    Полупрозрачный TOPMOST-оверлей на весь экран с «дыркой» под region и рамкой.
+    Без Qt/COM. Закрытие по таймеру, ESC или кликом (если click_through=False).
     """
+    # Локальные импорты
+    import time
+    import ctypes
+    import win32api, win32con, win32gui
+
+    x, y, w, h = map(int, region)
+
+    # --- Размер экрана
+    sw = win32api.GetSystemMetrics(0)
+    sh = win32api.GetSystemMetrics(1)
+
+    # --- Регистрация класса окна и WndProc
+    wc = win32gui.WNDCLASS()
+    hInstance = wc.hInstance = win32api.GetModuleHandle(None)
+    wc.lpszClassName = "OverlayWin32HoleClass_Ctypes"
+
+    def _on_destroy(hWnd, msg, wParam, lParam):
+        win32gui.PostQuitMessage(0)
+        return 0
+
+    def _on_keydown(hWnd, msg, wParam, lParam):
+        if not click_through and wParam == win32con.VK_ESCAPE:
+            win32gui.PostMessage(hWnd, win32con.WM_CLOSE, 0, 0)
+        return 0
+
+    def _on_lbutton(hWnd, msg, wParam, lParam):
+        if not click_through:
+            win32gui.PostMessage(hWnd, win32con.WM_CLOSE, 0, 0)
+        return 0
+
+    def _on_paint(hWnd, msg, wParam, lParam):
+        # Корректный паттерн BeginPaint/EndPaint без win32gui.PAINTSTRUCT()
+        hdc, paintStruct = win32gui.BeginPaint(hWnd)
+        try:
+            # Перо (WinAPI -> RGB, конвертируем BGR->RGB)
+            rgb = win32api.RGB(border_color[2], border_color[1], border_color[0])
+            pen = win32gui.CreatePen(win32con.PS_SOLID, int(border_width), rgb)
+            old_pen = win32gui.SelectObject(hdc, pen)
+
+            # Рамка вокруг «дырки»
+            win32gui.MoveToEx(hdc, x, y);             win32gui.LineTo(hdc, x + w, y)
+            win32gui.MoveToEx(hdc, x, y + h - 1);     win32gui.LineTo(hdc, x + w, y + h - 1)
+            win32gui.MoveToEx(hdc, x, y);             win32gui.LineTo(hdc, x, y + h)
+            win32gui.MoveToEx(hdc, x + w - 1, y);     win32gui.LineTo(hdc, x + w - 1, y + h)
+
+            win32gui.SelectObject(hdc, old_pen)
+            win32gui.DeleteObject(pen)
+
+            # Подпись (если нужна)
+            if caption:
+                # Чёрная подложка
+                bg_brush = win32gui.CreateSolidBrush(win32api.RGB(0, 0, 0))
+                pad_x, pad_y = 6, 4
+                top = max(0, y - 24)
+                rect = (x, top, x + 320, top + 20)
+                win32gui.FillRect(hdc, rect, bg_brush)
+                win32gui.DeleteObject(bg_brush)
+                # Белый текст
+                win32gui.SetTextColor(hdc, win32api.RGB(255, 255, 255))
+                win32gui.SetBkMode(hdc, win32con.TRANSPARENT)
+                win32gui.TextOut(hdc, rect[0] + pad_x, rect[1] + pad_y, str(caption))
+        finally:
+            win32gui.EndPaint(hWnd, paintStruct)
+        return 0
+
+    wc.lpfnWndProc = {
+        win32con.WM_DESTROY:      _on_destroy,
+        win32con.WM_KEYDOWN:      _on_keydown,
+        win32con.WM_LBUTTONDOWN:  _on_lbutton,
+        win32con.WM_PAINT:        _on_paint,
+    }
+
+    atom = win32gui.RegisterClass(wc)
+
+    # --- Создаём TOPMOST + LAYERED окно
+    style = win32con.WS_POPUP
+    exstyle = win32con.WS_EX_TOPMOST | win32con.WS_EX_LAYERED | win32con.WS_EX_TOOLWINDOW
+    if click_through:
+        exstyle |= win32con.WS_EX_TRANSPARENT  # пропуск кликов
+
+    hwnd = win32gui.CreateWindowEx(
+        exstyle, atom, "overlay", style,
+        0, 0, sw, sh, 0, 0, hInstance, None
+    )
+
+    # --- Полупрозрачность фона
+    win32gui.SetLayeredWindowAttributes(hwnd, 0, int(alpha), win32con.LWA_ALPHA)
+
+    # --- Регион окна с «дыркой» (через GDI32 / ctypes)
+    gdi32 = ctypes.windll.gdi32
+    CreateRectRgn = gdi32.CreateRectRgn
+    CombineRgn    = gdi32.CombineRgn
+    DeleteObject  = gdi32.DeleteObject
+    RGN_DIFF      = 4  # win32con.RGN_DIFF
+
+    r_full  = CreateRectRgn(0, 0, sw, sh)
+    r_hole  = CreateRectRgn(x, y, x + w, y + h)
+    r_final = CreateRectRgn(0, 0, 0, 0)
+    CombineRgn(r_final, r_full, r_hole, RGN_DIFF)  # r_final = r_full - r_hole
+
+    win32gui.SetWindowRgn(hwnd, r_final, True)  # r_final теперь принадлежит окну
+    DeleteObject(r_full)
+    DeleteObject(r_hole)
+
+    # --- Показ
+    win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
+    win32gui.UpdateWindow(hwnd)
+
+    # --- Лёгкий message loop до таймаута
+    t_end = time.time() + (delay_ms / 1000.0)
+    while time.time() < t_end:
+        win32gui.PumpWaitingMessages()
+        time.sleep(0.01)
+
+    # --- Закрыть и очистить
+    if win32gui.IsWindow(hwnd):
+        win32gui.DestroyWindow(hwnd)
     try:
-        # 1) Capture full screen (replace with your own if you have one)
-        # If you already have a full-screen capture helper, use it here:
-        # full_bgr = take_full_screenshot()
-        # Fallback using pyautogui (returns PIL.Image in RGB):
-        import pyautogui
-        pil_img = pyautogui.screenshot()  # full screen
-        full_bgr = cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
-
-        # 2) Draw overlay
-        x, y, w, h = region
-        H, W = full_bgr.shape[:2]
-        dbg = full_bgr.copy()
-
-        if dim_background:
-            # Slightly darken everything except the region
-            overlay = dbg.copy()
-            overlay[:] = (0, 0, 0)
-            alpha = 0.45
-            dbg = cv2.addWeighted(overlay, alpha, dbg, 1 - alpha, 0)
-            # Paste original region back to keep it bright
-            x2, y2 = max(0, x), max(0, y)
-            x3, y3 = min(W, x + w), min(H, y + h)
-            if x2 < x3 and y2 < y3:
-                dbg[y2:y3, x2:x3] = full_bgr[y2:y3, x2:x3]
-
-        # 3) Draw border and corner crosshair
-        cv2.rectangle(dbg, (x, y), (x + w, y + h), border_color, thickness, lineType=cv2.LINE_AA)
-        cv2.drawMarker(dbg, (x, y), (0, 0, 255), markerType=cv2.MARKER_TILTED_CROSS, markerSize=18, thickness=2)
-
-        # 4) Add a small label with coords
-        label = f"region x={x} y={y} w={w} h={h}"
-        (tw, th), _ = cv2.getTextSize(label, cv2.FONT_HERSHEY_SIMPLEX, 0.6, 1)
-        bx, by = max(4, x), max(0, y - th - 10)
-        cv2.rectangle(dbg, (bx, by), (bx + tw + 10, by + th + 10), (0, 0, 0), -1)
-        cv2.putText(dbg, label, (bx + 5, by + th + 5), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 1, cv2.LINE_AA)
-
-        # 5) Show
-        _safe_show(dbg, delay_ms)
-
-    except Exception as e:
-        print(f"Error in show_screen_with_region: {e}")
-
-
+        win32gui.UnregisterClass(atom, hInstance)
+    except Exception:
+        pass

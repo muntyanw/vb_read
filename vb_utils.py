@@ -1,17 +1,10 @@
+import pywinauto
 from pywinauto import Application, mouse
 from log import log_and_print
-import asyncio
-from tg import send_message_to_tg_channel
-import re
-from dispatcher.dispatch_client import send_for_analysis
-import hashlib
 import cv2
 import numpy as np
 from typing import Optional, Tuple, Union, Dict, List
-from utils import take_screenshot, preprocess_image, show_screen_with_region
-import cv2
-import numpy as np
-from typing import List, Tuple, Union
+from utils import preprocess_image, show_overlay_win32_hole, showImage, take_screenshot
 
 ImageLike = Union[str, np.ndarray] 
 
@@ -86,15 +79,6 @@ def right_click(app, window_title, x=0, y=0):
     except Exception as e:
         print(f"Error during right-click: {e}")
 
-def right_click(window, x=0, y=0):
-    """
-    Кликает правой кнопкой мыши
-    """
-    window.set_focus()
-    # Выполняем клик правой кнопкой мыши
-    mouse.click(button="right", coords=(x, y))
-    log_and_print(f"Right-clicked at ({x}, {y}) on the chat panel")
-
 def left_click(window, x=0, y=0):
     """
     Кликает левой кнопкой мыши
@@ -103,87 +87,6 @@ def left_click(window, x=0, y=0):
     # Выполняем клик левой кнопкой мыши
     mouse.click(button="left", coords=(x, y))
     log_and_print(f"Left-clicked at ({x}, {y}) on the chat panel")
-
-# Глобальный флаг для предотвращения двойной реакции
-processed_messages = set()
-# Семафор для последовательной обработки сообщений
-processing_semaphore = asyncio.Semaphore(1)
-
-async def process_one_message_telegramm(message_text, bot_client, channel_name, name_viber, file_path):
-
-    log_and_print(f"bot_client: {bot_client}", 'info')
-    log_and_print(f"service_channel_name: {channel_name}", 'info')
-    log_and_print(f"name_viber: {name_viber}", 'info')
-
-    if message_text:
-        # Добавляем ID сообщения в список обработанных
-        processed_messages.add(message_text)
-    elif file_path:
-        processed_messages.add(file_path)
-
-
-    # Обрабатываем сообщение последовательно с использованием семафора
-    async with processing_semaphore:
-        try:
-            log_and_print(f'Обработка сообщения: {message_text}', 'info')
-
-            await send_message_to_tg_channel(bot_client, channel_name, message_text, file_path)
-
-        except Exception as e:
-            log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')
-            await asyncio.sleep(10)  # Задержка
-
-def reformat_telegram_text(input_text):
-    """
-    Takes a text, finds all text enclosed in single asterisks (*),
-    and replaces them with double asterisks (**) for Telegram formatting.
-
-    Args:
-        input_text (str): The input text.
-
-    Returns:
-        str: The modified text with updated formatting.
-    """
-    # Regular expression to find text enclosed in single asterisks
-    pattern = r'\*(.*?)\*'
-
-    # Replace single asterisks with double asterisks
-    formatted_text = re.sub(pattern, r'**\1**', input_text)
-
-    return formatted_text
-
-async def process_one_message_dispatcher(message_text, name_viber, file_path):
-
-    log_and_print(f"name_viber: {name_viber}", 'info')
-
-    if message_text:
-        # Добавляем ID сообщения в список обработанных
-        processed_messages.add(message_text)
-    elif file_path:
-        processed_messages.add(file_path)
-
-
-    # Обрабатываем сообщение последовательно с использованием семафора
-    async with processing_semaphore:
-        try:
-            log_and_print(f'Обработка сообщения: {message_text}', 'info')
-            md5_hash = hashlib.md5(message_text.encode()).hexdigest()
-
-            await send_for_analysis(
-                message_id = md5_hash,
-                text = message_text,
-                chat_id = "UkrBusTravel",
-                sender = None,
-                attachments = None,
-                locale = "uk",
-                timeout_s = 8.0,
-                retries = 2
-            )
-
-        except Exception as e:
-            log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')
-            await asyncio.sleep(10)  # Задержка
-
 
 def _load_bgr(img: ImageLike) -> np.ndarray:
     """Завантажує зображення з файлу або прийнятого масиву у BGR."""
@@ -288,66 +191,98 @@ def find_message_bottom_by_image(
 
     return best
 
-
 def capture_and_find_image_boundary_coordinates(
     region,
-    search_image: ImageLike,
-    preprocess: bool = True,
+    search_images: List[ImageLike],
+    preprocess: bool = False,
     visualize: bool = False,
     threshold: float = 0.83
 ) -> List[Tuple[int, int, int, int]]:
     """
-    Capture screenshot of `region`, find all matches of `search_image` (template),
+    Capture screenshot of `region`, find all matches for ANY template from `search_images`,
     and return rectangles [(x, y, w, h)] in screenshot-local coordinates.
     If `visualize` is True, draw overlays and call showImage() right here.
     """
-
     try:
-        
-        # 7) Inline visualization (if requested)
+        # 0) Визуализация области захвата (опционально)
         if visualize:
-            show_screen_with_region(region, 3000)
-        
-        # 1) Capture screenshot of the region
+            show_overlay_win32_hole(
+                region=region,
+                delay_ms=2000,
+                alpha=120,
+                border_color=(0, 255, 0),
+                border_width=3,
+                click_through=False
+            )
+
+        # 1) Скриншот области
         screenshot_np = take_screenshot(region)
         log_and_print("[capture_and_find_image_boundary_coordinates] Screenshot captured.")
 
-        # 2) Optional preprocessing
-        if preprocess:
-            processed_image = preprocess_image(screenshot_np)
-            log_and_print("[capture_and_find_image_boundary_coordinates] Image preprocessed.")
-        else:
-            processed_image = screenshot_np
+        # 2) Предобработка (если нужно)
+        processed_image = preprocess_image(screenshot_np) if preprocess else screenshot_np
+        if visualize:
+            showImage(processed_image, 6000)
 
-        # 3) Load/prepare template
-        if isinstance(search_image, str):
-            tpl_bgr = cv2.imread(search_image, cv2.IMREAD_COLOR)
-            if tpl_bgr is None:
-                raise FileNotFoundError(f"Cannot read template: {search_image}")
-        else:
-            tpl_bgr = search_image
+        # 3) Готовим изображение и шаблоны (серый + лёгкое размытие)
+        img_gray = cv2.cvtColor(processed_image, cv2.COLOR_BGR2GRAY) if processed_image.ndim == 3 else processed_image
+        img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
+
+        img_h, img_w = img_gray.shape[:2]
+        if img_h == 0 or img_w == 0:
+            log_and_print("[capture_and_find_image_boundary_coordinates] Empty screenshot dimensions.")
+            return []
+
+        # Нормализуем список шаблонов
+        if not isinstance(search_images, (list, tuple)) or len(search_images) == 0:
+            raise ValueError("`search_images` must be a non-empty list/tuple of images or paths.")
+
+        candidates = []  # (x, y, w, h, score)
+
+        for tpl in search_images:
+            # 4) Загрузка/нормализация шаблона
+            if isinstance(tpl, str):
+                tpl_bgr = cv2.imread(tpl, cv2.IMREAD_COLOR)
+                if tpl_bgr is None:
+                    log_and_print(f"[capture_and_find_image_boundary_coordinates] Cannot read template: {tpl}")
+                    continue
+            else:
+                tpl_bgr = tpl
+
             if tpl_bgr.ndim == 2:
                 tpl_bgr = cv2.cvtColor(tpl_bgr, cv2.COLOR_GRAY2BGR)
 
-        # 4) Grayscale + light blur for robustness
-        img_gray = cv2.cvtColor(processed_image, cv2.COLOR_BGR2GRAY) if processed_image.ndim == 3 else processed_image
-        tpl_gray = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY) if tpl_bgr.ndim == 3 else tpl_bgr
-        img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
-        tpl_gray = cv2.GaussianBlur(tpl_gray, (3, 3), 0)
+            tpl_gray = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY) if tpl_bgr.ndim == 3 else tpl_bgr
+            tpl_gray = cv2.GaussianBlur(tpl_gray, (3, 3), 0)
 
-        th, tw = tpl_gray.shape[:2]
+            th, tw = tpl_gray.shape[:2]
+            if th == 0 or tw == 0:
+                continue
 
-        # 5) Template matching (single-shot; OpenCV computes full response map)
-        res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+            # 4.1) Если шаблон больше картинки — уменьшаем
+            if th > img_h or tw > img_w:
+                scale = min(img_w / tw, img_h / th) * 0.98  # немного меньше, чтобы гарантированно поместился
+                new_w = max(1, int(tw * scale))
+                new_h = max(1, int(th * scale))
+                if new_w < 1 or new_h < 1:
+                    log_and_print("[capture_and_find_image_boundary_coordinates] Template too large; skipped after scaling.")
+                    continue
+                tpl_gray = cv2.resize(tpl_gray, (new_w, new_h), interpolation=cv2.INTER_AREA)
+                th, tw = tpl_gray.shape[:2]
 
-        # 6) Collect all peaks above threshold
-        ys, xs = np.where(res >= threshold)
-        scores = res[ys, xs] if (len(ys) > 0) else np.array([])
+            # 5) Сопоставление шаблона
+            res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
 
-        candidates = [(int(x0), int(y0), int(tw), int(th), float(sc))
-                      for x0, y0, sc in zip(xs.tolist(), ys.tolist(), scores.tolist())]
+            # 6) Пики выше порога
+            ys, xs = np.where(res >= threshold)
+            if len(ys) == 0:
+                continue
+            scores = res[ys, xs]
 
-        # Optional: simple NMS to avoid duplicate overlapping boxes
+            for x0, y0, sc in zip(xs.tolist(), ys.tolist(), scores.tolist()):
+                candidates.append((int(x0), int(y0), int(tw), int(th), float(sc)))
+
+        # 7) Простая NMS, чтобы убрать пересечения
         def nms(boxes, iou_thresh=0.3):
             if not boxes:
                 return []
@@ -379,10 +314,11 @@ def capture_and_find_image_boundary_coordinates(
 
         picked = nms(candidates, iou_thresh=0.3)
         coordinates = [(x, y, w, h) for (x, y, w, h, _) in picked]
+        #sort from y
+        coordinates_sorted = sorted(coordinates, key=lambda c: c[1])
 
         log_and_print(f"[capture_and_find_image_boundary_coordinates] Matches: {len(coordinates)} (threshold={threshold}).")
-
-        return coordinates
+        return coordinates_sorted
 
     except Exception as e:
         print(f"Ошибка в capture_and_find_image_boundary_coordinates: {e}")

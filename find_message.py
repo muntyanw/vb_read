@@ -34,11 +34,8 @@ def save_current_text(text, file_name='previous_text.txt', max_chars=read_settin
         except FileNotFoundError:
             existing_content = ""
 
-        # Clean the new text
-        cleaned_text = remove_service_symbols_and_spaces(text)
-
         # Combine the existing and new cleaned text
-        combined_text = existing_content + cleaned_text
+        combined_text = existing_content + text
 
         # If the combined text exceeds the max_chars limit, truncate it to the last max_chars
         if len(combined_text) > max_chars:
@@ -50,6 +47,6 @@ def save_current_text(text, file_name='previous_text.txt', max_chars=read_settin
     except Exception as e:
         log_and_print(f"Error saving text to file: {e}")
 
-        log_and_print(f"Текст успешно добавлен. Последние {max_lines} строк сохранены. Добавлено: {text}")
+        log_and_print(f"Текст успешно добавлен. Последние {max_chars} строк сохранены. Добавлено: {text}")
     except Exception as e:
         log_and_print(f"Ошибка при сохранении текста в файл {file_name}: {e}")
