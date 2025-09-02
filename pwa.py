@@ -1,11 +1,9 @@
 from tg import startTgClient
-from vb_utils import *
-from recognize_text import capture_and_find_multiple_text_coordinates, find_text_upward_with_highlight
+from recognize_text import find_text_upward_with_highlight
 from log import log_and_print
 import pyperclip
 from find_message import load_previous_text, save_current_text, remove_service_symbols_and_spaces
 from pywinauto import Application
-import ctypes
 import cv2
 from PIL import Image, ImageGrab
 from io import BytesIO
@@ -17,8 +15,9 @@ import pyautogui as pag
 import os
 from paint import show_position
 from core import gui_driver as gd
-from dispatcher.dispatch_client import send_messages_from_y_mess
+from dispatcher.dispatch_client import processViberMess, klickUkrBus
 import asyncio
+from vb_utils import scroll_with_mouse, left_click
 
 # Константы WinAPI
 SWP_NOSIZE = 0x0001
@@ -153,65 +152,6 @@ async def init():
 
     return s
 
-def fill_y_mess(window, s):
-    s.y_mess = []
-    window.set_focus()
-    log_and_print(f"Старт fill_y_mess")
-
-    height = s.search_board_mess_y_end - s.search_board_mess_y_start
-    width = s.search_board_mess_x_end - s.search_board_mess_x_start
-    x, y = s.search_board_mess_x_start, s.search_board_mess_y_start
-
-    log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
-
-    coordinates = capture_and_find_image_boundary_coordinates(
-        (x, y, 70, height), 
-        [
-            read_setting("image_border_down"),
-            read_setting("image_border_down2")
-        ],
-        visualize = read_setting("visualize"))
-    window.set_focus()
-
-    s.y_mess = [coord[1] for coord in coordinates]
-
-    log_and_print(f"s.y_mess = {s.y_mess}")
-
-def fill_y_mess_care_find(window, s):
-    s.y_mess = []
-    window.set_focus()
-    log_and_print("[fill_y_mess_care_find] Старт fill_y_mess ретельного пошуку")
-    x, y, height = s.search_board_mess_x_start, s.search_board_mess_y_end, s.search_board_mess_y_end - s.search_board_mess_y_start
-    left_click(x + s.x_offset_out_mess, y - 100)
-    log_and_print(f"[fill_y_mess_care_find] x = {x} y = {y} height = {height}")
-
-    comment_height = read_setting("comment_height")
-    comment_width = read_setting("comment_width")
-
-    stop = False
-    while True:
-        window.set_focus()
-
-        y = find_text_upward_with_highlight(x, y, s.search_board_mess_y_end, height, comment_height, comment_width, read_setting("word_comment"))
-        log_and_print(f"y = {y}")
-        if y:
-            y_finded = y + int(comment_height / 2) - s.search_board_mess_y_start
-            s.y_mess.append(y_finded)
-
-            visualize = read_setting("visualize")
-            if visualize:
-                show_position(x, y_finded, duration=2, size=50, color="red")
-
-            log_and_print(f"[fill_y_mess_care_find] Меседж знайдений y_finded = {y_finded}")
-            y = y - comment_height
-        else:
-            log_and_print(f"[fill_y_mess_care_find] Меседж не знайдений")
-            break
-
-    log_and_print(f"[fill_y_mess_care_find] s.y_mess = {s.y_mess}")
-    s.y_mess.reverse()
-    log_and_print(f"[fill_y_mess_care_find] s.y_mess.reverse() = {s.y_mess}")
-
 async def send_image(window, s, menu_items, x, y):
     global count_y_mess_empty
     x2, y2, w, h = menu_items["isImage"]
@@ -250,8 +190,8 @@ async def send_image(window, s, menu_items, x, y):
     bio.seek(0)
 
     log_and_print(f"[send_message] Отправка нового имиджа в tg: {bio.name}")
-    for channel_name in s.channel_names:
-        await process_one_message_dispatcher("", s.name_viber, file_path)
+    #for channel_name in s.channel_names:
+        #await process_one_message_dispatcher("", s.name_viber, file_path)
 
 async def send_video(window, s, menu_items, x, y):
     global count_y_mess_empty
@@ -322,95 +262,37 @@ async def send_video(window, s, menu_items, x, y):
     s.old_text = load_previous_text()
 
     log_and_print(f"[send_message] Отправка нового файла в tg: {file}")
-    for channel_name in s.channel_names:
-        await process_one_message_dispatcher("", s.name_viber, file)
-
-async def send_message(window, s, menu_items, x, y):
-    window.set_focus()
-    #left_click(window, x, y)
-    #cv2.waitKey(10)
-    resp = None
-
-    if menu_items["isText"]:
-        resp = await send_text(window, s, menu_items, x, y)
-    elif menu_items["isImage"]:
-        resp = await send_image(window, s, menu_items, x, y)
-    elif menu_items["isVideo"]:
-        resp = await send_video(window, s, menu_items, x, y)
-        
-    return resp
+    #for channel_name in s.channel_names:
+        #await process_one_message_dispatcher("", s.name_viber, file)
 
 async def main():
-    global count_y_mess_empty
+    
+    count_scroll_up = read_setting("count_scroll_up")
+    count_scroll_down = read_setting("count_scroll_down")
+    pause_cycle_read = read_setting("pause_read_messages_second")
+    
     try:
         s = await init()
-
-        pause = 2
 
         app = Application(backend="uia").connect(title="Rakuten Viber")
         window = app.window(title="Rakuten Viber")
 
         window.set_focus()
-        hwnd = window.handle
         
+        klickUkrBus()
         
-        if not gd.click_image("ukrbus.png", 
-                          scope=(0, 300, 120, 700), 
-                          confidence=0.7,
-                          count_click=1,
-                          multiscale = True,
-                          #plus_y=30,
-                          is_debug=False):
-            
-            log_and_print("Not find name carrier UkrBusTravel")
-            return False
-
         gd.pause(0.5)
-
-        count_scroll_up = read_setting("count_scroll_up")
-        count_scroll_down = read_setting("count_scroll_down")
 
         scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
 
         while True:
-            window.set_focus()
-            right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
-
-            count_repeat = read_setting("count_repeat")
-            for i in range(count_repeat):
-
-                ctypes.windll.user32.LockWindowUpdate(hwnd)
-                was_send = True
-                while was_send:
-                    was_send = False
-                    if count_y_mess_empty <= 20:
-                        fill_y_mess(window, s)
-
-                    if len(s.y_mess) > 0:
-                        was_send = await send_messages_from_y_mess(window,s)
-                        if was_send:
-                            scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
-                    else:
-                        count_y_mess_empty = count_y_mess_empty + 1
-
-                ctypes.windll.user32.LockWindowUpdate(0)
-
-                log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
-                log_and_print(f"pause = {pause}")
-                await asyncio.sleep(pause)
-                
-                pag.keyDown('esq')
-                gd.pause(0.4)
-                pag.keyUp('esq')
-                gd.pause(0.4)
-
-                scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
-
-            window.set_focus()
-            right_click(window, s.search_board_mess_x_start + s.x_offset_out_mess + 60, s.search_board_mess_y_end - 100)
-
-            log_and_print(f"pause = {read_setting("pause_read_messages_second")}")
-            await asyncio.sleep(read_setting("pause_read_messages_second"))
+            await processViberMess(window, s,
+                             count_scroll_up,
+                             count_scroll_down,
+                             pause_cycle_read)
+                             
+                              
+            
 
     except Exception as e:
         print(f"An error occurred: {e}")

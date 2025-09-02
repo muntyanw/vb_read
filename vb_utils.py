@@ -196,7 +196,7 @@ def capture_and_find_image_boundary_coordinates(
     search_images: List[ImageLike],
     preprocess: bool = False,
     visualize: bool = False,
-    threshold: float = 0.83
+    threshold: float = 0.88
 ) -> List[Tuple[int, int, int, int]]:
     """
     Capture screenshot of `region`, find all matches for ANY template from `search_images`,

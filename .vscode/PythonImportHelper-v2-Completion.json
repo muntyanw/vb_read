@@ -430,6 +430,14 @@
         "documentation": {}
     },
     {
+        "label": "SequenceMatcher",
+        "importPath": "difflib",
+        "description": "difflib",
+        "isExtraImport": true,
+        "detail": "difflib",
+        "documentation": {}
+    },
+    {
         "label": "platform",
         "kind": 6,
         "isExtraImport": true,
@@ -832,6 +840,70 @@
         "documentation": {}
     },
     {
+        "label": "scroll_with_mouse",
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "isExtraImport": true,
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_find_image_boundary_coordinates",
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "isExtraImport": true,
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "scroll_with_mouse",
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "isExtraImport": true,
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "left_click",
+        "importPath": "vb_utils",
+        "description": "vb_utils",
+        "isExtraImport": true,
+        "detail": "vb_utils",
+        "documentation": {}
+    },
+    {
+        "label": "text_includes",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_recognize",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "find_text_upward_with_highlight",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "capture_and_recognize",
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "isExtraImport": true,
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
         "label": "send_for_analysis",
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
@@ -848,7 +920,15 @@
         "documentation": {}
     },
     {
-        "label": "send_messages_from_y_mess",
+        "label": "processViberMess",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "klickUkrBus",
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
         "isExtraImport": true,
@@ -897,38 +977,6 @@
         "documentation": {}
     },
     {
-        "label": "capture_and_recognize",
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "isExtraImport": true,
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
-        "label": "capture_and_find_multiple_text_coordinates",
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "isExtraImport": true,
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
-        "label": "find_text_upward_with_highlight",
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "isExtraImport": true,
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
-        "label": "capture_and_recognize",
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "isExtraImport": true,
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
         "label": "tkinter",
         "kind": 6,
         "isExtraImport": true,
@@ -968,14 +1016,6 @@
         "description": "tg",
         "isExtraImport": true,
         "detail": "tg",
-        "documentation": {}
-    },
-    {
-        "label": "*",
-        "importPath": "vb_utils",
-        "description": "vb_utils",
-        "isExtraImport": true,
-        "detail": "vb_utils",
         "documentation": {}
     },
     {
@@ -1847,11 +1887,38 @@
         "documentation": {}
     },
     {
+        "label": "clickLastMess",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def clickLastMess():\n    if not gd.click_image(\"last_mess.png\", \n                            scope=(720, 910, 790, 980), \n                            confidence=0.7,\n                            count_click=1,\n                            multiscale = True,\n                            is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    return True",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "klickUkrBus",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def klickUkrBus():\n    if not gd.click_image(\"ukrbus.png\", \n                            scope=(0, 200, 120, 700), \n                            confidence=0.7,\n                            count_click=1,\n                            multiscale = True,\n                            is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    clickLastMess()",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
         "label": "sendViberMessDispatherToСarrier",
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y)\n    if not gd.click_text([\"Переслать\",], \n            count_attempt_find=2,\n            pause_attempt = 4,\n            lang=\"rus\", \n            scope=(x - 100, y - 100, x+550, y+650),\n            is_debug=is_debug):\n                log_and_print(\"Not find menu item Переслать\")",
+        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y-20)\n    if not gd.click_text([\"Переслать\",], \n            count_attempt_find=2,\n            pause_attempt = 4,\n            lang=\"rus\", \n            scope=(x, y - 100, x+160, y+400),\n            is_debug=is_debug):\n                log_and_print(\"Not find menu item Переслать\")",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "fill_y_mess",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 60, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = capture_and_find_image_boundary_coordinates(\n        (x, y, 70, height), ",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1897,6 +1964,15 @@
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
         "peekOfCode": "count_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")\n    log_and_print(f\"name_viber: {name_viber}\", 'info')",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "count_y_mess_empty",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "count_y_mess_empty = 0\nasync def processViberMess(window, s, \n                    count_scroll_up, \n                    count_scroll_down,\n                    pause_cycle_read):\n    global count_y_mess_empty\n    hwnd = window.handle\n    window.set_focus()\n    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)\n    count_repeat = read_setting(\"count_repeat\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2144,24 +2220,6 @@
         "documentation": {}
     },
     {
-        "label": "fill_y_mess",
-        "kind": 2,
-        "importPath": "pwa",
-        "description": "pwa",
-        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = capture_and_find_image_boundary_coordinates(\n        (x, y, 70, height), ",
-        "detail": "pwa",
-        "documentation": {}
-    },
-    {
-        "label": "fill_y_mess_care_find",
-        "kind": 2,
-        "importPath": "pwa",
-        "description": "pwa",
-        "peekOfCode": "def fill_y_mess_care_find(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"[fill_y_mess_care_find] Старт fill_y_mess ретельного пошуку\")\n    x, y, height = s.search_board_mess_x_start, s.search_board_mess_y_end, s.search_board_mess_y_end - s.search_board_mess_y_start\n    left_click(x + s.x_offset_out_mess, y - 100)\n    log_and_print(f\"[fill_y_mess_care_find] x = {x} y = {y} height = {height}\")\n    comment_height = read_setting(\"comment_height\")\n    comment_width = read_setting(\"comment_width\")\n    stop = False",
-        "detail": "pwa",
-        "documentation": {}
-    },
-    {
         "label": "SWP_NOSIZE",
         "kind": 5,
         "importPath": "pwa",
@@ -2288,11 +2346,20 @@
         "documentation": {}
     },
     {
+        "label": "text_includes",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def text_includes(query: str, target: str, threshold: float = 0.7) -> bool:\n    \"\"\"\n    Определяет, входит ли query в target с вероятностью.\n    Возвращает число от 0 до 1 (чем выше, тем больше вероятность).\n    Если максимальное совпадение >= threshold, можно считать что входит.\n    \"\"\"\n    q_len = len(query)\n    if q_len == 0:\n        return False\n    max_score = 0.0",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
         "label": "pytesseract.pytesseract.tesseract_cmd",
         "kind": 5,
         "importPath": "recognize_text",
         "description": "recognize_text",
-        "peekOfCode": "pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'\nimport cv2\ndef filter_recognized_text(text):\n    \"\"\"\n    Filters out lines that are shorter than 6 characters and contain colons.\n    \"\"\"\n    lines = text.split('\\n')  # Разбиваем текст на строки\n    filtered_lines = []\n    for line in lines:\n        stripped_line = line.strip()  # Убираем пробелы в начале и конце строки",
+        "peekOfCode": "pytesseract.pytesseract.tesseract_cmd = r'C:\\Program Files\\Tesseract-OCR\\tesseract.exe'\ndef filter_recognized_text(text):\n    \"\"\"\n    Filters out lines that are shorter than 6 characters and contain colons.\n    \"\"\"\n    lines = text.split('\\n')  # Разбиваем текст на строки\n    filtered_lines = []\n    for line in lines:\n        stripped_line = line.strip()  # Убираем пробелы в начале и конце строки\n        if len(stripped_line) < 6 and ':' in stripped_line:",
         "detail": "recognize_text",
         "documentation": {}
     },
@@ -2553,7 +2620,7 @@
         "kind": 2,
         "importPath": "vb_utils",
         "description": "vb_utils",
-        "peekOfCode": "def capture_and_find_image_boundary_coordinates(\n    region,\n    search_images: List[ImageLike],\n    preprocess: bool = False,\n    visualize: bool = False,\n    threshold: float = 0.83\n) -> List[Tuple[int, int, int, int]]:\n    \"\"\"\n    Capture screenshot of `region`, find all matches for ANY template from `search_images`,\n    and return rectangles [(x, y, w, h)] in screenshot-local coordinates.",
+        "peekOfCode": "def capture_and_find_image_boundary_coordinates(\n    region,\n    search_images: List[ImageLike],\n    preprocess: bool = False,\n    visualize: bool = False,\n    threshold: float = 0.88\n) -> List[Tuple[int, int, int, int]]:\n    \"\"\"\n    Capture screenshot of `region`, find all matches for ANY template from `search_images`,\n    and return rectangles [(x, y, w, h)] in screenshot-local coordinates.",
         "detail": "vb_utils",
         "documentation": {}
     },

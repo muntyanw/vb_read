@@ -12,6 +12,9 @@ import pyperclip
 import pyautogui as pag
 from utils import read_setting
 import hashlib
+import ctypes
+from vb_utils import scroll_with_mouse, capture_and_find_image_boundary_coordinates
+from recognize_text import text_includes
 
 DISPATCH_URL = os.getenv("DISPATCH_URL", "http://192.168.1.223:8888/api/v1/dispatch/analyze")
 DISPATCH_API_KEY = os.getenv("DISPATCH_API_KEY", "3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87")
@@ -20,7 +23,6 @@ processed_messages = set()
 # Семафор для последовательной обработки сообщений
 processing_semaphore = asyncio.Semaphore(1)
 count_y_mess_empty = 0
-
 
 class DispatchError(Exception):
     pass
@@ -61,7 +63,6 @@ async def process_one_message_dispatcher(message_text, name_viber, file_path):
         except Exception as e:
             log_and_print(f"Oшибка при обработке одного сообщения: {e}", 'error')
             await asyncio.sleep(10)  # Задержка
-
 
 async def send_for_analysis(
     *,
@@ -110,7 +111,6 @@ async def send_for_analysis(
     # theoretically unreachable
     raise DispatchError(f"Dispatch failed: {last_exc}")
 
-
 async def send_messages_from_y_mess(window, s):
     global count_y_mess_empty
     window.set_focus()
@@ -121,8 +121,8 @@ async def send_messages_from_y_mess(window, s):
             y = y_start + y - s.height_item_menu
             window.set_focus()
 
-            xRight = x + 10
-            yRight = y
+            xRight = x + 60
+            yRight = y - 20
             gd.right_click(xRight, yRight)
 
             x = x + 50
@@ -131,12 +131,12 @@ async def send_messages_from_y_mess(window, s):
                 count_attempt_find=2,
                 pause_attempt = 2,
                 lang="rus", 
-                scope=(x - 100, 
-                    y -  int(s.height_menu*1.5), 
-                    x + int(s.width_menu*2.4), 
-                    y + int(s.height_menu*2.4)), 
+                scope=(x, 
+                    y -  int(s.height_menu/2.4), 
+                    x + int(s.width_menu*1.3), 
+                    y + int(s.height_menu*1.4)), 
                 is_debug=False,
-                threshold = 0.5,
+                threshold = 0.8,
                 occurrence = 1
                 ):
                 log_and_print("Not find Скопировать сообщение")
@@ -152,7 +152,7 @@ async def send_messages_from_y_mess(window, s):
             if not text:
                 log_and_print(f"[send_text] Не вдалося скопіювати меседж, буфєр обміну пустий")
             else:
-                if text not in s.old_text:
+                if not text_includes(text, s.old_text, 0.7):
                     log_and_print(f"[send_text] Збереження нового сповіщення для аналізу: {text}")
                     save_current_text(text)
                     s.old_text = load_previous_text()
@@ -165,21 +165,50 @@ async def send_messages_from_y_mess(window, s):
     
     return False #відсилкі не було       
 
+def clickLastMess():
+    
+    if not gd.click_image("last_mess.png", 
+                            scope=(720, 910, 790, 980), 
+                            confidence=0.7,
+                            count_click=1,
+                            multiscale = True,
+                            is_debug=False):
+        
+        log_and_print("Not find name carrier UkrBusTravel")
+        return False
+    
+    return True
+
+def klickUkrBus():
+    
+    if not gd.click_image("ukrbus.png", 
+                            scope=(0, 200, 120, 700), 
+                            confidence=0.7,
+                            count_click=1,
+                            multiscale = True,
+                            is_debug=False):
+        
+        log_and_print("Not find name carrier UkrBusTravel")
+        return False
+    
+    clickLastMess()
+    return True
+    
 def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
             
     is_debug = False
-    gd.right_click(x, y)
+    gd.right_click(x, y-20)
     if not gd.click_text(["Переслать",], 
             count_attempt_find=2,
             pause_attempt = 4,
             lang="rus", 
-            scope=(x - 100, y - 100, x+550, y+650),
+            scope=(x, y - 100, x+160, y+400),
             is_debug=is_debug):
                 log_and_print("Not find menu item Переслать")
                 return False
             
     pos = gd.find_image("find.png", 
-            scope=(420, 200, 560, 300),
+            scope=(320, 320, 380, 380),
             multiscale=False,
             is_debug=is_debug)
     
@@ -202,10 +231,10 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
             count_attempt_find=2,
             pause_attempt = 4,
             lang="rus", 
-            scope=(pos[0], pos[0]-200, pos[0]+300, pos[0]+300), 
+            scope=(pos[0], pos[0]-200, pos[0]+300, pos[0]+200), 
             is_debug=is_debug,
             threshold = 0.5,
-            occurrence = 1
+            occurrence = 2
             ):
                 log_and_print(f"Not find 2 NameViberCarrier  {NameViberCarrier}")
                 return False
@@ -213,33 +242,91 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
     gd.pause(1)
             
     if not gd.click_image("resend.png", 
-                          scope=(680, 840, 980, 960), 
+                          scope=(460, 730, 640, 810), 
                           confidence=0.5,
                           count_click=1,
-                          #plus_y=30,
                           is_debug=False):
             
         log_and_print(f"Not find name carrier {NameViberCarrier}")
         return False
-    
-    gd.pause(1)
-    
-    if not gd.click_image("ukrbus.png", 
-                        scope=(0, 300, 120, 700), 
-                        confidence=0.7,
-                        count_click=1,
-                        multiscale = True,
-                        #plus_y=0,
-                        is_debug=False):
-        
-        log_and_print("Not find name carrier UkrBusTravel")
-        return False
+            
+    return klickUkrBus()
 
-    gd.pause(1)
-            
-    return True
+def fill_y_mess(window, s):
+    s.y_mess = []
+    window.set_focus()
+    log_and_print(f"Старт fill_y_mess")
+
+    height = s.search_board_mess_y_end - s.search_board_mess_y_start
+    width = s.search_board_mess_x_end - s.search_board_mess_x_start
+    x, y = s.search_board_mess_x_start + 60, s.search_board_mess_y_start
+
+    log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
+
+    coordinates = capture_and_find_image_boundary_coordinates(
+        (x, y, 70, height), 
+        [
+            read_setting("image_border_down"),
+            read_setting("image_border_down2")
+        ],
+        visualize = read_setting("visualize"),
+        threshold = 0.9)
+    window.set_focus()
+
+    s.y_mess = [coord[1] for coord in coordinates]
+
+    log_and_print(f"s.y_mess = {s.y_mess}")
+
+count_y_mess_empty = 0
+async def processViberMess(window, s, 
+                    count_scroll_up, 
+                    count_scroll_down,
+                    pause_cycle_read):
     
-            
+    global count_y_mess_empty
+    hwnd = window.handle
+        
+    window.set_focus()
+    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
+
+    count_repeat = read_setting("count_repeat")
+    for i in range(count_repeat):
+
+        ctypes.windll.user32.LockWindowUpdate(hwnd)
+        was_send = True
+        while was_send:
+            was_send = False
+            if count_y_mess_empty <= 20:
+                fill_y_mess(window, s)
+
+            if len(s.y_mess) > 0:
+                was_send = await send_messages_from_y_mess(window,s)
+                if was_send:
+                    scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
+            else:
+                count_y_mess_empty = count_y_mess_empty + 1
+
+        ctypes.windll.user32.LockWindowUpdate(0)
+
+        pause = 2
+        log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
+        log_and_print(f"pause = {pause}")
+        await asyncio.sleep(pause)
+        
+        pag.keyDown('esq')
+        gd.pause(0.4)
+        pag.keyUp('esq')
+        gd.pause(0.4)
+
+        scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
+
+    window.set_focus()
+    gd.click(s.search_board_mess_x_start + s.x_offset_out_mess + 60, s.search_board_mess_y_end - 100)
+
+    log_and_print(f"pause = {read_setting("pause_read_messages_second")}")
+    gd.pause(pause_cycle_read)
+
     
-            
+
+    
     

@@ -3,11 +3,11 @@ import pytesseract
 from pytesseract import Output
 from utils import read_setting, showImage, take_screenshot
 import numpy as np
-
+from difflib import SequenceMatcher
+import cv2
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
-import cv2
 
 def filter_recognized_text(text):
     """
@@ -238,7 +238,7 @@ def capture_and_find_text_coordinates(region, search_words, preprocess=True, cas
     except Exception as e:
         print(f"Ошибка в capture_and_find_text_coordinates: {e}")
         return []
- 
+
 def find_text_upward_with_highlight(start_x, start_y, y_max, height, template_height, template_width, search_words):
 
     step = int(template_height / 2)  # Шаг поиска
@@ -280,4 +280,23 @@ def find_text_upward_with_highlight(start_x, start_y, y_max, height, template_he
 
     return None
 
-
+def text_includes(query: str, target: str, threshold: float = 0.7) -> bool:
+    """
+    Определяет, входит ли query в target с вероятностью.
+    Возвращает число от 0 до 1 (чем выше, тем больше вероятность).
+    Если максимальное совпадение >= threshold, можно считать что входит.
+    """
+    q_len = len(query)
+    if q_len == 0:
+        return False
+    
+    max_score = 0.0
+    
+    # Перебираем окна по длине query
+    for i in range(0, len(target) - q_len + 1):
+        window = target[i:i+q_len]
+        score = SequenceMatcher(None, query, window).ratio()
+        if score > max_score:
+            max_score = score
+    
+    return max_score >= threshold
