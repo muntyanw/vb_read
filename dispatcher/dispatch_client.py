@@ -121,47 +121,54 @@ async def send_messages_from_y_mess(window, s):
             y = y_start + y - s.height_item_menu
             window.set_focus()
 
-            xRight = x + 60
+            xRight = x + 50
             yRight = y - 20
             gd.right_click(xRight, yRight)
+            log_and_print(f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}")
 
             x = x + 50
             
-            if not gd.click_text(["Скопировать сообщение",], 
+            if not gd.click_text(["Скопировать сообщение", "Копировать текст"], 
                 count_attempt_find=2,
                 pause_attempt = 2,
                 lang="rus", 
                 scope=(x, 
-                    y -  int(s.height_menu/2.4), 
+                    y -  int(s.height_menu/2), 
                     x + int(s.width_menu*1.3), 
                     y + int(s.height_menu*1.4)), 
                 is_debug=False,
                 threshold = 0.8,
                 occurrence = 1
                 ):
-                log_and_print("Not find Скопировать сообщение")
+                log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
                 count_y_mess_empty = count_y_mess_empty + 1
                 gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess,
                     s.search_board_mess_y_end - 100)
             
                     
-            log_and_print("[send_text] Повідомлення скопиювовано в буфер обміну")
+            log_and_print("[send_messages_from_y_mess] Повідомлення скопиювовано в буфер обміну")
             
             text = pyperclip.paste()
 
             if not text:
-                log_and_print(f"[send_text] Не вдалося скопіювати меседж, буфєр обміну пустий")
+                log_and_print("[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфєр обміну пустий")
             else:
                 if not text_includes(text, s.old_text, 0.7):
-                    log_and_print(f"[send_text] Збереження нового сповіщення для аналізу: {text}")
+                    log_and_print("[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:")
                     save_current_text(text)
                     s.old_text = load_previous_text()
                     
-                    #resp =  await process_one_message_dispatcher(text, s.name_viber, None)
-                    if True: #resp.actions:
+                    resp =  await process_one_message_dispatcher(text, s.name_viber, None)
+                    log_and_print(f"[send_messages_from_y_mess] response from chat gpt - resp = {resp}")
+                    action_type = None
+                    if resp.actions:
+                        action_type = resp.actions[0].get("type")
+                        
+                    if action_type != 'ignore':
                         sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight)
-                        #виходемо з циклу, щоб почати пошук меседжів з початку (помінялись коордінати )
                         return True
+                else:
+                    log_and_print("[send_messages_from_y_mess] Сповіщення вже було відправлено")
     
     return False #відсилкі не було       
 
@@ -177,19 +184,22 @@ def clickLastMess():
         log_and_print("Not find name carrier UkrBusTravel")
         return False
     
+    log_and_print("Click down to last messages")
     return True
 
 def klickUkrBus():
     
     if not gd.click_image("ukrbus.png", 
                             scope=(0, 200, 120, 700), 
-                            confidence=0.7,
+                            confidence=0.88,
                             count_click=1,
                             multiscale = True,
                             is_debug=False):
         
-        log_and_print("Not find name carrier UkrBusTravel")
+        log_and_print("Not find name chat UkrBusTravel")
         return False
+    
+    log_and_print("Click name chat UkrBusTravel")
     
     clickLastMess()
     return True
@@ -206,6 +216,8 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
             is_debug=is_debug):
                 log_and_print("Not find menu item Переслать")
                 return False
+                
+    log_and_print("Click Переслать")
             
     pos = gd.find_image("find.png", 
             scope=(320, 320, 380, 380),
@@ -216,16 +228,47 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         log_and_print("Not find field find in resend")
         return False
     
-    gd.click(pos[0] + 100, pos[1] + 10)
+    countAttempt = 0            
+    while True:
+        log_and_print(f"Attempt find recipient {countAttempt}")
+        countAttempt += 1
+        gd.click(pos[0] + 100, pos[1])
+        log_and_print("Click field find")
+        
+        pag.keyDown('ctrl')
+        gd.pause(0.5)
+        pag.press('a')
+        gd.pause(0.5)
+        pag.keyUp('ctrl')
+        gd.pause(1)
+        pag.press('delete')
+        log_and_print("delete old text")
     
-    pyperclip.copy(NameViberCarrier)
-    gd.pause(1)
-    pag.keyDown('ctrl')
-    gd.pause(0.1)
-    pag.press('v')
-    gd.pause(0.1)
-    pag.keyUp('ctrl')
-    gd.pause(1)
+        gd.pause(0.5)
+        pyperclip.copy(NameViberCarrier)
+        gd.pause(0.5)
+        pag.keyDown('ctrl')
+        gd.pause(0.3)
+        pag.press('v')
+        gd.pause(0.3)
+        pag.keyUp('ctrl')
+        gd.pause(1)
+        
+        if gd.find_text(NameViberCarrier, 
+            lang="ukr", 
+            scope=(320, 320, 580, 380), 
+            is_debug=True):
+            
+            log_and_print("Name recipient message paste successful")
+            break
+        else:
+            log_and_print("Name recipient message not find")
+        
+        if countAttempt > 6:
+            log_and_print("Error paste name recipient message ")
+            return False
+        
+    
     
     if not gd.click_text([NameViberCarrier,], 
             count_attempt_find=2,
@@ -238,7 +281,8 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
             ):
                 log_and_print(f"Not find 2 NameViberCarrier  {NameViberCarrier}")
                 return False
-            
+    
+    log_and_print(f"click name chat {NameViberCarrier}")
     gd.pause(1)
             
     if not gd.click_image("resend.png", 
@@ -249,6 +293,8 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
             
         log_and_print(f"Not find name carrier {NameViberCarrier}")
         return False
+        
+    log_and_print(f"click button resend")
             
     return klickUkrBus()
 

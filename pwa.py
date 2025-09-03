@@ -279,7 +279,9 @@ async def main():
 
         window.set_focus()
         
-        klickUkrBus()
+        if not klickUkrBus():
+            log_and_print("Not find chat UkrBus")
+            return None
         
         gd.pause(0.5)
 

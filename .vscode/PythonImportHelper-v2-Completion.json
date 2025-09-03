@@ -1891,7 +1891,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess():\n    if not gd.click_image(\"last_mess.png\", \n                            scope=(720, 910, 790, 980), \n                            confidence=0.7,\n                            count_click=1,\n                            multiscale = True,\n                            is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    return True",
+        "peekOfCode": "def clickLastMess():\n    if not gd.click_image(\"last_mess.png\", \n                            scope=(720, 910, 790, 980), \n                            confidence=0.7,\n                            count_click=1,\n                            multiscale = True,\n                            is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    log_and_print(\"Click down to last messages\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1900,7 +1900,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def klickUkrBus():\n    if not gd.click_image(\"ukrbus.png\", \n                            scope=(0, 200, 120, 700), \n                            confidence=0.7,\n                            count_click=1,\n                            multiscale = True,\n                            is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    clickLastMess()",
+        "peekOfCode": "def klickUkrBus():\n    if not gd.click_image(\"ukrbus.png\", \n                            scope=(0, 200, 120, 700), \n                            confidence=0.88,\n                            count_click=1,\n                            multiscale = True,\n                            is_debug=False):\n        log_and_print(\"Not find name chat UkrBusTravel\")\n        return False\n    log_and_print(\"Click name chat UkrBusTravel\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },

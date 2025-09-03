@@ -20,7 +20,7 @@
     "image_border_down": "images\\border-down.png",
     "image_border_down2": "images\\border-down2.png",
     "max_chars_member": 800,
-    "pause_read_messages_second": 30,
+    "pause_read_messages_second": 5,
     "search_phrases": {
         "isText": "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c",
         "isImage": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c",
