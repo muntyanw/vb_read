@@ -342,6 +342,22 @@
         "documentation": {}
     },
     {
+        "label": "List",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
+        "label": "Union",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "Any",
         "importPath": "typing",
         "description": "typing",
@@ -551,6 +567,14 @@
     },
     {
         "label": "BaseModel",
+        "importPath": "pydantic",
+        "description": "pydantic",
+        "isExtraImport": true,
+        "detail": "pydantic",
+        "documentation": {}
+    },
+    {
+        "label": "ValidationError",
         "importPath": "pydantic",
         "description": "pydantic",
         "isExtraImport": true,
@@ -1873,7 +1897,25 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:",
+        "peekOfCode": "class DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None\n    reason: Optional[str] = None",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "Action",
+        "kind": 6,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "class Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None\n    reason: Optional[str] = None\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any] = {}",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "Decision",
+        "kind": 6,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "class Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None\n    reason: Optional[str] = None\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any] = {}\n    actions: List[Action] = []\n    # опционально: поддержка старого/нового формата\n    decision: Optional[Decision] = None",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1882,7 +1924,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")\n    log_and_print(f\"name_viber: {name_viber}\", 'info')\n    if message_text:\n        # Добавляем ID сообщения в список обработанных\n        processed_messages.add(message_text)",
+        "peekOfCode": "class DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any] = {}\n    actions: List[Action] = []\n    # опционально: поддержка старого/нового формата\n    decision: Optional[Decision] = None\ndef _fallback_result(message_id: str) -> DispatchResult:\n    \"\"\"Резервный ответ, чтобы наверх не улетал None.\"\"\"\n    return DispatchResult(\n        message_id=message_id,",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1891,7 +1933,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess():\n    if not gd.click_image(\"last_mess.png\", \n                            scope=(720, 910, 790, 980), \n                            confidence=0.7,\n                            count_click=1,\n                            multiscale = True,\n                            is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    log_and_print(\"Click down to last messages\")",
+        "peekOfCode": "def clickLastMess():\n    if not gd.click_image(\"last_mess.png\", scope=(720, 910, 790, 980), confidence=0.7, count_click=1, multiscale=True, is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    log_and_print(\"Click down to last messages\")\n    return True\ndef klickUkrBus():\n    if not gd.click_image(\"ukrbus.png\", scope=(0, 200, 120, 700), confidence=0.88, count_click=1, multiscale=True, is_debug=False):\n        log_and_print(\"Not find name chat UkrBusTravel\")\n        return False",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1900,7 +1942,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def klickUkrBus():\n    if not gd.click_image(\"ukrbus.png\", \n                            scope=(0, 200, 120, 700), \n                            confidence=0.88,\n                            count_click=1,\n                            multiscale = True,\n                            is_debug=False):\n        log_and_print(\"Not find name chat UkrBusTravel\")\n        return False\n    log_and_print(\"Click name chat UkrBusTravel\")",
+        "peekOfCode": "def klickUkrBus():\n    if not gd.click_image(\"ukrbus.png\", scope=(0, 200, 120, 700), confidence=0.88, count_click=1, multiscale=True, is_debug=False):\n        log_and_print(\"Not find name chat UkrBusTravel\")\n        return False\n    log_and_print(\"Click name chat UkrBusTravel\")\n    clickLastMess()\n    return True\ndef sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y - 20)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1909,7 +1951,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y-20)\n    if not gd.click_text([\"Переслать\",], \n            count_attempt_find=2,\n            pause_attempt = 4,\n            lang=\"rus\", \n            scope=(x, y - 100, x+160, y+400),\n            is_debug=is_debug):\n                log_and_print(\"Not find menu item Переслать\")",
+        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y - 20)\n    if not gd.click_text(\n        [\"Переслать\"],\n        count_attempt_find=2,\n        pause_attempt=4,\n        lang=\"rus\",\n        scope=(x, y - 100, x + 160, y + 400),\n        is_debug=is_debug,",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1918,7 +1960,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(f\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 60, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = capture_and_find_image_boundary_coordinates(\n        (x, y, 70, height), ",
+        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 60, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = capture_and_find_image_boundary_coordinates(\n        (x, y, 70, height),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1927,7 +1969,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_URL = os.getenv(\"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\")\nDISPATCH_API_KEY = os.getenv(\"DISPATCH_API_KEY\", \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\")\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):",
+        "peekOfCode": "DISPATCH_URL = os.getenv(\"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\")\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1936,7 +1978,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\"DISPATCH_API_KEY\", \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\")\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str",
+        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1945,7 +1987,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list",
+        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1954,7 +1996,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")",
+        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):\n    matches: Optional[bool] = None",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1963,7 +2005,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "count_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\nclass DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any]\n    actions: list\nasync def process_one_message_dispatcher(message_text, name_viber, file_path):\n    log_and_print(f\"!!! process_one_message_dispatcher !!!\")\n    log_and_print(f\"name_viber: {name_viber}\", 'info')",
+        "peekOfCode": "count_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1972,7 +2014,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "count_y_mess_empty = 0\nasync def processViberMess(window, s, \n                    count_scroll_up, \n                    count_scroll_down,\n                    pause_cycle_read):\n    global count_y_mess_empty\n    hwnd = window.handle\n    window.set_focus()\n    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)\n    count_repeat = read_setting(\"count_repeat\")",
+        "peekOfCode": "count_y_mess_empty = 0\nasync def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_cycle_read):\n    global count_y_mess_empty\n    hwnd = window.handle\n    window.set_focus()\n    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)\n    count_repeat = read_setting(\"count_repeat\")\n    for i in range(count_repeat):\n        ctypes.windll.user32.LockWindowUpdate(hwnd)\n        was_send = True",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
