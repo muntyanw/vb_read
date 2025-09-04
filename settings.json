@@ -9,8 +9,8 @@
     "search_board_mess_y_start": 210,
     "search_board_mess_y_end": 980,
     "visualize": 0,
-    "count_scroll_up": 4,
-    "count_scroll_down": 3,
+    "count_scroll_up": 6,
+    "count_scroll_down": 6,
     "count_repeat": 4,
     "word_comment": [
         "Скопировать",

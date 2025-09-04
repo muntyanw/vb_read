@@ -314,8 +314,18 @@ def capture_and_find_image_boundary_coordinates(
 
         picked = nms(candidates, iou_thresh=0.3)
         coordinates = [(x, y, w, h) for (x, y, w, h, _) in picked]
+        unique_coords = []
+        used_y = []
+
+        for (x, y, w, h) in coordinates:
+            # проверяем, нет ли уже координаты с близким y
+            if not any(abs(y - uy) <= 100 for uy in used_y):
+                unique_coords.append((x, y, w, h))
+                used_y.append(y)
+
+        coordinates = unique_coords
         #sort from y
-        coordinates_sorted = sorted(coordinates, key=lambda c: c[1])
+        coordinates_sorted = sorted(coordinates, key=lambda c: c[1], reverse=True)
 
         log_and_print(f"[capture_and_find_image_boundary_coordinates] Matches: {len(coordinates)} (threshold={threshold}).")
         return coordinates_sorted

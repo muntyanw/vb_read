@@ -46,6 +46,9 @@ import win32api
 import win32process
 import logging
 
+pag.FAILSAFE = False
+pag.PAUSE = 0.2
+
 logging.basicConfig(
     filename= "log.log" ,
     filemode='w',
@@ -693,7 +696,8 @@ def _locate_multiscale(
     return (cx_abs, cy_abs)
 
 
-def _human_move(x: int, y: int, duration: Tuple[float, float] = (0.1, 0.2)) -> None:
+def _human_move(x: int, y: int, 
+                duration: Tuple[float, float] = (0.1, 0.2)) -> None:
     """
     Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение
     “по-человечески”. Используется Bezier-кривая + небольшие случайные паузы.
@@ -709,7 +713,7 @@ def _human_move(x: int, y: int, duration: Tuple[float, float] = (0.1, 0.2)) -> N
         _rand_near(x, y, 100),
         (x, y),
     ]
-    steps = 10
+    steps = 5
     for t in np.linspace(0, 1, steps):
         bx, by = _bezier_point(anchors, t)
         pag.moveTo(bx, by, duration=0)
@@ -762,7 +766,8 @@ def draw_click_circle(x, y, radius=20, duration=0.2):
     time.sleep(duration)
     win32gui.DestroyWindow(hwnd)
     
-def human_move_and_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),
+def human_move_and_click(x: int, y: int, 
+                         duration: Tuple[float, float] = (0.2, 0.3),
                          count_click: int = 1) -> None:
     """
     Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение
@@ -774,7 +779,6 @@ def human_move_and_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0
         LOGGER.debug(f"click x: {x} y: {y}")
         draw_click_circle(x,y)
         pag.click()
-        pause(0.4)
         
 def human_move_and_right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),
                          count_click: int = 1) -> None:
@@ -788,7 +792,6 @@ def human_move_and_right_click(x: int, y: int, duration: Tuple[float, float] = (
         LOGGER.debug(f"click x: {x} y: {y}")
         draw_click_circle(x,y,duration=0.4)
         pag.rightClick()
-        pause(0.4)
         
 def human_move_and_click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),
                          count_click: int = 1) -> None:
@@ -802,7 +805,6 @@ def human_move_and_click_diff(x: int, y: int, duration: Tuple[float, float] = (0
         LOGGER.debug(f"click x: {x} y: {y}")
         draw_click_circle(x,y)
         pag.click()
-        pause(0.4)
 
 def human_move(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):
     x = MON_X + x
@@ -984,6 +986,7 @@ def click_text(
     is_debug: bool = False,
     threshold: float = 0.7,
     occurrence: int = 1,
+    duration: Tuple[float, float] = (0.2, 0.3),
 ) -> bool:
     """
     OCR-based search: найти текст `query` на экране (в пределах MON_X..MON_W, MON_Y..MON_H)
@@ -1028,7 +1031,7 @@ def click_text(
     
     if pos:
         abs_x, abs_y = pos
-        human_move_and_click(abs_x, abs_y + plus_y)
+        human_move_and_click(abs_x, abs_y + plus_y, duration)
         return pos
 
     time.sleep(0.2)
@@ -1043,7 +1046,7 @@ def find_text(
     scope: tuple[int, int, int, int] | None = None,
     plus_y: int = 0,
     is_debug: bool = False,
-    occurrence: int = 1,  # <--- новый параметр: номер совпадения
+    occurrence: int = 1,  # номер совпадения
 ) -> tuple[int, int] | None:
     """
     OCR-based search: найти текст `query` на экране (в пределах MON_X..MON_W, MON_Y..MON_H).
@@ -1168,7 +1171,7 @@ def find_text_any(
     queries: Iterable[str],
     lang: str,
     count: int = 1,
-    pause_attempt_sec: int = 2,
+    pause_attempt_sec: int = 0.5,
     scope: tuple[int, int, int, int] | None = None,
     is_debug: bool = False,
     occurrence: int = 1,

@@ -189,34 +189,43 @@ async def send_for_analysis(
 async def send_messages_from_y_mess(window, s):
     global count_y_mess_empty
     window.set_focus()
-    x, y_start = s.search_board_mess_x_start, s.search_board_mess_y_start
-    for y in s.y_mess:
+    sending = 0
+    was_new_mess = False
+    for x, y in s.y_mess:
         if y:
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
-            y = y_start + y - s.height_item_menu
             window.set_focus()
 
-            xRight = x + 50
-            yRight = y - 20
+            x =  x + s.search_board_mess_x_start + 180
+            y = y + s.search_board_mess_y_start
+
+            xRight = x - 160
+            yRight = y
             gd.right_click(xRight, yRight)
             log_and_print(f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}")
-
-            x = x + 50
 
             if not gd.click_text(
                 ["Скопировать сообщение", "Копировать текст"],
                 count_attempt_find=2,
                 pause_attempt=2,
                 lang="rus",
-                scope=(x, y - int(s.height_menu / 2), x + int(s.width_menu * 1.3), y + int(s.height_menu * 1.4)),
-                is_debug=False,
+                scope=(int(x - s.width_menu), y - int(s.height_menu/2), x + int(s.width_menu*1.4), y + int(s.height_menu*2 )),
+                is_debug=0,
                 threshold=0.8,
                 occurrence=1,
             ):
                 log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
                 count_y_mess_empty = count_y_mess_empty + 1
-                gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
-
+                window.set_focus()
+                pag.keyDown("esq")
+                gd.pause(0.4)
+                pag.keyUp("esq")
+                gd.pause(0.4)
+                log_and_print("[send_messages_from_y_mess] press esq")
+                gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+                log_and_print("[send_messages_from_y_mess] right click empty place")
+                was_new_mess = True
+                
             log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
 
             text = pyperclip.paste()
@@ -225,6 +234,7 @@ async def send_messages_from_y_mess(window, s):
                 log_and_print("[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий")
             else:
                 if not text_includes(text, s.old_text, 0.7):
+                    was_new_mess = True
                     log_and_print("[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:")
                     save_current_text(text)
                     s.old_text = load_previous_text()
@@ -239,12 +249,20 @@ async def send_messages_from_y_mess(window, s):
                         action_type = _safe_action_type(first_action)
 
                     if action_type != "ignore":
+                        log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
                         sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight)
-                        return True
+                        # The above code is a Python function that returns the boolean value True.
+                        return was_new_mess
+                    else:
+                        log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
                 else:
+                    was_new_mess = False
+                    sending +=1
                     log_and_print("[send_messages_from_y_mess] Сповіщення вже було відправлено")
+                    if sending >= 2:
+                        break
 
-    return False  # відсилки не було
+    return was_new_mess 
 
 
 def clickLastMess():
@@ -274,6 +292,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         pause_attempt=4,
         lang="rus",
         scope=(x, y - 100, x + 160, y + 400),
+        threshold=0.86,
         is_debug=is_debug,
     ):
         log_and_print("Not find menu item Переслать")
@@ -296,17 +315,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         countAttempt += 1
         gd.click(pos[0] + 100, pos[1])
         log_and_print("Click field find")
-
-        pag.keyDown("ctrl")
-        gd.pause(0.5)
-        pag.press("a")
-        gd.pause(0.5)
-        pag.keyUp("ctrl")
-        gd.pause(1)
-        pag.press("delete")
-        log_and_print("delete old text")
-
-        gd.pause(0.5)
+        
         pyperclip.copy(NameViberCarrier)
         gd.pause(0.5)
         pag.keyDown("ctrl")
@@ -315,15 +324,28 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         gd.pause(0.3)
         pag.keyUp("ctrl")
         gd.pause(1)
+        log_and_print("Click ctrl v")
 
-        if gd.find_text(NameViberCarrier, 
+        if gd.find_text_any([NameViberCarrier,], 
                         lang="ukr", 
+                        count = 2,
                         scope=(320, 320, 580, 380), 
-                        is_debug=False):
+                        threshold=0.5,
+                        is_debug=0):
             log_and_print("Name recipient message paste successful")
             break
         else:
             log_and_print("Name recipient message not find")
+            
+            pag.keyDown("ctrl")
+            gd.pause(0.5)
+            pag.press("a")
+            gd.pause(0.5)
+            pag.keyUp("ctrl")
+            gd.pause(1)
+            pag.press("delete")
+            log_and_print("delete old text")
+
 
         if countAttempt > 6:
             log_and_print("Error paste name recipient message ")
@@ -333,7 +355,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         [NameViberCarrier],
         count_attempt_find=2,
         pause_attempt=4,
-        lang="rus",
+        lang="ukr",
         scope=(pos[0], pos[0] - 200, pos[0] + 300, pos[0] + 200),
         is_debug=is_debug,
         threshold=0.5,
@@ -360,19 +382,19 @@ def fill_y_mess(window, s):
 
     height = s.search_board_mess_y_end - s.search_board_mess_y_start
     width = s.search_board_mess_x_end - s.search_board_mess_x_start
-    x, y = s.search_board_mess_x_start + 60, s.search_board_mess_y_start
+    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start
 
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
 
     coordinates = capture_and_find_image_boundary_coordinates(
-        (x, y, 70, height),
-        [read_setting("image_border_down"), read_setting("image_border_down2")],
-        visualize=read_setting("visualize"),
-        threshold=0.9,
+        (x, y, 320, height),
+        ["images\\heart.png", "images\\heart2.png", "images\\heart3.png"],
+        visualize=0,
+        threshold=0.88,
     )
     window.set_focus()
 
-    s.y_mess = [coord[1] for coord in coordinates]
+    s.y_mess = [(coord[0], coord[1]) for coord in coordinates]
     log_and_print(f"s.y_mess = {s.y_mess}")
 
 
@@ -384,40 +406,48 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
     hwnd = window.handle
 
     window.set_focus()
-    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)
+    
+    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
 
     count_repeat = read_setting("count_repeat")
     for i in range(count_repeat):
         ctypes.windll.user32.LockWindowUpdate(hwnd)
-        was_send = True
-        while was_send:
-            was_send = False
-            if count_y_mess_empty <= 20:
-                fill_y_mess(window, s)
+        while True:
+            
+            fill_y_mess(window, s)
 
             if len(s.y_mess) > 0:
                 was_send = await send_messages_from_y_mess(window, s)
                 if was_send:
                     scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
+                else:
+                    scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
             else:
-                count_y_mess_empty = count_y_mess_empty + 1
+                break
+                
+            window.set_focus()
+            gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
 
         ctypes.windll.user32.LockWindowUpdate(0)
 
-        pause = 2
         log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
-        log_and_print(f"pause = {pause}")
-        await asyncio.sleep(pause)
-
-        pag.keyDown("esq")
-        gd.pause(0.4)
-        pag.keyUp("esq")
-        gd.pause(0.4)
-
-        scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
-
+        
     window.set_focus()
-    gd.click(s.search_board_mess_x_start + s.x_offset_out_mess + 60, s.search_board_mess_y_end - 100)
+    
+    pag.keyDown("esq")
+    gd.pause(0.2)
+    pag.keyUp("esq")
+    gd.pause(0.2)
+    
+    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+    
+    if not klickUkrBus():
+        log_and_print("Not find chat UkrBus")
+        return None
+
+    scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
+
+    
 
     log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
     gd.pause(pause_cycle_read)

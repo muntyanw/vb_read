@@ -115,40 +115,44 @@ async def init():
                 search_board_mess_y_end=1000
                 )
 
+    s.search_board_mess_x_start = read_setting("search_board_mess_x_start")
+    s.search_board_mess_x_end = read_setting("search_board_mess_x_end")
+    s.search_board_mess_y_start = read_setting("search_board_mess_y_start")
+    s.search_board_mess_y_end = read_setting("search_board_mess_y_end")
     # Создаем экземпляр и запускаем
-    log_and_print(f"Нажмить клавишу r щоб виділити область єкрана з сповіщеннями вайбєр, чи Enter щоб залишити старі")
-    while True:
-        if keyboard.is_pressed('enter'):
-            log_and_print("Нажата клавиша Enter")
-            s.search_board_mess_x_start = read_setting("search_board_mess_x_start")
-            s.search_board_mess_x_end = read_setting("search_board_mess_x_end")
-            s.search_board_mess_y_start = read_setting("search_board_mess_y_start")
-            s.search_board_mess_y_end = read_setting("search_board_mess_y_end")
-            break
+    #log_and_print(f"Нажмить клавишу r щоб виділити область єкрана з сповіщеннями вайбєр, чи Enter щоб залишити старі")
+    #while True:
+    #    if keyboard.is_pressed('enter'):
+    #        log_and_print("Нажата клавиша Enter")
+    #        s.search_board_mess_x_start = read_setting("search_board_mess_x_start")
+    #        s.search_board_mess_x_end = read_setting("search_board_mess_x_end")
+    #        s.search_board_mess_y_start = read_setting("search_board_mess_y_start")
+    #        s.search_board_mess_y_end = read_setting("search_board_mess_y_end")
+    #        break
 
-        elif keyboard.is_pressed('r'):
-            print("Нажата клавиша R")
-            screen_selector = ScreenRegionSelector()
-            screen_selector.run()
+    #    elif keyboard.is_pressed('r'):
+    #        print("Нажата клавиша R")
+    #        screen_selector = ScreenRegionSelector()
+    #        screen_selector.run()
 
             # После того как окно будет закрыто, получаем координаты выделенной области
-            selected_region = screen_selector.get_selected_region()
-            if selected_region:
-                start_x, start_y, end_x, end_y = selected_region
-                log_and_print(
-                    f"Координаты области с сообщениями для дальнейшего использования: ({start_x}, {start_y}) до ({end_x}, {end_y})")
+    #        selected_region = screen_selector.get_selected_region()
+    #        if selected_region:
+    #            start_x, start_y, end_x, end_y = selected_region
+    #            log_and_print(
+    #                f"Координаты области с сообщениями для дальнейшего использования: ({start_x}, {start_y}) до ({end_x}, {end_y})")
 
-                s.search_board_mess_x_start = start_x
-                s.search_board_mess_x_end = end_x
-                s.search_board_mess_y_start = start_y
-                s.search_board_mess_y_end = end_y
+    #            s.search_board_mess_x_start = start_x
+    #            s.search_board_mess_x_end = end_x
+    #            s.search_board_mess_y_start = start_y
+    #            s.search_board_mess_y_end = end_y
 
-                write_setting("search_board_mess_x_start", start_x)
-                write_setting("search_board_mess_x_end", end_x)
-                write_setting("search_board_mess_y_start", start_y)
-                write_setting("search_board_mess_y_end", end_y)
+    #            write_setting("search_board_mess_x_start", start_x)
+    #            write_setting("search_board_mess_x_end", end_x)
+    #            write_setting("search_board_mess_y_start", start_y)
+    #            write_setting("search_board_mess_y_end", end_y)
 
-            break
+    #        break
 
     return s
 
@@ -271,6 +275,8 @@ async def main():
     count_scroll_down = read_setting("count_scroll_down")
     pause_cycle_read = read_setting("pause_read_messages_second")
     
+    gd.ensure_layout()
+    
     try:
         s = await init()
 
@@ -279,9 +285,9 @@ async def main():
 
         window.set_focus()
         
-        if not klickUkrBus():
-            log_and_print("Not find chat UkrBus")
-            return None
+        # if not klickUkrBus():
+        #     log_and_print("Not find chat UkrBus")
+        #     return None
         
         gd.pause(0.5)
 

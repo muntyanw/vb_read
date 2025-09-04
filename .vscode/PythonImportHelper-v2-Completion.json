@@ -1609,7 +1609,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def human_move_and_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение\n    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.\n    \"\"\"\n    _human_move(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")\n        draw_click_circle(x,y)",
+        "peekOfCode": "def human_move_and_click(x: int, y: int, \n                         duration: Tuple[float, float] = (0.2, 0.3),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение\n    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.\n    \"\"\"\n    _human_move(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1735,7 +1735,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def find_text(\n    query: str,\n    lang: str,\n    count: int = 1,\n    pause_attempt: int = 2,\n    scope: tuple[int, int, int, int] | None = None,\n    plus_y: int = 0,\n    is_debug: bool = False,\n    occurrence: int = 1,  # <--- новый параметр: номер совпадения\n) -> tuple[int, int] | None:",
+        "peekOfCode": "def find_text(\n    query: str,\n    lang: str,\n    count: int = 1,\n    pause_attempt: int = 2,\n    scope: tuple[int, int, int, int] | None = None,\n    plus_y: int = 0,\n    is_debug: bool = False,\n    occurrence: int = 1,  # номер совпадения\n) -> tuple[int, int] | None:",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1753,7 +1753,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def find_text_any(\n    queries: Iterable[str],\n    lang: str,\n    count: int = 1,\n    pause_attempt_sec: int = 2,\n    scope: tuple[int, int, int, int] | None = None,\n    is_debug: bool = False,\n    occurrence: int = 1,\n    threshold: float = 0.7,\n    font_scale: float = 0.7,",
+        "peekOfCode": "def find_text_any(\n    queries: Iterable[str],\n    lang: str,\n    count: int = 1,\n    pause_attempt_sec: int = 0.5,\n    scope: tuple[int, int, int, int] | None = None,\n    is_debug: bool = False,\n    occurrence: int = 1,\n    threshold: float = 0.7,\n    font_scale: float = 0.7,",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1857,6 +1857,24 @@
         "documentation": {}
     },
     {
+        "label": "pag.FAILSAFE",
+        "kind": 5,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "pag.FAILSAFE = False\npag.PAUSE = 0.2\nlogging.basicConfig(\n    filename= \"log.log\" ,\n    filemode='w',\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    level=logging.DEBUG,\n    encoding='utf-8'\n)\nLOGGER = logging.getLogger(__name__) ",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "pag.PAUSE",
+        "kind": 5,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "pag.PAUSE = 0.2\nlogging.basicConfig(\n    filename= \"log.log\" ,\n    filemode='w',\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    level=logging.DEBUG,\n    encoding='utf-8'\n)\nLOGGER = logging.getLogger(__name__) \npag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
         "label": "LOGGER",
         "kind": 5,
         "importPath": "core.gui_driver",
@@ -1951,7 +1969,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y - 20)\n    if not gd.click_text(\n        [\"Переслать\"],\n        count_attempt_find=2,\n        pause_attempt=4,\n        lang=\"rus\",\n        scope=(x, y - 100, x + 160, y + 400),\n        is_debug=is_debug,",
+        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y - 20)\n    if not gd.click_text(\n        [\"Переслать\"],\n        count_attempt_find=2,\n        pause_attempt=4,\n        lang=\"rus\",\n        scope=(x, y - 100, x + 160, y + 400),\n        threshold=0.86,",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1960,7 +1978,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 60, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = capture_and_find_image_boundary_coordinates(\n        (x, y, 70, height),",
+        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = capture_and_find_image_boundary_coordinates(\n        (x, y, 320, height),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2014,7 +2032,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "count_y_mess_empty = 0\nasync def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_cycle_read):\n    global count_y_mess_empty\n    hwnd = window.handle\n    window.set_focus()\n    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_end - 100)\n    count_repeat = read_setting(\"count_repeat\")\n    for i in range(count_repeat):\n        ctypes.windll.user32.LockWindowUpdate(hwnd)\n        was_send = True",
+        "peekOfCode": "count_y_mess_empty = 0\nasync def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_cycle_read):\n    global count_y_mess_empty\n    hwnd = window.handle\n    window.set_focus()\n    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)\n    count_repeat = read_setting(\"count_repeat\")\n    for i in range(count_repeat):\n        ctypes.windll.user32.LockWindowUpdate(hwnd)\n        while True:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
