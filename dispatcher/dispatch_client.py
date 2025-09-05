@@ -191,6 +191,7 @@ async def send_messages_from_y_mess(window, s):
     window.set_focus()
     sending = 0
     was_new_mess = False
+    count_old_mess = 0
     for x, y in s.y_mess:
         if y:
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
@@ -227,7 +228,6 @@ async def send_messages_from_y_mess(window, s):
                 log_and_print("[send_messages_from_y_mess] press esq")
                 gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
                 log_and_print("[send_messages_from_y_mess] right click empty place")
-                was_new_mess = True
                 
             log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
 
@@ -238,6 +238,7 @@ async def send_messages_from_y_mess(window, s):
             else:
                 if not text_includes(text, s.old_text, 0.7):
                     was_new_mess = True
+                    count_old_mess = 0
                     log_and_print("[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:")
                     save_current_text(text)
                     s.old_text = load_previous_text()
@@ -259,7 +260,9 @@ async def send_messages_from_y_mess(window, s):
                     else:
                         log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
                 else:
-                    was_new_mess = False
+                    count_old_mess +=1
+                    if count_old_mess >= 2:
+                        was_new_mess = False
                     sending +=1
                     log_and_print("[send_messages_from_y_mess] Сповіщення вже було відправлено")
                     if sending >= 2:
