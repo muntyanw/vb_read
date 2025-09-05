@@ -209,7 +209,10 @@ async def send_messages_from_y_mess(window, s):
                 count_attempt_find=2,
                 pause_attempt=2,
                 lang="rus",
-                scope=(int(x - s.width_menu), y - int(s.height_menu/2), x + int(s.width_menu*1.4), y + int(s.height_menu*2 )),
+                scope=(int(x - s.width_menu), 
+                       y - int(s.height_menu), 
+                       x + int(s.width_menu*1.4), 
+                       y + int(s.height_menu*2 )),
                 is_debug=0,
                 threshold=0.8,
                 occurrence=1,
@@ -273,13 +276,14 @@ def clickLastMess():
     return True
 
 
-def klickUkrBus():
+def klickUkrBus(clickMessBool):
     if not gd.click_image("ukrbus.png", scope=(0, 200, 120, 700), confidence=0.88, count_click=1, multiscale=True, is_debug=False):
         log_and_print("Not find name chat UkrBusTravel")
         return False
 
     log_and_print("Click name chat UkrBusTravel")
-    clickLastMess()
+    if clickMessBool:
+        clickLastMess()
     return True
 
 
@@ -372,7 +376,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         return False
 
     log_and_print("click button resend")
-    return klickUkrBus()
+    return klickUkrBus(True)
 
 
 def fill_y_mess(window, s):
@@ -388,7 +392,8 @@ def fill_y_mess(window, s):
 
     coordinates = capture_and_find_image_boundary_coordinates(
         (x, y, 320, height),
-        ["images\\heart.png", "images\\heart2.png", "images\\heart3.png"],
+        ["images\\heart.png", "images\\heart2.png", 
+         "images\\heart3.png"],
         visualize=0,
         threshold=0.88,
     )
@@ -441,7 +446,7 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
     
     gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
     
-    if not klickUkrBus():
+    if not klickUkrBus(True):
         log_and_print("Not find chat UkrBus")
         return None
 
