@@ -186,8 +186,10 @@ async def send_for_analysis(
     raise DispatchError(f"Dispatch failed: {last_exc}")
 
 count_old_mess = 0
+last_direct = "down"
 async def send_messages_from_y_mess(window, s):
     global count_y_mess_empty
+    global last_direct
     window.set_focus()
     sending = 0
     was_new_mess = False
@@ -254,7 +256,7 @@ async def send_messages_from_y_mess(window, s):
                         action_type = _safe_action_type(first_action)
 
                     if action_type != "ignore":
-                        
+                        last_direct = "up"
                         log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
                         sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight)
                         # The above code is a Python function that returns the boolean value True.
@@ -416,11 +418,9 @@ def fill_y_mess(window, s):
     log_and_print(f"s.y_mess = {s.y_mess}")
 
 
-count_y_mess_empty = 0
-
-
 async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_cycle_read):
     global count_y_mess_empty
+    global last_direct
     hwnd = window.handle
 
     window.set_focus()
@@ -436,10 +436,12 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
 
             if len(s.y_mess) > 0:
                 was_send = await send_messages_from_y_mess(window, s)
-                if was_send:
+                if was_send and last_direct == "up":
                     scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
+                    last_direct = "up"
                 else:
                     scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
+                    last_direct = "down"
             else:
                 break
                 
