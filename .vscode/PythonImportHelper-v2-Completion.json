@@ -2032,16 +2032,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "count_old_mess = 0\nlast_direct = \"down\"\nasync def send_messages_from_y_mess(window, s):\n    global count_y_mess_empty\n    global last_direct\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:",
-        "detail": "dispatcher.dispatch_client",
-        "documentation": {}
-    },
-    {
-        "label": "last_direct",
-        "kind": 5,
-        "importPath": "dispatcher.dispatch_client",
-        "description": "dispatcher.dispatch_client",
-        "peekOfCode": "last_direct = \"down\"\nasync def send_messages_from_y_mess(window, s):\n    global count_y_mess_empty\n    global last_direct\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:",
+        "peekOfCode": "count_old_mess = 0\nasync def send_messages_from_y_mess(window, s):\n    global count_y_mess_empty\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:\n            log_and_print(f\"[send_messages_from_y_mess] Меседж y = {y}\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },

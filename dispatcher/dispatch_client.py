@@ -186,10 +186,8 @@ async def send_for_analysis(
     raise DispatchError(f"Dispatch failed: {last_exc}")
 
 count_old_mess = 0
-last_direct = "down"
 async def send_messages_from_y_mess(window, s):
     global count_y_mess_empty
-    global last_direct
     window.set_focus()
     sending = 0
     was_new_mess = False
@@ -213,12 +211,12 @@ async def send_messages_from_y_mess(window, s):
                 count_attempt_find=2,
                 pause_attempt=2,
                 lang="rus",
-                scope=(int(x - s.width_menu*1.4), 
-                       y - int(s.height_menu*1.4), 
-                       x + int(s.width_menu*1.6), 
-                       y + int(s.height_menu*2 )),
+                scope=(int(x - s.width_menu), 
+                       y - int(s.height_menu), 
+                       x + int(s.width_menu*1.2), 
+                       y + int(s.height_menu*1.4 )),
                 is_debug=0,
-                threshold=0.8,
+                threshold=0.66,
                 occurrence=1,
             ):
                 log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
@@ -256,7 +254,6 @@ async def send_messages_from_y_mess(window, s):
                         action_type = _safe_action_type(first_action)
 
                     if action_type != "ignore":
-                        last_direct = "up"
                         log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
                         sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight)
                         # The above code is a Python function that returns the boolean value True.
@@ -420,7 +417,6 @@ def fill_y_mess(window, s):
 
 async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_cycle_read):
     global count_y_mess_empty
-    global last_direct
     hwnd = window.handle
 
     window.set_focus()
@@ -436,12 +432,10 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
 
             if len(s.y_mess) > 0:
                 was_send = await send_messages_from_y_mess(window, s)
-                if was_send and last_direct == "up":
+                if was_send:
                     scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
-                    last_direct = "up"
                 else:
                     scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
-                    last_direct = "down"
             else:
                 break
                 
