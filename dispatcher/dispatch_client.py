@@ -216,7 +216,7 @@ async def send_messages_from_y_mess(window, s):
                        x + int(s.width_menu*1.2), 
                        y + int(s.height_menu*1.4 )),
                 is_debug=0,
-                threshold=0.66,
+                threshold=0.8,
                 occurrence=1,
             ):
                 log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
