@@ -1951,7 +1951,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess():\n    if not gd.click_image(\"last_mess.png\", scope=(720, 910, 790, 980), confidence=0.7, count_click=1, multiscale=True, is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    log_and_print(\"Click down to last messages\")\n    return True\ndef klickUkrBus(clickMessBool):\n    if not gd.click_image(\"ukrbus.png\", scope=(0, 200, 120, 700), confidence=0.88, count_click=1, multiscale=True, is_debug=False):\n        log_and_print(\"Not find name chat UkrBusTravel\")\n        return False",
+        "peekOfCode": "def clickLastMess():\n    if not gd.click_image(\"last_mess.png\", scope=(720, 910, 790, 980), confidence=0.7, count_click=1, multiscale=True, is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    log_and_print(\"Click down to last messages\")\n    return True\ndef klickUkrBus(clickMessBool):\n    if not gd.click_image(\"ukrbus.png\", \n                          scope=(0, 200, 120, 700), \n                          confidence=0.88, count_click=1, ",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1960,7 +1960,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def klickUkrBus(clickMessBool):\n    if not gd.click_image(\"ukrbus.png\", scope=(0, 200, 120, 700), confidence=0.88, count_click=1, multiscale=True, is_debug=False):\n        log_and_print(\"Not find name chat UkrBusTravel\")\n        return False\n    log_and_print(\"Click name chat UkrBusTravel\")\n    if clickMessBool:\n        clickLastMess()\n    return True\ndef sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False",
+        "peekOfCode": "def klickUkrBus(clickMessBool):\n    if not gd.click_image(\"ukrbus.png\", \n                          scope=(0, 200, 120, 700), \n                          confidence=0.88, count_click=1, \n                          multiscale=True, is_debug=0):\n        log_and_print(\"Not find name chat UkrBusTravel\")\n        return False\n    log_and_print(\"Click name chat UkrBusTravel\")\n    if clickMessBool:\n        clickLastMess()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2024,6 +2024,15 @@
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
         "peekOfCode": "count_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "count_old_mess",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "count_old_mess = 0\nasync def send_messages_from_y_mess(window, s):\n    global count_y_mess_empty\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:\n            log_and_print(f\"[send_messages_from_y_mess] Меседж y = {y}\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },

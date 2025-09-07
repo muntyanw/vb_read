@@ -185,13 +185,14 @@ async def send_for_analysis(
     # теоретически недостижимо
     raise DispatchError(f"Dispatch failed: {last_exc}")
 
-
+count_old_mess = 0
 async def send_messages_from_y_mess(window, s):
     global count_y_mess_empty
     window.set_focus()
     sending = 0
     was_new_mess = False
-    count_old_mess = 0
+    global count_old_mess
+    
     for x, y in s.y_mess:
         if y:
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
@@ -210,9 +211,9 @@ async def send_messages_from_y_mess(window, s):
                 count_attempt_find=2,
                 pause_attempt=2,
                 lang="rus",
-                scope=(int(x - s.width_menu), 
-                       y - int(s.height_menu), 
-                       x + int(s.width_menu*1.4), 
+                scope=(int(x - s.width_menu*1.4), 
+                       y - int(s.height_menu*1.4), 
+                       x + int(s.width_menu*1.6), 
                        y + int(s.height_menu*2 )),
                 is_debug=0,
                 threshold=0.8,
@@ -253,6 +254,7 @@ async def send_messages_from_y_mess(window, s):
                         action_type = _safe_action_type(first_action)
 
                     if action_type != "ignore":
+                        
                         log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
                         sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight)
                         # The above code is a Python function that returns the boolean value True.
@@ -263,10 +265,13 @@ async def send_messages_from_y_mess(window, s):
                     count_old_mess +=1
                     if count_old_mess >= 2:
                         was_new_mess = False
+                        count_old_mess = 0
+                        return was_new_mess
                     sending +=1
                     log_and_print("[send_messages_from_y_mess] Сповіщення вже було відправлено")
                     if sending >= 2:
-                        break
+                        #break
+                        pass
 
     return was_new_mess 
 
@@ -280,7 +285,10 @@ def clickLastMess():
 
 
 def klickUkrBus(clickMessBool):
-    if not gd.click_image("ukrbus.png", scope=(0, 200, 120, 700), confidence=0.88, count_click=1, multiscale=True, is_debug=False):
+    if not gd.click_image("ukrbus.png", 
+                          scope=(0, 200, 120, 700), 
+                          confidence=0.88, count_click=1, 
+                          multiscale=True, is_debug=0):
         log_and_print("Not find name chat UkrBusTravel")
         return False
 
@@ -396,7 +404,9 @@ def fill_y_mess(window, s):
     coordinates = capture_and_find_image_boundary_coordinates(
         (x, y, 320, height),
         ["images\\heart.png", "images\\heart2.png", 
-         "images\\heart3.png"],
+         "images\\heart3.png", "images\\heart4.png",
+         "images\\heart5.png", "images\\heart6.png",
+         "images\\heart5.png",],
         visualize=0,
         threshold=0.88,
     )
@@ -434,7 +444,7 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
                 break
                 
             window.set_focus()
-            gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+            #gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
 
         ctypes.windll.user32.LockWindowUpdate(0)
 

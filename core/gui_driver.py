@@ -713,7 +713,7 @@ def _human_move(x: int, y: int,
         _rand_near(x, y, 100),
         (x, y),
     ]
-    steps = 5
+    steps = 3
     for t in np.linspace(0, 1, steps):
         bx, by = _bezier_point(anchors, t)
         pag.moveTo(bx, by, duration=0)
