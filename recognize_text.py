@@ -298,5 +298,7 @@ def text_includes(query: str, target: str, threshold: float = 0.7) -> bool:
         score = SequenceMatcher(None, query, window).ratio()
         if score > max_score:
             max_score = score
+            if max_score >= threshold:
+                return True
     
     return max_score >= threshold
