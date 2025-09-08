@@ -783,14 +783,6 @@
         "documentation": {}
     },
     {
-        "label": "write_setting",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
         "label": "read_setting",
         "importPath": "utils",
         "description": "utils",
@@ -904,7 +896,7 @@
         "documentation": {}
     },
     {
-        "label": "text_includes",
+        "label": "text_includes_fast",
         "importPath": "recognize_text",
         "description": "recognize_text",
         "isExtraImport": true,
@@ -913,14 +905,6 @@
     },
     {
         "label": "capture_and_recognize",
-        "importPath": "recognize_text",
-        "description": "recognize_text",
-        "isExtraImport": true,
-        "detail": "recognize_text",
-        "documentation": {}
-    },
-    {
-        "label": "find_text_upward_with_highlight",
         "importPath": "recognize_text",
         "description": "recognize_text",
         "isExtraImport": true,
@@ -1092,28 +1076,19 @@
         "documentation": {}
     },
     {
-        "label": "ScreenRegionSelector",
-        "importPath": "ScreenRegionSelector",
-        "description": "ScreenRegionSelector",
+        "label": "fuzz",
+        "importPath": "rapidfuzz",
+        "description": "rapidfuzz",
         "isExtraImport": true,
-        "detail": "ScreenRegionSelector",
+        "detail": "rapidfuzz",
         "documentation": {}
     },
     {
-        "label": "keyboard",
-        "kind": 6,
+        "label": "process",
+        "importPath": "rapidfuzz",
+        "description": "rapidfuzz",
         "isExtraImport": true,
-        "importPath": "keyboard",
-        "description": "keyboard",
-        "detail": "keyboard",
-        "documentation": {}
-    },
-    {
-        "label": "show_position",
-        "importPath": "paint",
-        "description": "paint",
-        "isExtraImport": true,
-        "detail": "paint",
+        "detail": "rapidfuzz",
         "documentation": {}
     },
     {
@@ -2437,6 +2412,15 @@
         "importPath": "recognize_text",
         "description": "recognize_text",
         "peekOfCode": "def text_includes(query: str, target: str, threshold: float = 0.7) -> bool:\n    \"\"\"\n    Определяет, входит ли query в target с вероятностью.\n    Возвращает число от 0 до 1 (чем выше, тем больше вероятность).\n    Если максимальное совпадение >= threshold, можно считать что входит.\n    \"\"\"\n    q_len = len(query)\n    if q_len == 0:\n        return False\n    max_score = 0.0",
+        "detail": "recognize_text",
+        "documentation": {}
+    },
+    {
+        "label": "text_includes_fast",
+        "kind": 2,
+        "importPath": "recognize_text",
+        "description": "recognize_text",
+        "peekOfCode": "def text_includes_fast(query: str, target: str, threshold: float = 0.7) -> bool:\n    if not query:\n        return False\n    if query.lower() in target.lower():\n        return True\n    # fuzz.partial_ratio как раз для подстрок\n    return fuzz.partial_ratio(query, target) >= threshold * 100",
         "detail": "recognize_text",
         "documentation": {}
     },

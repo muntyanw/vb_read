@@ -243,9 +243,6 @@ async def send_messages_from_y_mess(window, s):
                     was_new_mess = True
                     count_old_mess = 0
                     log_and_print("[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:")
-                    save_current_text(text)
-                    s.old_text = load_previous_text()
-
                     resp = await process_one_message_dispatcher(text, s.name_viber, None)
                     log_and_print(f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}")
 
@@ -257,11 +254,18 @@ async def send_messages_from_y_mess(window, s):
 
                     if action_type != "ignore":
                         log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
-                        sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight)
+                  
+                        if not sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight):
+                            return "repeat"
+                            
                         # The above code is a Python function that returns the boolean value True.
                         return was_new_mess
                     else:
                         log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+                        
+                    
+                    save_current_text(text)
+                    s.old_text = load_previous_text()
                 else:
                     count_old_mess +=1
                     if count_old_mess >= 3:
@@ -406,11 +410,12 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
 
             if len(s.y_mess) > 0:
                 was_send = await send_messages_from_y_mess(window, s)
-                if was_send:
-                    scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
-                else:
-                    clickLastMess()
-                    scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
+                if was_send != "repeat":
+                    if was_send:
+                        scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
+                    else:
+                        clickLastMess()
+                        scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
             else:
                 break
                 
