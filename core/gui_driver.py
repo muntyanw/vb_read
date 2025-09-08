@@ -1022,6 +1022,7 @@ def click_text(
                         is_debug=is_debug, occurrence = occurrence)
         
     elif isinstance(query, Iterable):
+        start = time.perf_counter()
         pos = find_text_any(queries=query, lang=lang, 
                             count=count_attempt_find, 
                             pause_attempt_sec = pause_attempt, 
@@ -1029,6 +1030,9 @@ def click_text(
                             threshold = threshold,
                             is_debug=is_debug, 
                             occurrence = occurrence)
+        end = time.perf_counter()
+        tm = end - start
+        print(f"time find_text_any = {tm}")
     else:
         print("click_text error value query")
     
@@ -1195,7 +1199,6 @@ def find_text_any(
 
     Важно: используется screen(process_for_read=True) для OCR.
     """
-    start = time.perf_counter()
     
     if occurrence < 1:
         occurrence = 1
@@ -1223,8 +1226,6 @@ def find_text_any(
         ocr_texts = [w for w in texts if w != ""]
         if len(ocr_texts) == 0 and attempts == count:
             # На последней попытке OCR пуст — возвращаем пустой список
-            end = time.perf_counter()
-            LOGGER.debug(f"[find_text_any] time {end - start:.3f} сек")  
             return None
 
         # 4) Поиск совпадений
@@ -1311,13 +1312,10 @@ def find_text_any(
         # 6) Возвращаем массив и N-й элемент (если есть) — сразу после первой результативной попытки
         if matches or attempts == count:
             # Если ничего не найдено, вернём пустой массив и None
-            end = time.perf_counter()
-            LOGGER.debug(f"[find_text_any] time {end - start:.3f} сек"")
             return nth_abs
 
         # Иначе ждём и повторяем
         pause(pause_attempt_sec)
-
 
 def cursor_move_to(
     x: int = 500,
