@@ -1224,7 +1224,7 @@ def find_text_any(
         if len(ocr_texts) == 0 and attempts == count:
             # На последней попытке OCR пуст — возвращаем пустой список
             end = time.perf_counter()
-            LOGGER.debug(f"{label} {end - start:.3f} сек")  
+            LOGGER.debug(f"[find_text_any] time {end - start:.3f} сек")  
             return None
 
         # 4) Поиск совпадений
@@ -1312,7 +1312,7 @@ def find_text_any(
         if matches or attempts == count:
             # Если ничего не найдено, вернём пустой массив и None
             end = time.perf_counter()
-            LOGGER.debug(f"{label} {end - start:.3f} сек")
+            LOGGER.debug(f"[find_text_any] time {end - start:.3f} сек"")
             return nth_abs
 
         # Иначе ждём и повторяем
