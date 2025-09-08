@@ -9,7 +9,7 @@ def load_previous_text(file_name='previous_text.txt'):
         try:
             with open(file_name, 'r', encoding='utf-8') as f:
                 text = f.read()
-            log_and_print(f"Предыдущий текст успешно загружен text = {text}")
+            log_and_print("Предыдущий текст успешно загружен")
             return text
         except Exception as e:
             log_and_print(f"Ошибка при чтении файла {file_name}: {e}")

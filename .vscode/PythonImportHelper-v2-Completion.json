@@ -548,6 +548,14 @@
         "documentation": {}
     },
     {
+        "label": "contextmanager",
+        "importPath": "contextlib",
+        "description": "contextlib",
+        "isExtraImport": true,
+        "detail": "contextlib",
+        "documentation": {}
+    },
+    {
         "label": "asyncio",
         "kind": 6,
         "isExtraImport": true,
@@ -1983,6 +1991,15 @@
         "documentation": {}
     },
     {
+        "label": "pag.FAILSAFE",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "pag.FAILSAFE = False\nDISPATCH_URL = os.getenv(\"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\")\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
         "label": "DISPATCH_URL",
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
@@ -2041,7 +2058,7 @@
         "kind": 2,
         "importPath": "find_message",
         "description": "find_message",
-        "peekOfCode": "def load_previous_text(file_name='previous_text.txt'):\n    log_and_print(f\"Загрузка предыдущего текста из файла {file_name}\")\n    if os.path.exists(file_name):\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:\n                text = f.read()\n            log_and_print(f\"Предыдущий текст успешно загружен text = {text}\")\n            return text\n        except Exception as e:\n            log_and_print(f\"Ошибка при чтении файла {file_name}: {e}\")",
+        "peekOfCode": "def load_previous_text(file_name='previous_text.txt'):\n    log_and_print(f\"Загрузка предыдущего текста из файла {file_name}\")\n    if os.path.exists(file_name):\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:\n                text = f.read()\n            log_and_print(\"Предыдущий текст успешно загружен\")\n            return text\n        except Exception as e:\n            log_and_print(f\"Ошибка при чтении файла {file_name}: {e}\")",
         "detail": "find_message",
         "documentation": {}
     },
@@ -2276,6 +2293,15 @@
         "importPath": "pwa",
         "description": "pwa",
         "peekOfCode": "def get_image_hash(image, size=(8, 8)):\n    \"\"\"\n    Возвращает хэш для изображения, снижая его разрешение до size\n    и переводя в градации серого. Подходит для быстрого сравнения изображений.\n    Параметры:\n    - image: объект PIL.Image или любой формат, который PIL может прочитать\n      (BytesIO, путь к файлу)\n    - size: кортеж (ширина, высота) для уменьшения изображения\n    Возвращает:\n    - строку с хэшем (hex-формат)",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "pag.FAILSAFE",
+        "kind": 5,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "pag.FAILSAFE = False\n# Константы WinAPI\nSWP_NOSIZE = 0x0001\nSWP_NOMOVE = 0x0002\nSWP_NOACTIVATE = 0x0010\nSWP_DRAWFRAME = 0x0020\ns = {}\ncount_y_mess_empty = 0\ndef get_image_hash(image, size=(8, 8)):\n    \"\"\"",
         "detail": "pwa",
         "documentation": {}
     },

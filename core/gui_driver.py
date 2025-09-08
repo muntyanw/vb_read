@@ -46,6 +46,9 @@ import win32api
 import win32process
 import logging
 
+import time
+from contextlib import contextmanager
+
 pag.FAILSAFE = False
 pag.PAUSE = 0.2
 
@@ -1192,7 +1195,8 @@ def find_text_any(
 
     Важно: используется screen(process_for_read=True) для OCR.
     """
-
+    start = time.perf_counter()
+    
     if occurrence < 1:
         occurrence = 1
 
@@ -1219,6 +1223,8 @@ def find_text_any(
         ocr_texts = [w for w in texts if w != ""]
         if len(ocr_texts) == 0 and attempts == count:
             # На последней попытке OCR пуст — возвращаем пустой список
+            end = time.perf_counter()
+            LOGGER.debug(f"{label} {end - start:.3f} сек")  
             return None
 
         # 4) Поиск совпадений
@@ -1305,6 +1311,8 @@ def find_text_any(
         # 6) Возвращаем массив и N-й элемент (если есть) — сразу после первой результативной попытки
         if matches or attempts == count:
             # Если ничего не найдено, вернём пустой массив и None
+            end = time.perf_counter()
+            LOGGER.debug(f"{label} {end - start:.3f} сек")
             return nth_abs
 
         # Иначе ждём и повторяем

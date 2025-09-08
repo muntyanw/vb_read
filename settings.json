@@ -30,5 +30,7 @@
     "comment_height": 20,
     "comment_width": 142,
     "indent_up": 200,
-    "indent_down": 200
+    "indent_down": 200,
+    "dispatch_timeout_s": 15,
+    "dispatch_retries": 2
 }
