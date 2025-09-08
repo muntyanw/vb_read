@@ -5,6 +5,7 @@ from utils import read_setting, showImage, take_screenshot
 import numpy as np
 from difflib import SequenceMatcher
 import cv2
+from rapidfuzz import fuzz, process
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
@@ -302,3 +303,12 @@ def text_includes(query: str, target: str, threshold: float = 0.7) -> bool:
                 return True
     
     return max_score >= threshold
+
+
+def text_includes_fast(query: str, target: str, threshold: float = 0.7) -> bool:
+    if not query:
+        return False
+    if query.lower() in target.lower():
+        return True
+    # fuzz.partial_ratio как раз для подстрок
+    return fuzz.partial_ratio(query, target) >= threshold * 100

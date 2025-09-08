@@ -1,5 +1,4 @@
 from tg import startTgClient
-from recognize_text import find_text_upward_with_highlight
 from log import log_and_print
 import pyperclip
 from find_message import load_previous_text, save_current_text, remove_service_symbols_and_spaces
@@ -8,13 +7,9 @@ import cv2
 from PIL import Image, ImageGrab
 from io import BytesIO
 import hashlib
-from ScreenRegionSelector import ScreenRegionSelector
-import keyboard
-from utils import read_setting, write_setting
+from utils import read_setting
 import pyautogui as pag
-
 import os
-from paint import show_position
 from core import gui_driver as gd
 from dispatcher.dispatch_client import processViberMess, klickUkrBus
 import asyncio

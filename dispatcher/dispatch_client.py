@@ -14,7 +14,7 @@ from utils import read_setting
 import hashlib
 import ctypes
 from vb_utils import scroll_with_mouse, capture_and_find_image_boundary_coordinates
-from recognize_text import text_includes
+from recognize_text import text_includes_fast
 import time
 
 pag.FAILSAFE = False
@@ -239,7 +239,7 @@ async def send_messages_from_y_mess(window, s):
             if not text:
                 log_and_print("[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий")
             else:
-                if not text_includes(text, s.old_text, 0.7):
+                if not text_includes_fast(text, s.old_text, 0.7):
                     was_new_mess = True
                     count_old_mess = 0
                     log_and_print("[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:")
