@@ -12,12 +12,15 @@ from ScreenRegionSelector import ScreenRegionSelector
 import keyboard
 from utils import read_setting, write_setting
 import pyautogui as pag
+
 import os
 from paint import show_position
 from core import gui_driver as gd
 from dispatcher.dispatch_client import processViberMess, klickUkrBus
 import asyncio
 from vb_utils import scroll_with_mouse, left_click
+
+pag.FAILSAFE = False
 
 # Константы WinAPI
 SWP_NOSIZE = 0x0001

@@ -17,6 +17,8 @@ from vb_utils import scroll_with_mouse, capture_and_find_image_boundary_coordina
 from recognize_text import text_includes
 import time
 
+pag.FAILSAFE = False
+
 DISPATCH_URL = os.getenv("DISPATCH_URL", "http://192.168.1.223:8888/api/v1/dispatch/analyze")
 DISPATCH_API_KEY = os.getenv(
     "DISPATCH_API_KEY",
@@ -262,7 +264,7 @@ async def send_messages_from_y_mess(window, s):
                         log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
                 else:
                     count_old_mess +=1
-                    if count_old_mess >= 2:
+                    if count_old_mess >= 3:
                         was_new_mess = False
                         count_old_mess = 0
                         return was_new_mess
@@ -323,47 +325,19 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         log_and_print("Not find field find in resend")
         return False
 
-    countAttempt = 0
-    while True:
-        log_and_print(f"Attempt find recipient {countAttempt}")
-        countAttempt += 1
-        gd.click(pos[0] + 100, pos[1])
-        log_and_print("Click field find")
-        
-        pyperclip.copy(NameViberCarrier)
-        gd.pause(0.5)
-        pag.keyDown("ctrl")
-        gd.pause(0.3)
-        pag.press("v")
-        gd.pause(0.3)
-        pag.keyUp("ctrl")
-        gd.pause(1)
-        log_and_print("Click ctrl v")
+    gd.click(pos[0] + 100, pos[1])
+    log_and_print("Click field find")
+    
+    pyperclip.copy(NameViberCarrier)
+    gd.pause(0.5)
+    pag.keyDown("ctrl")
+    gd.pause(0.3)
+    pag.press("v")
+    gd.pause(0.3)
+    pag.keyUp("ctrl")
+    gd.pause(1)
+    log_and_print("Click ctrl v")
 
-        if gd.find_text_any([NameViberCarrier,], 
-                        lang="ukr", 
-                        count = 2,
-                        scope=(320, 320, 580, 380), 
-                        threshold=0.5,
-                        is_debug=0):
-            log_and_print("Name recipient message paste successful")
-            break
-        else:
-            log_and_print("Name recipient message not find")
-            
-            pag.keyDown("ctrl")
-            gd.pause(0.5)
-            pag.press("a")
-            gd.pause(0.5)
-            pag.keyUp("ctrl")
-            gd.pause(1)
-            pag.press("delete")
-            log_and_print("delete old text")
-
-
-        if countAttempt > 6:
-            log_and_print("Error paste name recipient message ")
-            return False
 
     if not gd.click_text(
         [NameViberCarrier],
@@ -435,6 +409,7 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
                 if was_send:
                     scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
                 else:
+                    clickLastMess()
                     scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
             else:
                 break
