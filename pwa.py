@@ -11,7 +11,7 @@ from utils import read_setting
 import pyautogui as pag
 import os
 from core import gui_driver as gd
-from dispatcher.dispatch_client import processViberMess, klickUkrBus
+from dispatcher.dispatch_client import processViberMess, klickPerevizniki
 import asyncio
 from vb_utils import scroll_with_mouse, left_click
 
@@ -283,8 +283,8 @@ async def main():
 
         window.set_focus()
         
-        if not klickUkrBus(False):
-            log_and_print("Not find chat UkrBus")
+        if not klickPerevizniki(False):
+            log_and_print("Not find chat Perevizniki")
             return None
         
         gd.pause(0.5)

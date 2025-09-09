@@ -187,6 +187,56 @@ async def send_for_analysis(
     # теоретически недостижимо
     raise DispatchError(f"Dispatch failed: {last_exc}")
 
+def click_copy_text_from_text(window, s, x, y):
+    global count_y_mess_empty
+    if not gd.click_text(
+        ["Скопировать сообщение", "Копировать текст"],
+        count_attempt_find=2,
+        pause_attempt=2,
+        lang="rus",
+        scope=(int(x - s.width_menu), 
+                y - int(s.height_menu), 
+                x + int(s.width_menu*1.2), 
+                y + int(s.height_menu*1.4 )),
+        is_debug=0,
+        threshold=0.8,
+        occurrence=1,
+    ):
+        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
+        count_y_mess_empty = count_y_mess_empty + 1
+        window.set_focus()
+        pag.keyDown("esq")
+        gd.pause(0.4)
+        pag.keyUp("esq")
+        gd.pause(0.4)
+        log_and_print("[send_messages_from_y_mess] press esq")
+        gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+        log_and_print("[send_messages_from_y_mess] right click empty place")
+        
+    log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
+
+def click_copy_text_from_image(window, s, x, y):
+    global count_y_mess_empty
+    if not gd.click_image("copy.png", 
+                          scope=(int(x - s.width_menu), 
+                                y - int(s.height_menu), 
+                                x + int(s.width_menu), 
+                                y + int(s.height_menu )), 
+                          confidence=0.88, count_click=1, 
+                          multiscale=False, is_debug=0): 
+        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
+        count_y_mess_empty = count_y_mess_empty + 1
+        window.set_focus()
+        pag.keyDown("esq")
+        gd.pause(0.4)
+        pag.keyUp("esq")
+        gd.pause(0.4)
+        log_and_print("[send_messages_from_y_mess] press esq")
+        gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+        log_and_print("[send_messages_from_y_mess] right click empty place")
+        
+    log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
+
 count_old_mess = 0
 async def send_messages_from_y_mess(window, s):
     global count_y_mess_empty
@@ -208,31 +258,7 @@ async def send_messages_from_y_mess(window, s):
             gd.right_click(xRight, yRight)
             log_and_print(f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}")
 
-            if not gd.click_text(
-                ["Скопировать сообщение", "Копировать текст"],
-                count_attempt_find=2,
-                pause_attempt=2,
-                lang="rus",
-                scope=(int(x - s.width_menu), 
-                       y - int(s.height_menu), 
-                       x + int(s.width_menu*1.2), 
-                       y + int(s.height_menu*1.4 )),
-                is_debug=0,
-                threshold=0.8,
-                occurrence=1,
-            ):
-                log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
-                count_y_mess_empty = count_y_mess_empty + 1
-                window.set_focus()
-                pag.keyDown("esq")
-                gd.pause(0.4)
-                pag.keyUp("esq")
-                gd.pause(0.4)
-                log_and_print("[send_messages_from_y_mess] press esq")
-                gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
-                log_and_print("[send_messages_from_y_mess] right click empty place")
-                
-            log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
+            click_copy_text_from_image(window, s, x, y)
 
             text = pyperclip.paste()
 
@@ -293,11 +319,25 @@ def klickUkrBus(clickMessBool):
     if not gd.click_image("ukrbus.png", 
                           scope=(0, 200, 120, 700), 
                           confidence=0.88, count_click=1, 
-                          multiscale=True, is_debug=0):
+                          multiscale=True, is_debug=1):
         log_and_print("Not find name chat UkrBusTravel")
         return False
 
     log_and_print("Click name chat UkrBusTravel")
+    if clickMessBool:
+        clickLastMess()
+    return True
+
+def klickPerevizniki(clickMessBool):
+
+    if not gd.click_image("pereviz.png", 
+                          scope=(0, 200, 120, 700), 
+                          confidence=0.88, count_click=1, 
+                          multiscale=True, is_debug=0):
+        log_and_print("Not find name chat Perevezniki")
+        return False
+
+    log_and_print("Click name chat Perevezniki")
     if clickMessBool:
         clickLastMess()
     return True
@@ -364,7 +404,8 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         return False
 
     log_and_print("click button resend")
-    return klickUkrBus(True)
+    klickPerevizniki(True)
+    return True
 
 
 def fill_y_mess(window, s):
@@ -435,7 +476,7 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
     
     gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
     
-    if not klickUkrBus(True):
+    if not klickPerevizniki(True):
         log_and_print("Not find chat UkrBus")
         return None
 

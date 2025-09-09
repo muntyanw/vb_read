@@ -321,14 +321,17 @@ def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,
     Возвращает True, если кликнули, False если не найдено за timeout секунд.
     """
     LOGGER.debug(f"Start find image {name}")
+    start = time.perf_counter()
     result_find = find_image(name, timeout, confidence, scope, is_debug, multiscale)
+    end = time.perf_counter()
+    tm = end - start
+    print(f"time find_text_any = {tm}")
+
     if result_find:
         LOGGER.debug(f"Foud image {name}")
         abs_x, abs_y = result_find
         if abs_x is not None and abs_y is not None:
-            
             human_move_and_click(abs_x + plus_x, abs_y + plus_y, count_click=count_click)
-            time.sleep(0.1)
             return True
         
 
