@@ -223,7 +223,7 @@ def click_copy_text_from_image(window, s, x, y):
                                 x + int(s.width_menu), 
                                 y + int(s.height_menu )), 
                           confidence=0.88, count_click=1, 
-                          multiscale=False, is_debug=0): 
+                          multiscale=True, is_debug=0): 
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
         count_y_mess_empty = count_y_mess_empty + 1
         window.set_focus()
@@ -235,7 +235,7 @@ def click_copy_text_from_image(window, s, x, y):
         gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
         log_and_print("[send_messages_from_y_mess] right click empty place")
         
-    log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
+    log_and_print("[send_messagfrom_y_mess] Повідомлення скопіювано в буфер обміну")
 
 count_old_mess = 0
 async def send_messages_from_y_mess(window, s):
@@ -281,11 +281,8 @@ async def send_messages_from_y_mess(window, s):
                     if action_type != "ignore":
                         log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
                   
-                        if not sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight):
-                            return "repeat"
-                            
-                        # The above code is a Python function that returns the boolean value True.
-                        return was_new_mess
+                        return sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight, s, text)
+                        
                     else:
                         log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
                         
@@ -343,7 +340,7 @@ def klickPerevizniki(clickMessBool):
     return True
 
 
-def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
+def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
     is_debug = False
     gd.right_click(x, y - 20)
     if not gd.click_text(
@@ -381,7 +378,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
     pag.keyUp("ctrl")
     gd.pause(1)
     log_and_print("Click ctrl v")
-
+    gd.pause(1)
 
     if not gd.click_text(
         [NameViberCarrier],
@@ -393,17 +390,21 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):
         threshold=0.5,
         occurrence=2,
     ):
-        log_and_print(f"Not find 2 NameViberCarrier  {NameViberCarrier}")
-        return False
+        log_and_print(f"Not find NameViberCarrier  {NameViberCarrier}")
+        return "repeat"
 
     log_and_print(f"click name chat {NameViberCarrier}")
     gd.pause(1)
 
     if not gd.click_image("resend.png", scope=(460, 730, 640, 810), confidence=0.5, count_click=1, is_debug=False):
-        log_and_print(f"Not find name carrier {NameViberCarrier}")
-        return False
+        log_and_print("Not find button resend")
+        return "repeat"
+    
+    log_and_print("click button resend success")
 
-    log_and_print("click button resend")
+    save_current_text(text)
+    s.old_text = load_previous_text()
+    
     klickPerevizniki(True)
     return True
 
@@ -477,7 +478,7 @@ async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_
     gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
     
     if not klickPerevizniki(True):
-        log_and_print("Not find chat UkrBus")
+        log_and_print("Not find chat Perevizniki")
         return None
 
     scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")

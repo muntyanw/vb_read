@@ -325,7 +325,7 @@ def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,
     result_find = find_image(name, timeout, confidence, scope, is_debug, multiscale)
     end = time.perf_counter()
     tm = end - start
-    print(f"time find_text_any = {tm}")
+    print(f"time find image (multiscale={multiscale}) = {tm}")
 
     if result_find:
         LOGGER.debug(f"Foud image {name}")

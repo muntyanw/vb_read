@@ -283,15 +283,16 @@ async def main():
 
         window.set_focus()
         
-        if not klickPerevizniki(False):
-            log_and_print("Not find chat Perevizniki")
-            return None
-        
         gd.pause(0.5)
 
         scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
 
         while True:
+            if not klickPerevizniki(True):
+                log_and_print("Not find chat Perevizniki")
+                return None
+            log_and_print("click chat Perevizniki")
+
             await processViberMess(window, s,
                              count_scroll_up,
                              count_scroll_down,
