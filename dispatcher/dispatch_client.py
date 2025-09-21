@@ -236,6 +236,7 @@ def click_copy_text_from_image(window, s, x, y):
         log_and_print("[send_messages_from_y_mess] right click empty place")
         
     log_and_print("[send_messagfrom_y_mess] Повідомлення скопіювано в буфер обміну")
+    return pyperclip.paste()
 
 count_old_mess = 0
 async def send_messages_from_y_mess(window, s):
@@ -258,9 +259,7 @@ async def send_messages_from_y_mess(window, s):
             gd.right_click(xRight, yRight)
             log_and_print(f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}")
 
-            click_copy_text_from_image(window, s, x, y)
-
-            text = pyperclip.paste()
+            text = click_copy_text_from_image(window, s, x, y)
 
             if not text:
                 log_and_print("[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий")
@@ -339,9 +338,54 @@ def klickPerevizniki(clickMessBool):
         clickLastMess()
     return True
 
+def findMessage(window, x, y, s, text):
+
+    current_text = click_copy_text_from_image(window, s, x, y)
+
+    if text_includes_fast(text, current_text, 0.7):
+        return x, y
+    else:
+         count_attempt_find = 0
+         count_attempt_find_max = 3
+         while True:
+            window.set_focus()
+            fill_y_mess(window, s)
+            if len(s.y_mess) > 0:
+                
+                for x, y in s.y_mess:
+                    if y:
+                        log_and_print(f"[findMessage] Меседж y = {y}")
+                        window.set_focus()
+
+                        x =  x + s.search_board_mess_x_start + 180
+                        y = y + s.search_board_mess_y_start
+
+                        xRight = x - 160
+                        yRight = y
+                        gd.right_click(xRight, yRight)
+                        log_and_print(f"[findMessage] right_click xRight = {xRight}, yRight = {yRight}")
+
+                        current_text = click_copy_text_from_image(window, s, x, y)
+                        if text_includes_fast(text, current_text, 0.7):
+                            return x, y
+                
+                count_attempt_find +=1
+                if count_attempt_find > count_attempt_find_max:
+                    return False
+                
+                count_scroll_up = read_setting("count_scroll_up")
+                scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
+
 
 def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
     is_debug = False
+
+    resultFind = findMessage(window, x, y, s, text)
+    if resultFind:
+        x, y = resultFind
+    else:
+        return False
+
     gd.right_click(x, y - 20)
     if not gd.click_text(
         ["Переслать"],
