@@ -19,7 +19,9 @@ import time
 
 pag.FAILSAFE = False
 
-DISPATCH_URL = os.getenv("DISPATCH_URL", "http://192.168.1.223:8888/api/v1/dispatch/analyze")
+DISPATCH_URL = os.getenv(
+    "DISPATCH_URL", "http://192.168.1.223:8888/api/v1/dispatch/analyze"
+)
 DISPATCH_API_KEY = os.getenv(
     "DISPATCH_API_KEY",
     "3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87",
@@ -77,7 +79,9 @@ def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
         return None
 
 
-async def process_one_message_dispatcher(message_text: Optional[str], name_viber: Optional[str], file_path: Optional[str]):
+async def process_one_message_dispatcher(
+    message_text: Optional[str], name_viber: Optional[str], file_path: Optional[str]
+):
     log_and_print("!!! process_one_message_dispatcher !!!")
     log_and_print(f"name_viber: {name_viber}", "info")
 
@@ -95,7 +99,7 @@ async def process_one_message_dispatcher(message_text: Optional[str], name_viber
                 message_id=md5_hash,
                 text=message_text or "",
                 chat_id="UkrBusTravel",
-                sender=name_viber,           # <— отправляем имя отправителя
+                sender=name_viber,  # <— отправляем имя отправителя
                 attachments=None,
                 locale="uk",
                 timeout_s=float(read_setting("dispatch_timeout_s") or 15.0),
@@ -136,17 +140,25 @@ async def send_for_analysis(
     }
 
     log_and_print(f"[dispatch] POST {DISPATCH_URL}")
-    log_and_print(f"[dispatch] headers: {{'X-API-Key': '***', 'Content-Type': 'application/json', 'X-Client': 'viber-worker'}}")
+    log_and_print(
+        f"[dispatch] headers: {{'X-API-Key': '***', 'Content-Type': 'application/json', 'X-Client': 'viber-worker'}}"
+    )
     log_and_print(f"[dispatch] payload: {payload}")
 
     last_exc: Optional[Exception] = None
     for attempt in range(retries + 1):
         try:
-            async with httpx.AsyncClient(timeout=timeout_s, follow_redirects=True) as client:
+            async with httpx.AsyncClient(
+                timeout=timeout_s, follow_redirects=True
+            ) as client:
                 resp = await client.post(DISPATCH_URL, json=payload, headers=headers)
                 log_and_print(f"[dispatch] status={resp.status_code}")
                 # логируем тело всегда — помогает при несовпадении контрактов
-                body_preview = resp.text if len(resp.text) < 2000 else (resp.text[:2000] + "...<truncated>")
+                body_preview = (
+                    resp.text
+                    if len(resp.text) < 2000
+                    else (resp.text[:2000] + "...<truncated>")
+                )
                 log_and_print(f"[dispatch] body: {body_preview}")
 
                 if resp.status_code == 401:
@@ -165,7 +177,12 @@ async def send_for_analysis(
                     actions: List[Action] = []
                     for a in actions_raw:
                         if isinstance(a, dict):
-                            actions.append(Action(type=a.get("type", "ignore"), payload=a.get("payload")))
+                            actions.append(
+                                Action(
+                                    type=a.get("type", "ignore"),
+                                    payload=a.get("payload"),
+                                )
+                            )
                     result = DispatchResult(
                         message_id=data.get("message_id", message_id),
                         extracted=data.get("extracted") or {},
@@ -176,7 +193,9 @@ async def send_for_analysis(
 
         except Exception as e:
             last_exc = e
-            log_and_print(f"[dispatch] attempt {attempt+1}/{retries+1} failed: {e}", "error")
+            log_and_print(
+                f"[dispatch] attempt {attempt+1}/{retries+1} failed: {e}", "error"
+            )
             if attempt < retries:
                 await asyncio.sleep(0.7 * (attempt + 1))  # легкий backoff
             else:
@@ -187,6 +206,7 @@ async def send_for_analysis(
     # теоретически недостижимо
     raise DispatchError(f"Dispatch failed: {last_exc}")
 
+
 def click_copy_text_from_text(window, s, x, y):
     global count_y_mess_empty
     if not gd.click_text(
@@ -194,10 +214,12 @@ def click_copy_text_from_text(window, s, x, y):
         count_attempt_find=2,
         pause_attempt=2,
         lang="rus",
-        scope=(int(x - s.width_menu), 
-                y - int(s.height_menu), 
-                x + int(s.width_menu*1.2), 
-                y + int(s.height_menu*1.4 )),
+        scope=(
+            int(x - s.width_menu),
+            y - int(s.height_menu),
+            x + int(s.width_menu * 1.2),
+            y + int(s.height_menu * 1.4),
+        ),
         is_debug=0,
         threshold=0.8,
         occurrence=1,
@@ -210,20 +232,30 @@ def click_copy_text_from_text(window, s, x, y):
         pag.keyUp("esq")
         gd.pause(0.4)
         log_and_print("[send_messages_from_y_mess] press esq")
-        gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+        gd.right_click(
+            s.search_board_mess_x_start + s.x_offset_out_mess,
+            s.search_board_mess_y_start + 10,
+        )
         log_and_print("[send_messages_from_y_mess] right click empty place")
-        
+
     log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
+
 
 def click_copy_text_from_image(window, s, x, y):
     global count_y_mess_empty
-    if not gd.click_image("copy.png", 
-                          scope=(int(x - s.width_menu), 
-                                y - int(s.height_menu), 
-                                x + int(s.width_menu), 
-                                y + int(s.height_menu )), 
-                          confidence=0.88, count_click=1, 
-                          multiscale=True, is_debug=0): 
+    if not gd.click_image(
+        "copy.png",
+        scope=(
+            int(x - s.width_menu),
+            y - int(s.height_menu),
+            x + int(s.width_menu),
+            y + int(s.height_menu),
+        ),
+        confidence=0.88,
+        count_click=1,
+        multiscale=True,
+        is_debug=0,
+    ):
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
         count_y_mess_empty = count_y_mess_empty + 1
         window.set_focus()
@@ -232,44 +264,61 @@ def click_copy_text_from_image(window, s, x, y):
         pag.keyUp("esq")
         gd.pause(0.4)
         log_and_print("[send_messages_from_y_mess] press esq")
-        gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+        gd.right_click(
+            s.search_board_mess_x_start + s.x_offset_out_mess,
+            s.search_board_mess_y_start + 10,
+        )
         log_and_print("[send_messages_from_y_mess] right click empty place")
-        
+        return ""
+
     log_and_print("[send_messagfrom_y_mess] Повідомлення скопіювано в буфер обміну")
     return pyperclip.paste()
 
+
 count_old_mess = 0
+
+
 async def send_messages_from_y_mess(window, s):
     global count_y_mess_empty
     window.set_focus()
     sending = 0
     was_new_mess = False
     global count_old_mess
-    
+
     for x, y in s.y_mess:
         if y:
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
             window.set_focus()
 
-            x =  x + s.search_board_mess_x_start + 180
+            x = x + s.search_board_mess_x_start + 180
             y = y + s.search_board_mess_y_start
 
             xRight = x - 160
             yRight = y
             gd.right_click(xRight, yRight)
-            log_and_print(f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}")
+            log_and_print(
+                f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
+            )
 
             text = click_copy_text_from_image(window, s, x, y)
 
             if not text:
-                log_and_print("[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий")
+                log_and_print(
+                    "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий"
+                )
             else:
                 if not text_includes_fast(text, s.old_text, 0.7):
                     was_new_mess = True
                     count_old_mess = 0
-                    log_and_print("[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:")
-                    resp = await process_one_message_dispatcher(text, s.name_viber, None)
-                    log_and_print(f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}")
+                    log_and_print(
+                        "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:"
+                    )
+                    resp = await process_one_message_dispatcher(
+                        text, s.name_viber, None
+                    )
+                    log_and_print(
+                        f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
+                    )
 
                     # Извлекаем тип первой команды (если есть)
                     action_type = None
@@ -279,32 +328,42 @@ async def send_messages_from_y_mess(window, s):
 
                     if action_type != "ignore":
                         log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
-                  
-                        return sendViberMessDispatherToСarrier("Віталій", window, xRight, yRight, s, text)
-                        
+
+                        return sendViberMessDispatherToСarrier(
+                            "Віталій", window, xRight, yRight, s, text
+                        )
+
                     else:
                         log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-                        
-                    
+
                     save_current_text(text)
                     s.old_text = load_previous_text()
                 else:
-                    count_old_mess +=1
+                    count_old_mess += 1
                     if count_old_mess >= 3:
                         was_new_mess = False
                         count_old_mess = 0
                         return was_new_mess
-                    sending +=1
-                    log_and_print("[send_messages_from_y_mess] Сповіщення вже було відправлено")
+                    sending += 1
+                    log_and_print(
+                        "[send_messages_from_y_mess] Сповіщення вже було відправлено"
+                    )
                     if sending >= 2:
-                        #break
+                        # break
                         pass
 
-    return was_new_mess 
+    return was_new_mess
 
 
 def clickLastMess():
-    if not gd.click_image("last_mess.png", scope=(720, 910, 790, 980), confidence=0.7, count_click=1, multiscale=True, is_debug=False):
+    if not gd.click_image(
+        "last_mess.png",
+        scope=(720, 910, 790, 980),
+        confidence=0.7,
+        count_click=1,
+        multiscale=True,
+        is_debug=False,
+    ):
         log_and_print("Not find name carrier UkrBusTravel")
         return False
     log_and_print("Click down to last messages")
@@ -312,10 +371,14 @@ def clickLastMess():
 
 
 def klickUkrBus(clickMessBool):
-    if not gd.click_image("ukrbus.png", 
-                          scope=(0, 200, 120, 700), 
-                          confidence=0.88, count_click=1, 
-                          multiscale=True, is_debug=1):
+    if not gd.click_image(
+        "ukrbus.png",
+        scope=(0, 200, 120, 700),
+        confidence=0.88,
+        count_click=1,
+        multiscale=True,
+        is_debug=1,
+    ):
         log_and_print("Not find name chat UkrBusTravel")
         return False
 
@@ -324,12 +387,17 @@ def klickUkrBus(clickMessBool):
         clickLastMess()
     return True
 
+
 def klickPerevizniki(clickMessBool):
 
-    if not gd.click_image("pereviz.png", 
-                          scope=(0, 200, 120, 700), 
-                          confidence=0.88, count_click=1, 
-                          multiscale=True, is_debug=0):
+    if not gd.click_image(
+        "pereviz.png",
+        scope=(0, 200, 120, 700),
+        confidence=0.88,
+        count_click=1,
+        multiscale=True,
+        is_debug=0,
+    ):
         log_and_print("Not find name chat Perevezniki")
         return False
 
@@ -338,41 +406,55 @@ def klickPerevizniki(clickMessBool):
         clickLastMess()
     return True
 
-def findMessage(window, x, y, s, text):
 
+def findMessage(window, x, y, s, text):
+    log_and_print(f"[findMessage] text = {text}")
     current_text = click_copy_text_from_image(window, s, x, y)
 
+    log_and_print(f"[findMessage] current_text = {current_text}")
+
     if text_includes_fast(text, current_text, 0.7):
+        log_and_print("[findMessage] succ message find")
         return x, y
     else:
-         count_attempt_find = 0
-         count_attempt_find_max = 3
-         while True:
+        log_and_print("[findMessage] succ message not find")
+        count_attempt_find = 0
+        count_attempt_find_max = 3
+        while True:
             window.set_focus()
             fill_y_mess(window, s)
             if len(s.y_mess) > 0:
-                
+
                 for x, y in s.y_mess:
                     if y:
                         log_and_print(f"[findMessage] Меседж y = {y}")
                         window.set_focus()
 
-                        x =  x + s.search_board_mess_x_start + 180
+                        x = x + s.search_board_mess_x_start + 180
                         y = y + s.search_board_mess_y_start
 
                         xRight = x - 160
                         yRight = y
                         gd.right_click(xRight, yRight)
-                        log_and_print(f"[findMessage] right_click xRight = {xRight}, yRight = {yRight}")
+                        log_and_print(
+                            f"[findMessage] right_click xRight = {xRight}, yRight = {yRight}"
+                        )
 
                         current_text = click_copy_text_from_image(window, s, x, y)
+                        if current_text == "":
+                            clickLastMess()
+                            continue
+
                         if text_includes_fast(text, current_text, 0.7):
+                            log_and_print("succ message find")
                             return x, y
-                
-                count_attempt_find +=1
+                        else:
+                            log_and_print("[findMessage] this not right text")
+
+                count_attempt_find += 1
                 if count_attempt_find > count_attempt_find_max:
                     return False
-                
+
                 count_scroll_up = read_setting("count_scroll_up")
                 scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
 
@@ -386,25 +468,28 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
     else:
         return False
 
-    gd.right_click(x, y - 20)
+    xRight = x - 160
+    yRight = y + 20
+    
+    gd.right_click(xRight, yRight)
+
     if not gd.click_text(
         ["Переслать"],
         count_attempt_find=2,
         pause_attempt=4,
         lang="rus",
-        scope=(x, y - 100, x + 160, y + 400),
+        scope=(x-200, y - 50, x + 200, y + 400),
         threshold=0.86,
-        is_debug=is_debug,
+        is_debug=1,
     ):
         log_and_print("Not find menu item Переслать")
         return False
 
     log_and_print("Click Переслать")
 
-    pos = gd.find_image("find.png", 
-                        scope=(320, 320, 380, 380), 
-                        multiscale=False, 
-                        is_debug=is_debug)
+    pos = gd.find_image(
+        "find.png", scope=(320, 320, 380, 380), multiscale=False, is_debug=is_debug
+    )
 
     if not pos:
         log_and_print("Not find field find in resend")
@@ -412,7 +497,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
 
     gd.click(pos[0] + 100, pos[1])
     log_and_print("Click field find")
-    
+
     pyperclip.copy(NameViberCarrier)
     gd.pause(0.5)
     pag.keyDown("ctrl")
@@ -440,15 +525,21 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
     log_and_print(f"click name chat {NameViberCarrier}")
     gd.pause(1)
 
-    if not gd.click_image("resend.png", scope=(460, 730, 640, 810), confidence=0.5, count_click=1, is_debug=False):
+    if not gd.click_image(
+        "resend.png",
+        scope=(460, 730, 640, 810),
+        confidence=0.5,
+        count_click=1,
+        is_debug=False,
+    ):
         log_and_print("Not find button resend")
         return "repeat"
-    
+
     log_and_print("click button resend success")
 
     save_current_text(text)
     s.old_text = load_previous_text()
-    
+
     klickPerevizniki(True)
     return True
 
@@ -466,10 +557,15 @@ def fill_y_mess(window, s):
 
     coordinates = capture_and_find_image_boundary_coordinates(
         (x, y, 320, height),
-        ["images\\heart.png", "images\\heart2.png", 
-         "images\\heart3.png", "images\\heart4.png",
-         "images\\heart5.png", "images\\heart6.png",
-         "images\\heart5.png",],
+        [
+            "images\\heart.png",
+            "images\\heart2.png",
+            "images\\heart3.png",
+            "images\\heart4.png",
+            "images\\heart5.png",
+            "images\\heart6.png",
+            "images\\heart5.png",
+        ],
         visualize=0,
         threshold=0.88,
     )
@@ -479,55 +575,65 @@ def fill_y_mess(window, s):
     log_and_print(f"s.y_mess = {s.y_mess}")
 
 
-async def processViberMess(window, s, count_scroll_up, count_scroll_down, pause_cycle_read):
+async def processViberMess(
+    window, s, count_scroll_up, count_scroll_down, pause_cycle_read
+):
     global count_y_mess_empty
     hwnd = window.handle
 
     window.set_focus()
-    
-    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+
+    gd.right_click(
+        s.search_board_mess_x_start + s.x_offset_out_mess,
+        s.search_board_mess_y_start + 10,
+    )
 
     count_repeat = read_setting("count_repeat")
     for i in range(count_repeat):
         ctypes.windll.user32.LockWindowUpdate(hwnd)
         while True:
-            
+
             fill_y_mess(window, s)
 
             if len(s.y_mess) > 0:
                 was_send = await send_messages_from_y_mess(window, s)
                 if was_send != "repeat":
                     if was_send:
-                        scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
+                        scroll_with_mouse(
+                            window, count_scroll=count_scroll_up, direction="up"
+                        )
                     else:
                         clickLastMess()
-                        scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
+                        scroll_with_mouse(
+                            window, count_scroll=count_scroll_down, direction="down"
+                        )
             else:
                 break
-                
+
             window.set_focus()
-            #gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
+            # gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
 
         ctypes.windll.user32.LockWindowUpdate(0)
 
         log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
-        
+
     window.set_focus()
-    
+
     pag.keyDown("esq")
     gd.pause(0.2)
     pag.keyUp("esq")
     gd.pause(0.2)
-    
-    gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
-    
+
+    gd.right_click(
+        s.search_board_mess_x_start + s.x_offset_out_mess,
+        s.search_board_mess_y_start + 10,
+    )
+
     if not klickPerevizniki(True):
         log_and_print("Not find chat Perevizniki")
         return None
 
     scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
-
-    
 
     log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
     gd.pause(pause_cycle_read)
