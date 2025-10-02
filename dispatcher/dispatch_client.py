@@ -58,6 +58,59 @@ class DispatchResult(BaseModel):
     decision: Optional[Decision] = None
 
 
+def _dispatch_base_url() -> str:
+    # из "http://host/api/v1/dispatch/analyze" → "http://host/api/v1/dispatch"
+    base = DISPATCH_URL.rstrip("/")
+    return base.rsplit("/", 1)[0]
+
+
+async def has_active_orders(
+    window_days: int = 2,
+    include_count: bool = False,
+    timeout_s: float = 5.0,
+    retries: int = 1,
+) -> tuple[bool, Optional[int]]:
+    """
+    Возвращает (has_active, count|None).
+    - has_active: True/False — есть ли активные заказы в окне [сегодня..сегодня+window_days]
+    - count: если include_count=True — количество (ограничено лимитом на сервере), иначе None
+    """
+    url = _dispatch_base_url() + "/has-active-orders"
+    params = {
+        "window_days": window_days,
+        "include_count": "true" if include_count else "false",
+    }
+    headers = {
+        "X-API-Key": DISPATCH_API_KEY,
+        "X-Client": "viber-worker",
+    }
+
+    for attempt in range(retries + 1):
+        try:
+            async with httpx.AsyncClient(
+                timeout=timeout_s, follow_redirects=True
+            ) as client:
+                resp = await client.get(url, params=params, headers=headers)
+                log_and_print(
+                    f"[has_active_orders] GET {url} status={resp.status_code}"
+                )
+                if resp.status_code == 401:
+                    raise DispatchError("Unauthorized: check X-API-Key")
+                resp.raise_for_status()
+                data = resp.json() or {}
+                return bool(data.get("has_active")), data.get("count")
+        except Exception as e:
+            log_and_print(
+                f"[has_active_orders] attempt {attempt+1}/{retries+1} failed: {e}",
+                "error",
+            )
+            if attempt < retries:
+                await asyncio.sleep(0.5 * (attempt + 1))
+
+    log_and_print("[has_active_orders] giving up, returning (False, None)", "error")
+    return False, None
+
+
 def _fallback_result(message_id: str) -> DispatchResult:
     """Резервный ответ, чтобы наверх не улетал None."""
     return DispatchResult(
@@ -241,7 +294,7 @@ def click_copy_text_from_text(window, s, x, y):
     log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
 
 
-def click_copy_text_from_image(window, s, x, y):
+def click_copy_text_from_image(window, s, x, y, is_debug = False):
     global count_y_mess_empty
     if not gd.click_image(
         "copy.png",
@@ -254,7 +307,7 @@ def click_copy_text_from_image(window, s, x, y):
         confidence=0.88,
         count_click=1,
         multiscale=True,
-        is_debug=0,
+        is_debug=is_debug,
     ):
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
         count_y_mess_empty = count_y_mess_empty + 1
@@ -293,7 +346,7 @@ async def send_messages_from_y_mess(window, s):
             x = x + s.search_board_mess_x_start + 180
             y = y + s.search_board_mess_y_start
 
-            xRight = x - 160
+            xRight = x - 140
             yRight = y
             gd.right_click(xRight, yRight)
             log_and_print(
@@ -326,18 +379,37 @@ async def send_messages_from_y_mess(window, s):
                         first_action = resp.actions[0]
                         action_type = _safe_action_type(first_action)
 
+                    result = True
                     if action_type != "ignore":
                         log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
 
-                        return sendViberMessDispatherToСarrier(
+                        result = sendViberMessDispatherToСarrier(
+                            "Віталій", window, xRight, yRight, s, text
+                        )
+
+
+
+                        if not result:
+                            pag.keyDown("esq")
+                            gd.pause(0.2)
+                            pag.keyUp("esq")
+                            gd.pause(0.2)
+
+                            gd.right_click(
+                                s.search_board_mess_x_start + s.x_offset_out_mess,
+                                s.search_board_mess_y_start + 10,
+                            )
+
+                            result = sendViberMessDispatherToСarrier(
                             "Віталій", window, xRight, yRight, s, text
                         )
 
                     else:
                         log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
 
-                    save_current_text(text)
-                    s.old_text = load_previous_text()
+                    if result:
+                        save_current_text(text)
+                        s.old_text = load_previous_text()
                 else:
                     count_old_mess += 1
                     if count_old_mess >= 3:
@@ -355,7 +427,7 @@ async def send_messages_from_y_mess(window, s):
     return was_new_mess
 
 
-def clickLastMess():
+def clickLastMess(window):
     if not gd.click_image(
         "last_mess.png",
         scope=(720, 910, 790, 980),
@@ -367,28 +439,29 @@ def clickLastMess():
         log_and_print("Not find name carrier UkrBusTravel")
         return False
     log_and_print("Click down to last messages")
+    #scroll_with_mouse(window, count_scroll=2, direction="up")
     return True
 
 
-def klickUkrBus(clickMessBool):
+def klickUkrBus(window, clickMessBool):
     if not gd.click_image(
         "ukrbus.png",
         scope=(0, 200, 120, 700),
         confidence=0.88,
         count_click=1,
         multiscale=True,
-        is_debug=1,
+        is_debug=0,
     ):
         log_and_print("Not find name chat UkrBusTravel")
         return False
 
     log_and_print("Click name chat UkrBusTravel")
     if clickMessBool:
-        clickLastMess()
+        clickLastMess(window)
     return True
 
 
-def klickPerevizniki(clickMessBool):
+def klickPerevizniki(window, clickMessBool):
 
     if not gd.click_image(
         "pereviz.png",
@@ -403,13 +476,15 @@ def klickPerevizniki(clickMessBool):
 
     log_and_print("Click name chat Perevezniki")
     if clickMessBool:
-        clickLastMess()
+        clickLastMess(window)
     return True
 
 
 def findMessage(window, x, y, s, text):
     log_and_print(f"[findMessage] text = {text}")
-    current_text = click_copy_text_from_image(window, s, x, y)
+    gd.right_click(x, y)
+    gd.pause(0.5)
+    current_text = click_copy_text_from_image(window, s, x+60, y, is_debug=0)
 
     log_and_print(f"[findMessage] current_text = {current_text}")
 
@@ -442,7 +517,7 @@ def findMessage(window, x, y, s, text):
 
                         current_text = click_copy_text_from_image(window, s, x, y)
                         if current_text == "":
-                            clickLastMess()
+                            clickLastMess(window)
                             continue
 
                         if text_includes_fast(text, current_text, 0.7):
@@ -457,7 +532,17 @@ def findMessage(window, x, y, s, text):
 
                 count_scroll_up = read_setting("count_scroll_up")
                 scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
+            else:
+                klickPerevizniki(window, True)
+                pag.keyDown("esq")
+                gd.pause(0.2)
+                pag.keyUp("esq")
+                gd.pause(0.2)
 
+                gd.right_click(
+                    s.search_board_mess_x_start + s.x_offset_out_mess,
+                    s.search_board_mess_y_start + 10,
+                )
 
 def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
     is_debug = False
@@ -468,9 +553,9 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
     else:
         return False
 
-    xRight = x - 160
+    xRight = x - 60
     yRight = y + 20
-    
+
     gd.right_click(xRight, yRight)
 
     if not gd.click_text(
@@ -478,9 +563,9 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
         count_attempt_find=2,
         pause_attempt=4,
         lang="rus",
-        scope=(x-200, y - 50, x + 200, y + 400),
+        scope=(x - 200, y - 50, x + 200, y + 400),
         threshold=0.86,
-        is_debug=1,
+        is_debug=0,
     ):
         log_and_print("Not find menu item Переслать")
         return False
@@ -540,7 +625,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
     save_current_text(text)
     s.old_text = load_previous_text()
 
-    klickPerevizniki(True)
+    klickPerevizniki(window, True)
     return True
 
 
@@ -603,10 +688,8 @@ async def processViberMess(
                             window, count_scroll=count_scroll_up, direction="up"
                         )
                     else:
-                        clickLastMess()
-                        scroll_with_mouse(
-                            window, count_scroll=count_scroll_down, direction="down"
-                        )
+                        clickLastMess(window)
+                        
             else:
                 break
 
@@ -629,7 +712,7 @@ async def processViberMess(
         s.search_board_mess_y_start + 10,
     )
 
-    if not klickPerevizniki(True):
+    if not klickPerevizniki(window, True):
         log_and_print("Not find chat Perevizniki")
         return None
 

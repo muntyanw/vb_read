@@ -1,7 +1,11 @@
 from tg import startTgClient
 from log import log_and_print
 import pyperclip
-from find_message import load_previous_text, save_current_text, remove_service_symbols_and_spaces
+from find_message import (
+    load_previous_text,
+    save_current_text,
+    remove_service_symbols_and_spaces,
+)
 from pywinauto import Application
 import cv2
 from PIL import Image, ImageGrab
@@ -11,7 +15,11 @@ from utils import read_setting
 import pyautogui as pag
 import os
 from core import gui_driver as gd
-from dispatcher.dispatch_client import processViberMess, klickPerevizniki
+from dispatcher.dispatch_client import (
+    processViberMess,
+    klickPerevizniki,
+    has_active_orders,
+)
 import asyncio
 from vb_utils import scroll_with_mouse, left_click
 
@@ -25,6 +33,7 @@ SWP_DRAWFRAME = 0x0020
 
 s = {}
 count_y_mess_empty = 0
+
 
 def get_image_hash(image, size=(8, 8)):
     """
@@ -41,7 +50,7 @@ def get_image_hash(image, size=(8, 8)):
     """
     # Если передан не PIL.Image, пытаемся открыть
     if not isinstance(image, Image.Image):
-        if hasattr(image, 'read'):
+        if hasattr(image, "read"):
             # Если это поток (например BytesIO)
             img = Image.open(image)
         else:
@@ -61,17 +70,24 @@ def get_image_hash(image, size=(8, 8)):
 
     return hash_hex
 
+
 class Context:
-    def __init__(self, bot_client, name_viber, channels, channel_names, old_text,
-                 width_menu=190,
-                 height_menu=220,
-                 height_item_menu=20,
-                 x_offset_out_mess=400,
-                 search_board_mess_x_start=360,
-                 search_board_mess_x_end=1000,
-                 search_board_mess_y_start=100,
-                 search_board_mess_y_end=1000,
-                 ):
+    def __init__(
+        self,
+        bot_client,
+        name_viber,
+        channels,
+        channel_names,
+        old_text,
+        width_menu=190,
+        height_menu=220,
+        height_item_menu=20,
+        x_offset_out_mess=400,
+        search_board_mess_x_start=360,
+        search_board_mess_x_end=1000,
+        search_board_mess_y_start=100,
+        search_board_mess_y_end=1000,
+    ):
 
         self.bot_client = bot_client
         self.name_viber = name_viber
@@ -88,38 +104,43 @@ class Context:
 
         self.y_mess = []
 
-        self.search_board_mess_x_start = search_board_mess_x_start,
-        self.search_board_mess_x_end = search_board_mess_x_end,
-        self.search_board_mess_y_start = search_board_mess_y_start,
-        self.search_board_mess_y_end = search_board_mess_y_end,
-
+        self.search_board_mess_x_start = (search_board_mess_x_start,)
+        self.search_board_mess_x_end = (search_board_mess_x_end,)
+        self.search_board_mess_y_start = (search_board_mess_y_start,)
+        self.search_board_mess_y_end = (search_board_mess_y_end,)
 
     def display_info(self):
         """Method to display the bot's main information."""
-        return (f"Bot Name: {self.name_viber}, Channels: {len(self.channels)}")
+        return f"Bot Name: {self.name_viber}, Channels: {len(self.channels)}"
+
 
 async def init():
     bot_client, name_viber, channels, channel_names = await startTgClient()
     old_text = load_previous_text()
 
-    s = Context(bot_client, name_viber, channels, channel_names, old_text,
-                width_menu=190,
-                height_menu=220,
-                height_item_menu=20,
-                x_offset_out_mess=400,
-                search_board_mess_x_start=60,
-                search_board_mess_x_end=1000,
-                search_board_mess_y_start=100,
-                search_board_mess_y_end=1000
-                )
+    s = Context(
+        bot_client,
+        name_viber,
+        channels,
+        channel_names,
+        old_text,
+        width_menu=190,
+        height_menu=220,
+        height_item_menu=20,
+        x_offset_out_mess=400,
+        search_board_mess_x_start=60,
+        search_board_mess_x_end=1000,
+        search_board_mess_y_start=100,
+        search_board_mess_y_end=1000,
+    )
 
     s.search_board_mess_x_start = read_setting("search_board_mess_x_start")
     s.search_board_mess_x_end = read_setting("search_board_mess_x_end")
     s.search_board_mess_y_start = read_setting("search_board_mess_y_start")
     s.search_board_mess_y_end = read_setting("search_board_mess_y_end")
     # Создаем экземпляр и запускаем
-    #log_and_print(f"Нажмить клавишу r щоб виділити область єкрана з сповіщеннями вайбєр, чи Enter щоб залишити старі")
-    #while True:
+    # log_and_print(f"Нажмить клавишу r щоб виділити область єкрана з сповіщеннями вайбєр, чи Enter щоб залишити старі")
+    # while True:
     #    if keyboard.is_pressed('enter'):
     #        log_and_print("Нажата клавиша Enter")
     #        s.search_board_mess_x_start = read_setting("search_board_mess_x_start")
@@ -133,7 +154,7 @@ async def init():
     #        screen_selector = ScreenRegionSelector()
     #        screen_selector.run()
 
-            # После того как окно будет закрыто, получаем координаты выделенной области
+    # После того как окно будет закрыто, получаем координаты выделенной области
     #        selected_region = screen_selector.get_selected_region()
     #        if selected_region:
     #            start_x, start_y, end_x, end_y = selected_region
@@ -154,12 +175,13 @@ async def init():
 
     return s
 
+
 async def send_image(window, s, menu_items, x, y):
     global count_y_mess_empty
     x2, y2, w, h = menu_items["isImage"]
     x = x + x2 + int(w / 2)
     y = y + y2 + int(h / 2)
-    #show_position(x, y, duration=10, size=40, color="blue")
+    # show_position(x, y, duration=10, size=40, color="blue")
     left_click(window, x, y)
     cv2.waitKey(100)
     log_and_print(f"[send_image] Зображення скопиювовано в буфер обміну")
@@ -181,19 +203,20 @@ async def send_image(window, s, menu_items, x, y):
 
     # Преобразуем изображение в поток байтов
     bio = BytesIO()
-    bio.name = hash + '.png'
+    bio.name = hash + ".png"
     file_path = os.getcwd() + "\\images\\" + bio.name
 
     if not os.path.isfile(file_path):
-        img.save(file_path, 'PNG')
+        img.save(file_path, "PNG")
 
-    #img.save(bio, 'PNG')
+    # img.save(bio, 'PNG')
 
     bio.seek(0)
 
     log_and_print(f"[send_message] Отправка нового имиджа в tg: {bio.name}")
-    #for channel_name in s.channel_names:
-        #await process_one_message_dispatcher("", s.name_viber, file_path)
+    # for channel_name in s.channel_names:
+    # await process_one_message_dispatcher("", s.name_viber, file_path)
+
 
 async def send_video(window, s, menu_items, x, y):
     global count_y_mess_empty
@@ -204,22 +227,22 @@ async def send_video(window, s, menu_items, x, y):
     x2, y2, w, h = menu_items["isVideo"]
     x = x + x2 + int(w / 2)
     y = y + y2 + int(h / 2)
-    #show_position(x, y, duration=10, size=40, color="blue")
+    # show_position(x, y, duration=10, size=40, color="blue")
     left_click(window, x, y)
     cv2.waitKey(1000)
 
-    pag.hotkey('ctrl', 'c')
+    pag.hotkey("ctrl", "c")
     cv2.waitKey(300)
-    file_name =  pyperclip.paste()
+    file_name = pyperclip.paste()
     log_and_print(f"[send_video] Буфер обмена {file_name}")
 
     textFind = remove_service_symbols_and_spaces(file_name)
     if textFind in s.old_text:
         count_y_mess_empty = count_y_mess_empty + 1
         log_and_print(f"[send_image] Файл уже был отправлен!")
-        pag.press('tab', presses=4, interval=0.1)
+        pag.press("tab", presses=4, interval=0.1)
         # cv2.waitKey(1000)
-        pag.press('enter')
+        pag.press("enter")
         cv2.waitKey(1000)
         return
 
@@ -231,50 +254,51 @@ async def send_video(window, s, menu_items, x, y):
 
     if os.path.isfile(file):
         log_and_print(f"[send_message_to_tg_channel] Файл уже сохранен: {file}")
-        pag.press('tab', presses=4, interval=0.1)
+        pag.press("tab", presses=4, interval=0.1)
         # cv2.waitKey(1000)
-        pag.press('enter')
+        pag.press("enter")
         cv2.waitKey(1000)
         return
 
     pyperclip.copy(path_files_downloads)
-    pag.press('tab', presses=6, interval=0.1)
-    #cv2.waitKey(1000)
-    pag.press('enter')
-    #cv2.waitKey(1000)
-    pag.hotkey('ctrl', 'v')
-    #cv2.waitKey(1000)
-    pag.press('enter')
-    #cv2.waitKey(1000)
-    pag.press('tab', presses=8, interval=0.1)
-    #cv2.waitKey(1000)
-    pag.press('enter')
+    pag.press("tab", presses=6, interval=0.1)
+    # cv2.waitKey(1000)
+    pag.press("enter")
+    # cv2.waitKey(1000)
+    pag.hotkey("ctrl", "v")
+    # cv2.waitKey(1000)
+    pag.press("enter")
+    # cv2.waitKey(1000)
+    pag.press("tab", presses=8, interval=0.1)
+    # cv2.waitKey(1000)
+    pag.press("enter")
 
     cv2.waitKey(1000)
 
-    #file = get_latest_file(path_files_downloads)
+    # file = get_latest_file(path_files_downloads)
 
     # if not file:
     #     log_and_print(f"[send_image] Не смогли сохранить файл!")
     #     return
 
-    #file_name = Path(file).stem
+    # file_name = Path(file).stem
 
     save_current_text(file_name)
     s.old_text = load_previous_text()
 
     log_and_print(f"[send_message] Отправка нового файла в tg: {file}")
-    #for channel_name in s.channel_names:
-        #await process_one_message_dispatcher("", s.name_viber, file)
+    # for channel_name in s.channel_names:
+    # await process_one_message_dispatcher("", s.name_viber, file)
+
 
 async def main():
-    
+
     count_scroll_up = read_setting("count_scroll_up")
     count_scroll_down = read_setting("count_scroll_down")
     pause_cycle_read = read_setting("pause_read_messages_second")
-    
+
     gd.ensure_layout()
-    
+
     try:
         s = await init()
 
@@ -282,30 +306,41 @@ async def main():
         window = app.window(title="Rakuten Viber")
 
         window.set_focus()
-        
+
         gd.pause(0.5)
 
         scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
 
         while True:
-            if not klickPerevizniki(True):
+            # has_any, approx_count = await has_active_orders(
+            #     window_days=2, include_count=False
+            # )
+
+            # if not has_any:
+            #     log_and_print(
+            #         "[guard] актуальных заказов нет — пропускаю чтение вайбера", "info"
+            #     )
+            #     gd.pause(60)
+            #     continue
+            # else:
+            #     log_and_print(
+            #         f"[guard] есть активные заказы (окно 2 дня){' — count~'+str(approx_count) if approx_count is not None else ''}",
+            #         "info",
+            #     )
+
+            if not klickPerevizniki(window, True):
                 log_and_print("Not find chat Perevizniki")
                 return None
             log_and_print("click chat Perevizniki")
 
-            await processViberMess(window, s,
-                             count_scroll_up,
-                             count_scroll_down,
-                             pause_cycle_read)
-                             
-                              
-            
+            await processViberMess(
+                window, s, count_scroll_up, count_scroll_down, pause_cycle_read
+            )
 
     except Exception as e:
         print(f"An error occurred: {e}")
         input("Press Enter to exit...")
 
+
 if __name__ == "__main__":
     asyncio.run(main())
-
-
