@@ -5,7 +5,7 @@ from utils import read_setting, showImage, take_screenshot
 import numpy as np
 from difflib import SequenceMatcher
 import cv2
-from rapidfuzz import fuzz, process
+from rapidfuzz import fuzz
 
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 
