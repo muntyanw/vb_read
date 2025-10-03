@@ -436,6 +436,7 @@ def _grab_with_dxcam(scope: Optional[Tuple[int, int, int, int]]) -> Optional[np.
     # dxcam expects (left, top, right, bottom)
     if scope:
         l, t, w, h = scope
+        l = l + MON_X
         frame = _DXCAM_HANDLE.grab(region=(l, t, l + w, t + h))
     else:
         frame = _DXCAM_HANDLE.grab()
@@ -710,6 +711,8 @@ def _human_move(x: int, y: int,
     """
     LOGGER.debug(f"Start human move to x: {x}, y: {y}")
     
+    x = x + MON_X
+    
     cx, cy = pag.position()  # текущая абсолютная позиция мыши
 
     # Точки для кривой Безье: старт → 2 случайные опоры → цель
@@ -729,6 +732,8 @@ def _human_move(x: int, y: int,
 
 def draw_click_circle(x, y, radius=20, duration=0.2):
     class_name = "ClickCircleClass"
+    
+    x= x + MON_X
 
     def wnd_proc(hwnd, msg, wparam, lparam):
         if msg == win32con.WM_PAINT:

@@ -944,7 +944,15 @@
         "documentation": {}
     },
     {
-        "label": "klickUkrBus",
+        "label": "klickPerevizniki",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "has_active_orders",
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
         "isExtraImport": true,
@@ -1583,7 +1591,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def draw_click_circle(x, y, radius=20, duration=0.2):\n    class_name = \"ClickCircleClass\"\n    def wnd_proc(hwnd, msg, wparam, lparam):\n        if msg == win32con.WM_PAINT:\n            hdc, ps = win32gui.BeginPaint(hwnd)\n            brush = win32gui.CreateSolidBrush(win32api.RGB(0, 0, 255))\n            win32gui.SelectObject(hdc, brush)\n            win32gui.Ellipse(hdc, 0, 0, radius * 2, radius * 2)\n            win32gui.EndPaint(hwnd, ps)\n            return 0",
+        "peekOfCode": "def draw_click_circle(x, y, radius=20, duration=0.2):\n    class_name = \"ClickCircleClass\"\n    x= x + MON_X\n    def wnd_proc(hwnd, msg, wparam, lparam):\n        if msg == win32con.WM_PAINT:\n            hdc, ps = win32gui.BeginPaint(hwnd)\n            brush = win32gui.CreateSolidBrush(win32api.RGB(0, 0, 255))\n            win32gui.SelectObject(hdc, brush)\n            win32gui.Ellipse(hdc, 0, 0, radius * 2, radius * 2)\n            win32gui.EndPaint(hwnd, ps)",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1925,7 +1933,25 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any] = {}\n    actions: List[Action] = []\n    # опционально: поддержка старого/нового формата\n    decision: Optional[Decision] = None\ndef _fallback_result(message_id: str) -> DispatchResult:\n    \"\"\"Резервный ответ, чтобы наверх не улетал None.\"\"\"\n    return DispatchResult(\n        message_id=message_id,",
+        "peekOfCode": "class DispatchResult(BaseModel):\n    message_id: str\n    extracted: Dict[str, Any] = {}\n    actions: List[Action] = []\n    # опционально: поддержка старого/нового формата\n    decision: Optional[Decision] = None\ndef _dispatch_base_url() -> str:\n    # из \"http://host/api/v1/dispatch/analyze\" → \"http://host/api/v1/dispatch\"\n    base = DISPATCH_URL.rstrip(\"/\")\n    return base.rsplit(\"/\", 1)[0]",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "click_copy_text_from_text",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def click_copy_text_from_text(window, s, x, y):\n    global count_y_mess_empty\n    if not gd.click_text(\n        [\"Скопировать сообщение\", \"Копировать текст\"],\n        count_attempt_find=2,\n        pause_attempt=2,\n        lang=\"rus\",\n        scope=(\n            int(x - s.width_menu),\n            y - int(s.height_menu),",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "click_copy_text_from_image",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def click_copy_text_from_image(window, s, x, y, is_debug = False):\n    global count_y_mess_empty\n    if not gd.click_image(\n        \"copy.png\",\n        scope=(\n            int(x - s.width_menu),\n            y - int(s.height_menu),\n            x + int(s.width_menu),\n            y + int(s.height_menu),\n        ),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1934,7 +1960,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess():\n    if not gd.click_image(\"last_mess.png\", scope=(720, 910, 790, 980), confidence=0.7, count_click=1, multiscale=True, is_debug=False):\n        log_and_print(\"Not find name carrier UkrBusTravel\")\n        return False\n    log_and_print(\"Click down to last messages\")\n    return True\ndef klickUkrBus(clickMessBool):\n    if not gd.click_image(\"ukrbus.png\", \n                          scope=(0, 200, 120, 700), \n                          confidence=0.88, count_click=1, ",
+        "peekOfCode": "def clickLastMess(window):\n    if not gd.click_image(\n        \"last_mess.png\",\n        scope=(720, 910, 790, 980),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):\n        log_and_print(\"Not find name carrier UkrBusTravel\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1943,7 +1969,25 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def klickUkrBus(clickMessBool):\n    if not gd.click_image(\"ukrbus.png\", \n                          scope=(0, 200, 120, 700), \n                          confidence=0.88, count_click=1, \n                          multiscale=True, is_debug=0):\n        log_and_print(\"Not find name chat UkrBusTravel\")\n        return False\n    log_and_print(\"Click name chat UkrBusTravel\")\n    if clickMessBool:\n        clickLastMess()",
+        "peekOfCode": "def klickUkrBus(window, clickMessBool):\n    if not gd.click_image(\n        \"ukrbus.png\",\n        scope=(0, 200, 120, 700),\n        confidence=0.88,\n        count_click=1,\n        multiscale=True,\n        is_debug=0,\n    ):\n        log_and_print(\"Not find name chat UkrBusTravel\")",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "klickPerevizniki",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def klickPerevizniki(window, clickMessBool):\n    if not gd.click_image(\n        \"pereviz.png\",\n        scope=(0, 200, 120, 700),\n        confidence=0.88,\n        count_click=1,\n        multiscale=True,\n        is_debug=0,\n    ):\n        log_and_print(\"Not find name chat Perevezniki\")",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "findMessage",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def findMessage(window, x, y, s, text):\n    log_and_print(f\"[findMessage] text = {text}\")\n    gd.right_click(x, y)\n    gd.pause(0.5)\n    current_text = click_copy_text_from_image(window, s, x+60, y, is_debug=0)\n    log_and_print(f\"[findMessage] current_text = {current_text}\")\n    if text_includes_fast(text, current_text, 0.7):\n        log_and_print(\"[findMessage] succ message find\")\n        return x, y\n    else:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1952,7 +1996,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y):\n    is_debug = False\n    gd.right_click(x, y - 20)\n    if not gd.click_text(\n        [\"Переслать\"],\n        count_attempt_find=2,\n        pause_attempt=4,\n        lang=\"rus\",\n        scope=(x, y - 100, x + 160, y + 400),\n        threshold=0.86,",
+        "peekOfCode": "def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):\n    is_debug = False\n    resultFind = findMessage(window, x, y, s, text)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 60\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1970,7 +2014,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "pag.FAILSAFE = False\nDISPATCH_URL = os.getenv(\"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\")\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)",
+        "peekOfCode": "pag.FAILSAFE = False\nDISPATCH_URL = os.getenv(\n    \"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\"\n)\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1979,7 +2023,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_URL = os.getenv(\"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\")\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0",
+        "peekOfCode": "DISPATCH_URL = os.getenv(\n    \"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\"\n)\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2258,7 +2302,7 @@
         "kind": 6,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "class Context:\n    def __init__(self, bot_client, name_viber, channels, channel_names, old_text,\n                 width_menu=190,\n                 height_menu=220,\n                 height_item_menu=20,\n                 x_offset_out_mess=400,\n                 search_board_mess_x_start=360,\n                 search_board_mess_x_end=1000,\n                 search_board_mess_y_start=100,\n                 search_board_mess_y_end=1000,",
+        "peekOfCode": "class Context:\n    def __init__(\n        self,\n        bot_client,\n        name_viber,\n        channels,\n        channel_names,\n        old_text,\n        width_menu=190,\n        height_menu=220,",
         "detail": "pwa",
         "documentation": {}
     },
