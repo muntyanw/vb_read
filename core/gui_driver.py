@@ -1504,7 +1504,13 @@ def ensure_layout(target: str = "en", max_attempts: int = 5) -> bool:
 
     return get_current_layout() == desired_code
 
+import mss, numpy as np, cv2
 
+def grab_monitor(region=None):
+    with mss.mss() as sct:
+        img = np.array(sct.grab(region))          # BGRA
+        img = img[..., :3]                     # BGR (для OpenCV) / RGB по необходимости
+        return img
 
 def capture_and_find_image_boundary_coordinates(
     region,
@@ -1534,7 +1540,9 @@ def capture_and_find_image_boundary_coordinates(
             )
 
         # 1) Скриншот области
-        screenshot_np = take_screenshot(region)
+        screenshot_np = grab_monitor(region)
+        if visualize:
+            showImage(screenshot_np, 6000)
         LOGGER.debug("[capture_and_find_image_boundary_coordinates] Screenshot captured.")
 
         # 2) Предобработка (если нужно)
