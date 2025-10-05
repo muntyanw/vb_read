@@ -133,10 +133,9 @@ def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
 
 
 async def process_one_message_dispatcher(
-    message_text: Optional[str], name_viber: Optional[str], file_path: Optional[str]
+    message_text: Optional[str], file_path: Optional[str]
 ):
     log_and_print("!!! process_one_message_dispatcher !!!")
-    log_and_print(f"name_viber: {name_viber}", "info")
 
     uid_source = message_text or file_path or f"msg-{time.time()}"
     if uid_source:
@@ -152,7 +151,7 @@ async def process_one_message_dispatcher(
                 message_id=md5_hash,
                 text=message_text or "",
                 chat_id="UkrBusTravel",
-                sender=name_viber,  # <— отправляем имя отправителя
+                sender="",  # <— отправляем имя отправителя
                 attachments=None,
                 locale="uk",
                 timeout_s=float(read_setting("dispatch_timeout_s") or 15.0),
@@ -367,7 +366,7 @@ async def send_messages_from_y_mess(window, s):
                         "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:"
                     )
                     resp = await process_one_message_dispatcher(
-                        text, s.name_viber, None
+                        text, None
                     )
                     log_and_print(
                         f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"

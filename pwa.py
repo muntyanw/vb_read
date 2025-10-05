@@ -111,7 +111,7 @@ class Context:
 
     def display_info(self):
         """Method to display the bot's main information."""
-        return f"Bot Name: {self.name_viber}, Channels: {len(self.channels)}"
+        #return f"Bot Name: {self.name_viber}, Channels: {len(self.channels)}"
 
 
 async def init():
