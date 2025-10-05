@@ -469,7 +469,7 @@ def klickPerevizniki(window, clickMessBool):
         confidence=0.88,
         count_click=1,
         multiscale=True,
-        is_debug=1,
+        is_debug=0,
     ):
         log_and_print("Not find name chat Perevezniki")
         return False
@@ -651,7 +651,7 @@ def fill_y_mess(window, s):
             "images\\heart6.png",
             "images\\heart5.png",
         ],
-        visualize=0,
+        visualize=1,
         threshold=0.88,
     )
     window.set_focus()

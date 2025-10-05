@@ -42,23 +42,26 @@ import win32gui
 import win32con
 import win32api
 import win32process
-import logging
+import logging, sys
 
 from utils import preprocess_image, show_overlay_win32_hole, showImage, take_screenshot
 ImageLike = Union[str, np.ndarray]
+
+MON_Y = 0
 
 pag.FAILSAFE = False
 pag.PAUSE = 0.2
 
 logging.basicConfig(
-    filename= "log.log" ,
-    filemode='w',
-    format='%(asctime)s - %(levelname)s - %(message)s',
     level=logging.DEBUG,
-    encoding='utf-8'
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('log.log', mode='w', encoding='utf-8'),
+        logging.StreamHandler(sys.stdout),  # console
+    ],
+    force=True,  # important if something configured logging before
 )
-
-LOGGER = logging.getLogger(__name__) 
+LOGGER = logging.getLogger(__name__)
 
 pag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»
 
@@ -260,8 +263,8 @@ def find_image(name: str, timeout: float = 8.0,
             
         if pos:
             LOGGER.debug(f"return image: {name} pos: {pos}")
-            abs_x = MON_X + pos[0]
-            abs_y = MON_Y + pos[1]
+            abs_x = pos[0]
+            abs_y = pos[1]
             return (abs_x, abs_y) 
 
     LOGGER.debug(f"image {name} not found")
@@ -284,11 +287,13 @@ def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,
     end = time.perf_counter()
     tm = end - start
     print(f"time find image (multiscale={multiscale}) = {tm}")
-
+    LOGGER.debug(f"result_find = {result_find}")
     if result_find:
+        
         LOGGER.debug(f"Foud image {name}")
         abs_x, abs_y = result_find
         if abs_x is not None and abs_y is not None:
+            draw_click_circle(abs_x + plus_x, abs_y + plus_y)
             human_move_and_click(abs_x + plus_x, abs_y + plus_y, count_click=count_click)
             return True
         
