@@ -13,7 +13,7 @@ import pyautogui as pag
 from utils import read_setting
 import hashlib
 import ctypes
-from vb_utils import scroll_with_mouse, capture_and_find_image_boundary_coordinates
+from vb_utils import scroll_with_mouse
 from recognize_text import text_includes_fast
 import time
 
@@ -640,7 +640,7 @@ def fill_y_mess(window, s):
 
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
 
-    coordinates = capture_and_find_image_boundary_coordinates(
+    coordinates = gd.capture_and_find_image_boundary_coordinates(
         (x, y, 320, height),
         [
             "images\\heart.png",

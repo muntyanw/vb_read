@@ -54,6 +54,8 @@ CONTROL_PORT: int = int(_RAW_SETTINGS.get("control_port", 4567))
 MONITOR_WIDTH:  int = int(_RAW_SETTINGS.get("monitor_width", 1920))
 MONITOR_HEIGHT: int = int(_RAW_SETTINGS.get("monitor_height", 1080))
 MONITOR_INDEX: int = int(_RAW_SETTINGS.get("monitor_index", 1))
+MON_X: int = int(_RAW_SETTINGS.get("mon_x", 1920))
+
 
 TEMPLATE_DIR: Path = Path(_RAW_SETTINGS.get("ui_images", "")).expanduser().resolve()
 

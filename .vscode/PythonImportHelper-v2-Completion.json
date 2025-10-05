@@ -260,15 +260,6 @@
         "documentation": {}
     },
     {
-        "label": "mss.tools",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "mss.tools",
-        "description": "mss.tools",
-        "detail": "mss.tools",
-        "documentation": {}
-    },
-    {
         "label": "ctypes",
         "kind": 6,
         "isExtraImport": true,
@@ -318,6 +309,14 @@
         "documentation": {}
     },
     {
+        "label": "Union",
+        "importPath": "typing",
+        "description": "typing",
+        "isExtraImport": true,
+        "detail": "typing",
+        "documentation": {}
+    },
+    {
         "label": "Optional",
         "importPath": "typing",
         "description": "typing",
@@ -423,14 +422,6 @@
     },
     {
         "label": "Dict",
-        "importPath": "typing",
-        "description": "typing",
-        "isExtraImport": true,
-        "detail": "typing",
-        "documentation": {}
-    },
-    {
-        "label": "List",
         "importPath": "typing",
         "description": "typing",
         "isExtraImport": true,
@@ -503,6 +494,14 @@
         "documentation": {}
     },
     {
+        "label": "MON_X",
+        "importPath": "project_config",
+        "description": "project_config",
+        "isExtraImport": true,
+        "detail": "project_config",
+        "documentation": {}
+    },
+    {
         "label": "win32gui",
         "kind": 6,
         "isExtraImport": true,
@@ -548,11 +547,99 @@
         "documentation": {}
     },
     {
-        "label": "contextmanager",
-        "importPath": "contextlib",
-        "description": "contextlib",
+        "label": "preprocess_image",
+        "importPath": "utils",
+        "description": "utils",
         "isExtraImport": true,
-        "detail": "contextlib",
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "show_overlay_win32_hole",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "showImage",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "take_screenshot",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "showImage",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "take_screenshot",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "is_video_file",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "get_video_dimensions_cv2",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
         "documentation": {}
     },
     {
@@ -759,102 +846,6 @@
         "documentation": {}
     },
     {
-        "label": "read_setting",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "read_setting",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "read_setting",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "read_setting",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "showImage",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "take_screenshot",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "is_video_file",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "get_video_dimensions_cv2",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "preprocess_image",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "show_overlay_win32_hole",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "showImage",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
-        "label": "take_screenshot",
-        "importPath": "utils",
-        "description": "utils",
-        "isExtraImport": true,
-        "detail": "utils",
-        "documentation": {}
-    },
-    {
         "label": "hashlib",
         "kind": 6,
         "isExtraImport": true,
@@ -865,14 +856,6 @@
     },
     {
         "label": "scroll_with_mouse",
-        "importPath": "vb_utils",
-        "description": "vb_utils",
-        "isExtraImport": true,
-        "detail": "vb_utils",
-        "documentation": {}
-    },
-    {
-        "label": "capture_and_find_image_boundary_coordinates",
         "importPath": "vb_utils",
         "description": "vb_utils",
         "isExtraImport": true,
@@ -1466,7 +1449,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def pause(amount):\n    LOGGER.debug(f\"pause {amount} second\")\n    time.sleep(amount)\ndef _get_monitor_region(scope) -> dict:\n    if scope != None:\n        left, bottom, right, top = scope\n        monitor_region = {\n            \"top\": bottom,\n            \"left\": MON_X + left,\n            \"width\" :right - left,",
+        "peekOfCode": "def pause(amount):\n    LOGGER.debug(f\"pause {amount} second\")\n    time.sleep(amount)\ndef _get_monitor_region(scope) -> dict:\n    left, bottom, right, top = scope\n    print(f\"MON_X = {MON_X}\")\n    monitor_region = {\n        \"top\": bottom,\n        \"left\": MON_X + left,\n        \"width\" :right - left,",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1485,15 +1468,6 @@
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
         "peekOfCode": "def arrays_fuzzy_equal_as_one_str(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:\n    \"\"\"\n    Преобразует два массива в строки и сравнивает их\n    :param window:      первый список строк\n    :param query_words: второй список строк\n    :param threshold:   минимальный порог похожести (по умолчанию 0.7)\n    :return: True, если все парные строковые элементы похожи ≥ threshold\n    \"\"\"\n    if len(window) != len(query_words):\n        return False",
-        "detail": "core.gui_driver",
-        "documentation": {}
-    },
-    {
-        "label": "launch_chrome",
-        "kind": 2,
-        "importPath": "core.gui_driver",
-        "description": "core.gui_driver",
-        "peekOfCode": "def launch_chrome(profile_dir: Path, url: str = \"https://e-consul.gov.ua/messages\") -> subprocess.Popen:\n    \"\"\"\n    The function `launch_chrome` launches Chrome with specified profile directory, window size, and\n    position on the screen.\n    :param profile_dir: The `profile_dir` parameter in the `launch_chrome` function is expected to be a\n    `Path` object representing the directory where Chrome will store user profile data. This directory\n    will be used as the user data directory for the Chrome instance being launched\n    :type profile_dir: Path\n    :param url: The `url` parameter in the `launch_chrome` function is a string that represents the URL\n    of the website you want to open in the Chrome browser. In the provided code snippet, the default URL",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1538,16 +1512,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def type_text(text: str, interval: Tuple[float, float] = (0.05, 0.12)) -> None:\n    \"\"\"\n    Печатать строку с небольшим случайным интервалом между символами.\n    \"\"\"\n    for ch in text:\n        pag.typewrite(ch)\n        time.sleep(random.uniform(*interval))\ndef take_screenshot() -> Path:\n    \"\"\"\n    Сделать PNG скрин целевого MONITOR_INDEX с помощью MSS и вернуть Path.",
-        "detail": "core.gui_driver",
-        "documentation": {}
-    },
-    {
-        "label": "take_screenshot",
-        "kind": 2,
-        "importPath": "core.gui_driver",
-        "description": "core.gui_driver",
-        "peekOfCode": "def take_screenshot() -> Path:\n    \"\"\"\n    Сделать PNG скрин целевого MONITOR_INDEX с помощью MSS и вернуть Path.\n    \"\"\"\n    import tempfile, datetime as dt\n    ts = dt.datetime.utcnow().isoformat().replace(\":\", \"-\")\n    output_path = Path(tempfile.gettempdir()) / f\"scr_{ts}.png\"\n    with mss.mss() as sct:\n        # Снимаем именно ту область, что описывает монитора:\n        monitor_region = {\"top\": MON_Y, \"left\": MON_X, \"width\": MON_W, \"height\": MON_H}",
+        "peekOfCode": "def type_text(text: str, interval: Tuple[float, float] = (0.05, 0.12)) -> None:\n    \"\"\"\n    Печатать строку с небольшим случайным интервалом между символами.\n    \"\"\"\n    for ch in text:\n        pag.typewrite(ch)\n        time.sleep(random.uniform(*interval))\ndef show_image(img) -> None:\n    # Показать изображение через matplotlib\n    plt.figure(figsize=(8, 5))",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1637,7 +1602,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):\n    if x == None:\n        x, y = pag.position()\n    else:\n        x = MON_X + x\n    human_move_and_click(x, y) \ndef right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):",
+        "peekOfCode": "def click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):\n    if x == None:\n        x, y = pag.position()\n    else:\n        x = MON_X + x\n    human_move_and_click(x, y) \ndef right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1646,7 +1611,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.\n    Вход: pts — список точек (x, y), t от 0.0 до 1.0.",
+        "peekOfCode": "def right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.\n    Вход: pts — список точек (x, y), t от 0.0 до 1.0.\n    Выход: координаты точки на кривой Безье.\n    \"\"\"",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1655,7 +1620,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x = MON_X + x\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.\n    Вход: pts — список точек (x, y), t от 0.0 до 1.0.\n    Выход: координаты точки на кривой Безье.\n    \"\"\"\n    pts_arr = np.array(pts, dtype=float)",
+        "peekOfCode": "def click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.\n    Вход: pts — список точек (x, y), t от 0.0 до 1.0.\n    Выход: координаты точки на кривой Безье.\n    \"\"\"\n    pts_arr = np.array(pts, dtype=float)\n    while len(pts_arr) > 1:",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1831,11 +1796,29 @@
         "documentation": {}
     },
     {
+        "label": "capture_and_find_image_boundary_coordinates",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def capture_and_find_image_boundary_coordinates(\n    region,\n    search_images: List[ImageLike],\n    preprocess: bool = False,\n    visualize: bool = False,\n    threshold: float = 0.88\n) -> List[Tuple[int, int, int, int]]:\n    \"\"\"\n    Capture screenshot of `region`, find all matches for ANY template from `search_images`,\n    and return rectangles [(x, y, w, h)] in screenshot-local coordinates.",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
         "label": "main",
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
         "peekOfCode": "def main():\n    init_tesseract()\nif __name__ == \"__main__\":\n    main()",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
+        "label": "ImageLike",
+        "kind": 5,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "ImageLike = Union[str, np.ndarray]\npag.FAILSAFE = False\npag.PAUSE = 0.2\nlogging.basicConfig(\n    filename= \"log.log\" ,\n    filemode='w',\n    format='%(asctime)s - %(levelname)s - %(message)s',\n    level=logging.DEBUG,\n    encoding='utf-8'\n)",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1862,7 +1845,7 @@
         "kind": 5,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "LOGGER = logging.getLogger(__name__) \npag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»\n# ---------------------------------------------------------------------------\n# Constants: ищем монитор с разрешением необходимым для работы\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\nwith mss.mss() as sct:\n    monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран\n    # monitors[1] — первый физический экран; monitors[2] — второй и т.д.\n    # Мы ожидаем MONITOR_INDEX 1-based",
+        "peekOfCode": "LOGGER = logging.getLogger(__name__) \npag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»\n# ---------------------------------------------------------------------------\n# Constants: ищем монитор с разрешением необходимым для работы\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\n# with mss.mss() as sct:\n#     monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран\n#     # monitors[1] — первый физический экран; monitors[2] — второй и т.д.\n#     # Мы ожидаем MONITOR_INDEX 1-based",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1871,7 +1854,7 @@
         "kind": 5,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "pag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»\n# ---------------------------------------------------------------------------\n# Constants: ищем монитор с разрешением необходимым для работы\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\nwith mss.mss() as sct:\n    monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран\n    # monitors[1] — первый физический экран; monitors[2] — второй и т.д.\n    # Мы ожидаем MONITOR_INDEX 1-based\n    if 1 <= MONITOR_INDEX < len(monitors):",
+        "peekOfCode": "pag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»\n# ---------------------------------------------------------------------------\n# Constants: ищем монитор с разрешением необходимым для работы\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\n# with mss.mss() as sct:\n#     monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран\n#     # monitors[1] — первый физический экран; monitors[2] — второй и т.д.\n#     # Мы ожидаем MONITOR_INDEX 1-based\n#     print(f\"MONITOR_INDEX = {MONITOR_INDEX}\")",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1970,7 +1953,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def klickPerevizniki(window, clickMessBool):\n    if not gd.click_image(\n        \"pereviz.png\",\n        scope=(0, 200, 120, 700),\n        confidence=0.88,\n        count_click=1,\n        multiscale=True,\n        is_debug=0,\n    ):\n        log_and_print(\"Not find name chat Perevezniki\")",
+        "peekOfCode": "def klickPerevizniki(window, clickMessBool):\n    if not gd.click_image(\n        \"pereviz.png\",\n        scope=(0, 200, 120, 700),\n        confidence=0.88,\n        count_click=1,\n        multiscale=True,\n        is_debug=1,\n    ):\n        log_and_print(\"Not find name chat Perevezniki\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1997,7 +1980,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = capture_and_find_image_boundary_coordinates(\n        (x, y, 320, height),",
+        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = gd.capture_and_find_image_boundary_coordinates(\n        (x, y, 320, height),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2006,7 +1989,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "pag.FAILSAFE = False\nDISPATCH_URL = os.getenv(\n    \"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\"\n)\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()",
+        "peekOfCode": "pag.FAILSAFE = False\nDISPATCH_URL = os.getenv(\n    \"DISPATCH_URL\", \"http://46.63.40.211:8888/api/v1/dispatch/analyze\"\n)\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2015,7 +1998,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_URL = os.getenv(\n    \"DISPATCH_URL\", \"http://192.168.1.223:8888/api/v1/dispatch/analyze\"\n)\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений",
+        "peekOfCode": "DISPATCH_URL = os.getenv(\n    \"DISPATCH_URL\", \"http://46.63.40.211:8888/api/v1/dispatch/analyze\"\n)\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2294,7 +2277,7 @@
         "kind": 6,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "class Context:\n    def __init__(\n        self,\n        bot_client,\n        name_viber,\n        channels,\n        channel_names,\n        old_text,\n        width_menu=190,\n        height_menu=220,",
+        "peekOfCode": "class Context:\n    def __init__(\n        self,\n        #bot_client,\n        #name_viber,\n        #channels,\n        #channel_names,\n        old_text,\n        width_menu=190,\n        height_menu=220,",
         "detail": "pwa",
         "documentation": {}
     },
@@ -2718,15 +2701,6 @@
         "importPath": "vb_utils",
         "description": "vb_utils",
         "peekOfCode": "def find_message_bottom_by_image(\n    screenshot: ImageLike,\n    search_image: ImageLike,                        # <-- вместо search_words\n    search_roi: Optional[Tuple[int, int, int, int]] = None,  # (x,y,w,h) як і раніше\n    threshold: float = 0.83,                        # мін. кореляція для прийняття збігу\n    scales: Tuple[float, ...] = tuple(np.linspace(0.85, 1.15, 9)),  # мульти-скейл\n    return_debug: bool = False,\n) -> Dict[str, Union[int, float, Tuple[int,int,int,int], np.ndarray]]:\n    \"\"\"\n    Знаходить нижню межу повідомлення у Viber за шаблоном (search_image).",
-        "detail": "vb_utils",
-        "documentation": {}
-    },
-    {
-        "label": "capture_and_find_image_boundary_coordinates",
-        "kind": 2,
-        "importPath": "vb_utils",
-        "description": "vb_utils",
-        "peekOfCode": "def capture_and_find_image_boundary_coordinates(\n    region,\n    search_images: List[ImageLike],\n    preprocess: bool = False,\n    visualize: bool = False,\n    threshold: float = 0.88\n) -> List[Tuple[int, int, int, int]]:\n    \"\"\"\n    Capture screenshot of `region`, find all matches for ANY template from `search_images`,\n    and return rectangles [(x, y, w, h)] in screenshot-local coordinates.",
         "detail": "vb_utils",
         "documentation": {}
     },

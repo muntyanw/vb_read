@@ -14,7 +14,6 @@ from __future__ import annotations
 
 import os
 import random
-import subprocess
 import time
 from pathlib import Path
 import datetime as _dt
@@ -27,16 +26,15 @@ import pyautogui as pag
 import pytesseract
 import matplotlib.pyplot as plt
 import mss
-import mss.tools
 import ctypes
-from typing import Final, Iterable, Optional, Tuple, List
+from typing import Final, Iterable, Optional, Tuple, List, Union
 from difflib import SequenceMatcher
 import platform
 
 from project_config import (TEMPLATE_DIR,
                             MONITOR_WIDTH, MONITOR_HEIGHT,
                             MONITOR_INDEX,
-                            TESSDATA_PREFIX)
+                            TESSDATA_PREFIX, MON_X)
 
 from pytesseract import Output
 
@@ -46,8 +44,8 @@ import win32api
 import win32process
 import logging
 
-import time
-from contextlib import contextmanager
+from utils import preprocess_image, show_overlay_win32_hole, showImage, take_screenshot
+ImageLike = Union[str, np.ndarray]
 
 pag.FAILSAFE = False
 pag.PAUSE = 0.2
@@ -70,45 +68,39 @@ pag.FAILSAFE = True  # оставить возможность «движени�
 TARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)
 
 
-with mss.mss() as sct:
-    monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран
-    # monitors[1] — первый физический экран; monitors[2] — второй и т.д.
-    # Мы ожидаем MONITOR_INDEX 1-based
-    print(f"MONITOR_INDEX = {MONITOR_INDEX}")
-    if 1 <= MONITOR_INDEX < len(monitors):
-        mon = monitors[MONITOR_INDEX]
-        print(mon)
-        #MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
-        MON_X, MON_Y, MON_W, MON_H = mon["width"], mon["top"],mon["width"], mon["height"]
-        LOGGER.debug("Using MSS monitor #%d: offset (%d,%d), size %dx%d",
-                    MONITOR_INDEX, MON_X, MON_Y, MON_W, MON_H)
-    else:
-        # fallback: если указанный индекс вне диапазона — берем первый монитор
-        mon = monitors[1]
-        MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
-        LOGGER.warning("monitor_index=%d is invalid, using primary monitor #%d", MONITOR_INDEX, 1)
+
+# with mss.mss() as sct:
+#     monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран
+#     # monitors[1] — первый физический экран; monitors[2] — второй и т.д.
+#     # Мы ожидаем MONITOR_INDEX 1-based
+#     print(f"MONITOR_INDEX = {MONITOR_INDEX}")
+#     if 1 <= MONITOR_INDEX < len(monitors):
+#         mon = monitors[MONITOR_INDEX]
+#         print(mon)
+#         MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
+#         #MON_X, MON_Y, MON_W, MON_H = mon["width"], mon["top"],mon["width"], mon["height"]
+#         LOGGER.debug("Using MSS monitor #%d: offset (%d,%d), size %dx%d",
+#                     MONITOR_INDEX, MON_X, MON_Y, MON_W, MON_H)
+#     else:
+#         # fallback: если указанный индекс вне диапазона — берем первый монитор
+#         mon = monitors[1]
+#         MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
+#         LOGGER.warning("monitor_index=%d is invalid, using primary monitor #%d", MONITOR_INDEX, 1)
 
 def pause(amount):
     LOGGER.debug(f"pause {amount} second")
     time.sleep(amount)
     
 def _get_monitor_region(scope) -> dict:
-    if scope != None:
-        left, bottom, right, top = scope
-        print(f"MON_X = {MON_X}")
-        monitor_region = {
-            "top": bottom,
-            "left": MON_X + left,
-            "width" :right - left,
-            "height": top - bottom
-        }
-    else:
-        monitor_region = {
-            "top": MON_Y,
-            "left": MON_X,
-            "width": MON_W,
-            "height": MON_H
-        }
+    left, bottom, right, top = scope
+    print(f"MON_X = {MON_X}")
+    monitor_region = {
+        "top": bottom,
+        "left": MON_X + left,
+        "width" :right - left,
+        "height": top - bottom
+    }
+
     return monitor_region
 # ---------------------------------------------------------------------------
 # Public helpers
@@ -165,44 +157,6 @@ def arrays_fuzzy_equal_as_one_str(window: List[str], query_words: List[str], thr
     
     return ratio >= threshold
 
-def launch_chrome(profile_dir: Path, url: str = "https://e-consul.gov.ua/messages") -> subprocess.Popen:
-    """
-    The function `launch_chrome` launches Chrome with specified profile directory, window size, and
-    position on the screen.
-    
-    :param profile_dir: The `profile_dir` parameter in the `launch_chrome` function is expected to be a
-    `Path` object representing the directory where Chrome will store user profile data. This directory
-    will be used as the user data directory for the Chrome instance being launched
-    :type profile_dir: Path
-    :param url: The `url` parameter in the `launch_chrome` function is a string that represents the URL
-    of the website you want to open in the Chrome browser. In the provided code snippet, the default URL
-    is set to "https://e-consul.gov.ua/", but you can pass a different URL, defaults to
-    https://e-consul.gov.ua/
-    :type url: str (optional)
-    :return: The function `launch_chrome` returns a `subprocess.Popen` object, which represents a
-    process that has been launched to run the Chrome browser with specific parameters such as window
-    size, position, and URL.
-    """
-    """
-    Launch Chrome at 1920×1080 on the monitor matching TARGET_RES (или primary).
-    """
-    chrome_path = _detect_chrome()
-
-    width, height = MON_W, MON_H
-    offset_x, offset_y = MON_X, MON_Y
-
-    cmd = [
-        str(chrome_path),
-        f"--user-data-dir={profile_dir}",
-        "--new-window",
-        "--start-maximized",
-        #f"--window-size={width},{height}",
-        #f"--window-position={offset_x},{offset_y}",
-        #f"--force-page-scale-factor=1",
-        url,
-    ]
-    LOGGER.debug("Run Chrome at %dx%d+%d+%d: %s", width, height, offset_x, offset_y, cmd)
-    return subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 def detect_checkbox_type_from_frame(scope: tuple[int, int, int, int] = None,
                 is_debug: bool = False) -> str:
@@ -348,24 +302,6 @@ def type_text(text: str, interval: Tuple[float, float] = (0.05, 0.12)) -> None:
     for ch in text:
         pag.typewrite(ch)
         time.sleep(random.uniform(*interval))
-
-def take_screenshot() -> Path:
-    """
-    Сделать PNG скрин целевого MONITOR_INDEX с помощью MSS и вернуть Path.
-    """
-    import tempfile, datetime as dt
-
-    ts = dt.datetime.utcnow().isoformat().replace(":", "-")
-    output_path = Path(tempfile.gettempdir()) / f"scr_{ts}.png"
-
-    with mss.mss() as sct:
-        # Снимаем именно ту область, что описывает монитора:
-        monitor_region = {"top": MON_Y, "left": MON_X, "width": MON_W, "height": MON_H}
-        img_data = sct.grab(monitor_region)
-        # Записываем в PNG (MSS возвращает raw-битмап):
-        mss.tools.to_png(img_data.rgb, img_data.size, output=str(output_path))
-
-    return output_path
 
 def show_image(img) -> None:
     # Показать изображение через matplotlib
@@ -842,11 +778,9 @@ def click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.
     human_move_and_click(x, y) 
     
 def right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):
-    x = MON_X + x
     human_move_and_right_click(x, y) 
     
 def click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):
-    x = MON_X + x
     human_move_and_click_diff(x, y)
     
 def _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:
@@ -1564,6 +1498,154 @@ def ensure_layout(target: str = "en", max_attempts: int = 5) -> bool:
         time.sleep(0.3)
 
     return get_current_layout() == desired_code
+
+
+
+def capture_and_find_image_boundary_coordinates(
+    region,
+    search_images: List[ImageLike],
+    preprocess: bool = False,
+    visualize: bool = False,
+    threshold: float = 0.88
+) -> List[Tuple[int, int, int, int]]:
+    """
+    Capture screenshot of `region`, find all matches for ANY template from `search_images`,
+    and return rectangles [(x, y, w, h)] in screenshot-local coordinates.
+    If `visualize` is True, draw overlays and call showImage() right here.
+    """
+    x, y, w, h = map(int, region)
+    x = x + MON_X
+    region = (x, y, w, h)
+    try:
+        # 0) Визуализация области захвата (опционально)
+        if visualize:
+            show_overlay_win32_hole(
+                region=region,
+                delay_ms=2000,
+                alpha=120,
+                border_color=(0, 255, 0),
+                border_width=3,
+                click_through=False
+            )
+
+        # 1) Скриншот области
+        screenshot_np = take_screenshot(region)
+        LOGGER.debug("[capture_and_find_image_boundary_coordinates] Screenshot captured.")
+
+        # 2) Предобработка (если нужно)
+        processed_image = preprocess_image(screenshot_np) if preprocess else screenshot_np
+        if visualize:
+            showImage(processed_image, 6000)
+
+        # 3) Готовим изображение и шаблоны (серый + лёгкое размытие)
+        img_gray = cv2.cvtColor(processed_image, cv2.COLOR_BGR2GRAY) if processed_image.ndim == 3 else processed_image
+        img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
+
+        img_h, img_w = img_gray.shape[:2]
+        if img_h == 0 or img_w == 0:
+            LOGGER.debug("[capture_and_find_image_boundary_coordinates] Empty screenshot dimensions.")
+            return []
+
+        # Нормализуем список шаблонов
+        if not isinstance(search_images, (list, tuple)) or len(search_images) == 0:
+            raise ValueError("`search_images` must be a non-empty list/tuple of images or paths.")
+
+        candidates = []  # (x, y, w, h, score)
+
+        for tpl in search_images:
+            # 4) Загрузка/нормализация шаблона
+            if isinstance(tpl, str):
+                tpl_bgr = cv2.imread(tpl, cv2.IMREAD_COLOR)
+                if tpl_bgr is None:
+                    LOGGER.debug(f"[capture_and_find_image_boundary_coordinates] Cannot read template: {tpl}")
+                    continue
+            else:
+                tpl_bgr = tpl
+
+            if tpl_bgr.ndim == 2:
+                tpl_bgr = cv2.cvtColor(tpl_bgr, cv2.COLOR_GRAY2BGR)
+
+            tpl_gray = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY) if tpl_bgr.ndim == 3 else tpl_bgr
+            tpl_gray = cv2.GaussianBlur(tpl_gray, (3, 3), 0)
+
+            th, tw = tpl_gray.shape[:2]
+            if th == 0 or tw == 0:
+                continue
+
+            # 4.1) Если шаблон больше картинки — уменьшаем
+            if th > img_h or tw > img_w:
+                scale = min(img_w / tw, img_h / th) * 0.98  # немного меньше, чтобы гарантированно поместился
+                new_w = max(1, int(tw * scale))
+                new_h = max(1, int(th * scale))
+                if new_w < 1 or new_h < 1:
+                    LOGGER.debug("[capture_and_find_image_boundary_coordinates] Template too large; skipped after scaling.")
+                    continue
+                tpl_gray = cv2.resize(tpl_gray, (new_w, new_h), interpolation=cv2.INTER_AREA)
+                th, tw = tpl_gray.shape[:2]
+
+            # 5) Сопоставление шаблона
+            res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+
+            # 6) Пики выше порога
+            ys, xs = np.where(res >= threshold)
+            if len(ys) == 0:
+                continue
+            scores = res[ys, xs]
+
+            for x0, y0, sc in zip(xs.tolist(), ys.tolist(), scores.tolist()):
+                candidates.append((int(x0), int(y0), int(tw), int(th), float(sc)))
+
+        # 7) Простая NMS, чтобы убрать пересечения
+        def nms(boxes, iou_thresh=0.3):
+            if not boxes:
+                return []
+            boxes = sorted(boxes, key=lambda b: b[4], reverse=True)
+            picked = []
+
+            def iou(a, b):
+                ax1, ay1, aw, ah = a[0], a[1], a[2], a[3]
+                bx1, by1, bw, bh = b[0], b[1], b[2], b[3]
+                ax2, ay2 = ax1 + aw, ay1 + ah
+                bx2, by2 = bx1 + bw, by1 + bh
+                inter_x1 = max(ax1, bx1)
+                inter_y1 = max(ay1, by1)
+                inter_x2 = min(ax2, bx2)
+                inter_y2 = min(ay2, by2)
+                inter_w = max(0, inter_x2 - inter_x1)
+                inter_h = max(0, inter_y2 - inter_y1)
+                inter = inter_w * inter_h
+                area_a = aw * ah
+                area_b = bw * bh
+                union = area_a + area_b - inter + 1e-9
+                return inter / union
+
+            while boxes:
+                best = boxes.pop(0)
+                picked.append(best)
+                boxes = [b for b in boxes if iou(best, b) < iou_thresh]
+            return picked
+
+        picked = nms(candidates, iou_thresh=0.3)
+        coordinates = [(x, y, w, h) for (x, y, w, h, _) in picked]
+        unique_coords = []
+        used_y = []
+
+        for (x, y, w, h) in coordinates:
+            # проверяем, нет ли уже координаты с близким y
+            if not any(abs(y - uy) <= 100 for uy in used_y):
+                unique_coords.append((x, y, w, h))
+                used_y.append(y)
+
+        coordinates = unique_coords
+        #sort from y
+        coordinates_sorted = sorted(coordinates, key=lambda c: c[1], reverse=True)
+
+        LOGGER.debug(f"[capture_and_find_image_boundary_coordinates] Matches: {len(coordinates)} (threshold={threshold}).")
+        return coordinates_sorted
+
+    except Exception as e:
+        print(f"Ошибка в capture_and_find_image_boundary_coordinates: {e}")
+        return []
 
 def main():
     init_tesseract()
