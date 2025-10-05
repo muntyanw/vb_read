@@ -74,10 +74,10 @@ def get_image_hash(image, size=(8, 8)):
 class Context:
     def __init__(
         self,
-        bot_client,
-        name_viber,
-        channels,
-        channel_names,
+        #bot_client,
+        #name_viber,
+        #channels,
+        #channel_names,
         old_text,
         width_menu=190,
         height_menu=220,
@@ -89,10 +89,10 @@ class Context:
         search_board_mess_y_end=1000,
     ):
 
-        self.bot_client = bot_client
-        self.name_viber = name_viber
-        self.channels = channels
-        self.channel_names = channel_names
+        #self.bot_client = bot_client
+        #self.name_viber = name_viber
+        #self.channels = channels
+        #self.channel_names = channel_names
         self.old_text = old_text
 
         # Assign default attributes
@@ -115,14 +115,14 @@ class Context:
 
 
 async def init():
-    bot_client, name_viber, channels, channel_names = await startTgClient()
+    #bot_client, name_viber, channels, channel_names = await startTgClient()
     old_text = load_previous_text()
 
     s = Context(
-        bot_client,
-        name_viber,
-        channels,
-        channel_names,
+        #bot_client,
+        #name_viber,
+        #channels,
+        #channel_names,
         old_text,
         width_menu=190,
         height_menu=220,

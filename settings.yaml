@@ -34,7 +34,7 @@ control_port: 4567
 
 monitor_width: 1920
 monitor_height: 1080
-monitor_index: 0
+monitor_index: 1
 
 #human_move_mouse_steps = 10
 

@@ -74,9 +74,12 @@ with mss.mss() as sct:
     monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран
     # monitors[1] — первый физический экран; monitors[2] — второй и т.д.
     # Мы ожидаем MONITOR_INDEX 1-based
+    print(f"MONITOR_INDEX = {MONITOR_INDEX}")
     if 1 <= MONITOR_INDEX < len(monitors):
         mon = monitors[MONITOR_INDEX]
-        MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
+        print(mon)
+        #MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
+        MON_X, MON_Y, MON_W, MON_H = mon["width"], mon["top"],mon["width"], mon["height"]
         LOGGER.debug("Using MSS monitor #%d: offset (%d,%d), size %dx%d",
                     MONITOR_INDEX, MON_X, MON_Y, MON_W, MON_H)
     else:
@@ -92,6 +95,7 @@ def pause(amount):
 def _get_monitor_region(scope) -> dict:
     if scope != None:
         left, bottom, right, top = scope
+        print(f"MON_X = {MON_X}")
         monitor_region = {
             "top": bottom,
             "left": MON_X + left,
@@ -437,6 +441,7 @@ def _grab_with_dxcam(scope: Optional[Tuple[int, int, int, int]]) -> Optional[np.
     if scope:
         l, t, w, h = scope
         l = l + MON_X
+        print(f"MON_X = {MON_X}")
         frame = _DXCAM_HANDLE.grab(region=(l, t, l + w, t + h))
     else:
         frame = _DXCAM_HANDLE.grab()

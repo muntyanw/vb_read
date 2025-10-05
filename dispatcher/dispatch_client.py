@@ -20,7 +20,7 @@ import time
 pag.FAILSAFE = False
 
 DISPATCH_URL = os.getenv(
-    "DISPATCH_URL", "http://192.168.1.223:8888/api/v1/dispatch/analyze"
+    "DISPATCH_URL", "http://46.63.40.211:8888/api/v1/dispatch/analyze"
 )
 DISPATCH_API_KEY = os.getenv(
     "DISPATCH_API_KEY",
@@ -469,7 +469,7 @@ def klickPerevizniki(window, clickMessBool):
         confidence=0.88,
         count_click=1,
         multiscale=True,
-        is_debug=0,
+        is_debug=1,
     ):
         log_and_print("Not find name chat Perevezniki")
         return False
