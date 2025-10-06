@@ -777,8 +777,6 @@ def human_move_diff(diff_x: int, diff_y: int, duration: Tuple[float, float] = (0
 def click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):
     if x == None:
         x, y = pag.position()
-    else:
-        x = MON_X + x
         
     human_move_and_click(x, y) 
     
