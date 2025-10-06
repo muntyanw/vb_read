@@ -650,7 +650,7 @@ def fill_y_mess(window, s):
             "images\\heart6.png",
             "images\\heart5.png",
         ],
-        visualize=1,
+        visualize=0,
         threshold=0.88,
     )
     window.set_focus()

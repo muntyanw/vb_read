@@ -1213,8 +1213,8 @@ def find_text_any(
                     center_x_rel = (x_left + x_right) // 2
                     center_y_rel = (y_top + y_bottom) // 2
 
-                    abs_x = MON_X + scope_left + center_x_rel
-                    abs_y = MON_Y + scope_top + center_y_rel
+                    abs_x = scope_left + center_x_rel
+                    abs_y = scope_top + center_y_rel
 
                     found_count += 1
                     matches.append((abs_x, abs_y))
