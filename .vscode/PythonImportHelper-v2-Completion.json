@@ -1805,6 +1805,15 @@
         "documentation": {}
     },
     {
+        "label": "grab_monitor",
+        "kind": 2,
+        "importPath": "core.gui_driver",
+        "description": "core.gui_driver",
+        "peekOfCode": "def grab_monitor(region=None, as_rgb=False):\n    \"\"\"\n    region:\n      - tuple/list: (x, y, w, h) абсолютные координаты виртуального рабочего стола\n      - dict: {\"left\":x, \"top\":y, \"width\":w, \"height\":h}\n      - None: весь виртуальный экран (sct.monitors[1])\n    as_rgb: True -> RGB (как у pyautogui), False -> BGR (для OpenCV)\n    returns: np.ndarray (H, W, 3), uint8\n    \"\"\"\n    with mss.mss() as sct:",
+        "detail": "core.gui_driver",
+        "documentation": {}
+    },
+    {
         "label": "capture_and_find_image_boundary_coordinates",
         "kind": 2,
         "importPath": "core.gui_driver",

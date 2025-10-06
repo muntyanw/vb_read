@@ -1504,12 +1504,39 @@ def ensure_layout(target: str = "en", max_attempts: int = 5) -> bool:
 
     return get_current_layout() == desired_code
 
-import mss, numpy as np, cv2
-
-def grab_monitor(region=None):
+def grab_monitor(region=None, as_rgb=False):
+    """
+    region:
+      - tuple/list: (x, y, w, h) абсолютные координаты виртуального рабочего стола
+      - dict: {"left":x, "top":y, "width":w, "height":h}
+      - None: весь виртуальный экран (sct.monitors[1])
+    as_rgb: True -> RGB (как у pyautogui), False -> BGR (для OpenCV)
+    returns: np.ndarray (H, W, 3), uint8
+    """
     with mss.mss() as sct:
-        img = np.array(sct.grab(region))          # BGRA
-        img = img[..., :3]                     # BGR (для OpenCV) / RGB по необходимости
+        # Build bbox
+        if region is None:
+            mon = sct.monitors[1]  # full virtual desktop
+            bbox = {"left": mon["left"], "top": mon["top"],
+                    "width": mon["width"], "height": mon["height"]}
+        elif isinstance(region, (tuple, list)):
+            x, y, w, h = map(int, region)
+            if w <= 0 or h <= 0:
+                raise ValueError("width/height must be > 0")
+            bbox = {"left": x, "top": y, "width": w, "height": h}
+        elif isinstance(region, dict):
+            bbox = {"left": int(region["left"]), "top": int(region["top"]),
+                    "width": int(region["width"]), "height": int(region["height"])}
+            if bbox["width"] <= 0 or bbox["height"] <= 0:
+                raise ValueError("width/height must be > 0")
+        else:
+            raise ValueError("region must be None, (x,y,w,h), or dict with left/top/width/height")
+
+        # Grab
+        shot = sct.grab(bbox)              # BGRA
+        img = np.array(shot, dtype=np.uint8)[:, :, :3]  # BGR
+        if as_rgb:
+            img = img[:, :, ::-1].copy()   # BGR->RGB to match pyautogui
         return img
 
 def capture_and_find_image_boundary_coordinates(
