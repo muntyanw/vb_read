@@ -17,8 +17,7 @@ import os
 from core import gui_driver as gd
 from dispatcher.dispatch_client import (
     processViberMess,
-    klickPerevizniki,
-    has_active_orders,
+    klickViberChannel,
 )
 import asyncio
 from vb_utils import scroll_with_mouse, left_click
@@ -74,10 +73,7 @@ def get_image_hash(image, size=(8, 8)):
 class Context:
     def __init__(
         self,
-        #bot_client,
-        #name_viber,
-        #channels,
-        #channel_names,
+        name_viber_channel,
         old_text,
         width_menu=190,
         height_menu=220,
@@ -89,14 +85,9 @@ class Context:
         search_board_mess_y_end=1000,
     ):
 
-        #self.bot_client = bot_client
-        #self.name_viber = name_viber
-        #self.channels = channels
-        #self.channel_names = channel_names
+        self.name_viber_channel = name_viber_channel
         self.old_text = old_text
 
-        # Assign default attributes
-        self.search_board_mess_x_start = search_board_mess_x_start
         self.width_menu = width_menu
         self.height_menu = height_menu
         self.height_item_menu = height_item_menu
@@ -104,10 +95,10 @@ class Context:
 
         self.y_mess = []
 
-        self.search_board_mess_x_start = (search_board_mess_x_start,)
-        self.search_board_mess_x_end = (search_board_mess_x_end,)
-        self.search_board_mess_y_start = (search_board_mess_y_start,)
-        self.search_board_mess_y_end = (search_board_mess_y_end,)
+        self.search_board_mess_x_start = search_board_mess_x_start
+        self.search_board_mess_x_end = search_board_mess_x_end
+        self.search_board_mess_y_start = search_board_mess_y_start
+        self.search_board_mess_y_end = search_board_mess_y_end
 
     def display_info(self):
         """Method to display the bot's main information."""
@@ -115,29 +106,20 @@ class Context:
 
 
 async def init():
-    #bot_client, name_viber, channels, channel_names = await startTgClient()
-    old_text = load_previous_text()
 
     s = Context(
-        #bot_client,
-        #name_viber,
-        #channels,
-        #channel_names,
-        old_text,
+        name_viber_channel = read_setting("name_viber_channel"),
+        old_text =  load_previous_text(),
         width_menu=190,
         height_menu=220,
         height_item_menu=20,
         x_offset_out_mess=400,
-        search_board_mess_x_start=60,
-        search_board_mess_x_end=1000,
-        search_board_mess_y_start=100,
-        search_board_mess_y_end=1000,
+        search_board_mess_x_start=int(read_setting("search_board_mess_x_start")),
+        search_board_mess_x_end=int(read_setting("search_board_mess_x_end")),
+        search_board_mess_y_start=int(read_setting("search_board_mess_y_start")),
+        search_board_mess_y_end=int(read_setting("search_board_mess_y_end")),
     )
 
-    s.search_board_mess_x_start = read_setting("search_board_mess_x_start")
-    s.search_board_mess_x_end = read_setting("search_board_mess_x_end")
-    s.search_board_mess_y_start = read_setting("search_board_mess_y_start")
-    s.search_board_mess_y_end = read_setting("search_board_mess_y_end")
     # Создаем экземпляр и запускаем
     # log_and_print(f"Нажмить клавишу r щоб виділити область єкрана з сповіщеннями вайбєр, чи Enter щоб залишити старі")
     # while True:
@@ -328,10 +310,10 @@ async def main():
             #         "info",
             #     )
 
-            if not klickPerevizniki(window, True):
-                log_and_print("Not find chat Perevizniki")
+            if not klickViberChannel(window, True, s):
+                log_and_print(f"Not find chat {s.name_viber_channel}")
                 return None
-            log_and_print("click chat Perevizniki")
+            log_and_print(f"click chat {s.name_viber_channel}")
 
             await processViberMess(
                 window, s, count_scroll_up, count_scroll_down, pause_cycle_read

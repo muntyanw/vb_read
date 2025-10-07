@@ -1,5 +1,4 @@
 {
-    "name_viber": "Viber1",
     "capture_and_recognize": {
         "lang": "ukr",
         "custom_config": "--oem 3 --psm 6"
@@ -32,5 +31,6 @@
     "indent_up": 200,
     "indent_down": 200,
     "dispatch_timeout_s": 15,
-    "dispatch_retries": 2
+    "dispatch_retries": 2,
+    "name_viber_channel":"pereviz"
 }

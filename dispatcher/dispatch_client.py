@@ -442,33 +442,15 @@ def clickLastMess(window):
     return True
 
 
-def klickUkrBus(window, clickMessBool):
+def klickViberChannel(window, clickMessBool, s):
+
     if not gd.click_image(
-        "ukrbus.png",
+        s.name_viber_channel + ".png",
         scope=(0, 200, 120, 700),
         confidence=0.88,
         count_click=1,
         multiscale=True,
-        is_debug=0,
-    ):
-        log_and_print("Not find name chat UkrBusTravel")
-        return False
-
-    log_and_print("Click name chat UkrBusTravel")
-    if clickMessBool:
-        clickLastMess(window)
-    return True
-
-
-def klickPerevizniki(window, clickMessBool):
-
-    if not gd.click_image(
-        "pereviz.png",
-        scope=(0, 200, 120, 700),
-        confidence=0.88,
-        count_click=1,
-        multiscale=True,
-        is_debug=0,
+        is_debug=False,
     ):
         log_and_print("Not find name chat Perevezniki")
         return False
@@ -483,7 +465,7 @@ def findMessage(window, x, y, s, text):
     log_and_print(f"[findMessage] text = {text}")
     gd.right_click(x, y)
     gd.pause(0.5)
-    current_text = click_copy_text_from_image(window, s, x+60, y, is_debug=0)
+    current_text = click_copy_text_from_image(window, s, x+60, y, is_debug=False)
 
     log_and_print(f"[findMessage] current_text = {current_text}")
 
@@ -532,7 +514,7 @@ def findMessage(window, x, y, s, text):
                 count_scroll_up = read_setting("count_scroll_up")
                 scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
             else:
-                klickPerevizniki(window, True)
+                klickViberChannel(window, True, s)
                 pag.keyDown("esq")
                 gd.pause(0.2)
                 pag.keyUp("esq")
@@ -564,7 +546,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
         lang="rus",
         scope=(x - 200, y - 50, x + 200, y + 400),
         threshold=0.86,
-        is_debug=0,
+        is_debug=False,
     ):
         log_and_print("Not find menu item Переслать")
         return False
@@ -624,7 +606,7 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
     save_current_text(text)
     s.old_text = load_previous_text()
 
-    klickPerevizniki(window, True)
+    klickViberChannel(window, True, s)
     return True
 
 
@@ -650,7 +632,7 @@ def fill_y_mess(window, s):
             "images\\heart6.png",
             "images\\heart5.png",
         ],
-        visualize=0,
+        visualize=False,
         threshold=0.88,
     )
     window.set_focus()
@@ -672,7 +654,7 @@ async def processViberMess(
         s.search_board_mess_y_start + 10,
     )
 
-    count_repeat = read_setting("count_repeat")
+    count_repeat = int(read_setting("count_repeat"))
     for i in range(count_repeat):
         ctypes.windll.user32.LockWindowUpdate(hwnd)
         while True:
@@ -711,8 +693,8 @@ async def processViberMess(
         s.search_board_mess_y_start + 10,
     )
 
-    if not klickPerevizniki(window, True):
-        log_and_print("Not find chat Perevizniki")
+    if not klickViberChannel(window, True, s):
+        log_and_print(f"Not find chat {s.name_viber_channel}")
         return None
 
     scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")

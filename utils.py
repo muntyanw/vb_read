@@ -1,4 +1,5 @@
 import json
+import string
 from log import log_and_print
 import os
 import cv2
@@ -53,7 +54,7 @@ def preprocess_image(image_np):
     return opened
 
 
-def read_setting(field_path):
+def read_setting(field_path) -> str | int | float | bool:
 
     file_path = "settings.json"
     try:
