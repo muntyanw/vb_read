@@ -16,6 +16,7 @@ import ctypes
 from vb_utils import scroll_with_mouse
 from recognize_text import text_includes_fast
 import time
+from tg import telegram_channel_name
 
 pag.FAILSAFE = False
 
@@ -133,7 +134,9 @@ def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
 
 
 async def process_one_message_dispatcher(
-    message_text: Optional[str], file_path: Optional[str]
+    message_text: Optional[str], 
+    file_path: Optional[str],
+    s
 ):
     log_and_print("!!! process_one_message_dispatcher !!!")
 
@@ -150,7 +153,7 @@ async def process_one_message_dispatcher(
             return await send_for_analysis(
                 message_id=md5_hash,
                 text=message_text or "",
-                chat_id="UkrBusTravel",
+                chat_id=s.name_viber_channel,
                 sender="",  # <— отправляем имя отправителя
                 attachments=None,
                 locale="uk",
@@ -366,7 +369,7 @@ async def send_messages_from_y_mess(window, s):
                         "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:"
                     )
                     resp = await process_one_message_dispatcher(
-                        text, None
+                        text, None, s
                     )
                     log_and_print(
                         f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
@@ -426,9 +429,9 @@ async def send_messages_from_y_mess(window, s):
     return was_new_mess
 
 
-def clickLastMess(window):
+def clickLastMess(window, s):
     if not gd.click_image(
-        "last_mess.png",
+        f"{s.name_viber_channel}\\last_mess.png",
         scope=(720, 910, 790, 980),
         confidence=0.7,
         count_click=1,
@@ -457,7 +460,7 @@ def klickViberChannel(window, clickMessBool, s):
 
     log_and_print("Click name chat Perevezniki")
     if clickMessBool:
-        clickLastMess(window)
+        clickLastMess(window, s)
     return True
 
 
@@ -498,7 +501,7 @@ def findMessage(window, x, y, s, text):
 
                         current_text = click_copy_text_from_image(window, s, x, y)
                         if current_text == "":
-                            clickLastMess(window)
+                            clickLastMess(window, s)
                             continue
 
                         if text_includes_fast(text, current_text, 0.7):
@@ -624,13 +627,13 @@ def fill_y_mess(window, s):
     coordinates = gd.capture_and_find_image_boundary_coordinates(
         (x, y, 320, height),
         [
-            "images\\heart.png",
-            "images\\heart2.png",
-            "images\\heart3.png",
-            "images\\heart4.png",
-            "images\\heart5.png",
-            "images\\heart6.png",
-            "images\\heart5.png",
+            f"images\\{s.name_viber_channel}\\heart.png",
+            f"images\\{s.name_viber_channel}\\heart2.png",
+            f"images\\{s.name_viber_channel}\\heart3.png",
+            f"images\\{s.name_viber_channel}\\heart4.png",
+            f"images\\{s.name_viber_channel}\\heart5.png",
+            f"images\\{s.name_viber_channel}\\heart6.png",
+            f"images\\{s.name_viber_channel}\\heart5.png",
         ],
         visualize=False,
         threshold=0.88,
@@ -669,7 +672,7 @@ async def processViberMess(
                             window, count_scroll=count_scroll_up, direction="up"
                         )
                     else:
-                        clickLastMess(window)
+                        clickLastMess(window, s)
                         
             else:
                 break
