@@ -455,7 +455,7 @@ def klickViberChannel(window, clickMessBool, s):
         multiscale=True,
         is_debug=False,
     ):
-        log_and_print("Not find name chat Perevezniki")
+        log_and_print(f"Not find name chat {s.name_viber_channel}")
         return False
 
     log_and_print("Click name chat Perevezniki")
