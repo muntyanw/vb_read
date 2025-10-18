@@ -903,6 +903,38 @@
         "documentation": {}
     },
     {
+        "label": "telegram_channel_name",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "startTgClient",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "send_message_to_tg_channel",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
+        "label": "startTgClient",
+        "importPath": "tg",
+        "description": "tg",
+        "isExtraImport": true,
+        "detail": "tg",
+        "documentation": {}
+    },
+    {
         "label": "send_for_analysis",
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
@@ -927,15 +959,7 @@
         "documentation": {}
     },
     {
-        "label": "klickPerevizniki",
-        "importPath": "dispatcher.dispatch_client",
-        "description": "dispatcher.dispatch_client",
-        "isExtraImport": true,
-        "detail": "dispatcher.dispatch_client",
-        "documentation": {}
-    },
-    {
-        "label": "has_active_orders",
+        "label": "klickViberChannel",
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
         "isExtraImport": true,
@@ -1008,30 +1032,6 @@
         "importPath": "yaml",
         "description": "yaml",
         "detail": "yaml",
-        "documentation": {}
-    },
-    {
-        "label": "startTgClient",
-        "importPath": "tg",
-        "description": "tg",
-        "isExtraImport": true,
-        "detail": "tg",
-        "documentation": {}
-    },
-    {
-        "label": "send_message_to_tg_channel",
-        "importPath": "tg",
-        "description": "tg",
-        "isExtraImport": true,
-        "detail": "tg",
-        "documentation": {}
-    },
-    {
-        "label": "startTgClient",
-        "importPath": "tg",
-        "description": "tg",
-        "isExtraImport": true,
-        "detail": "tg",
         "documentation": {}
     },
     {
@@ -1121,6 +1121,15 @@
         "description": "telethon.tl.types",
         "isExtraImport": true,
         "detail": "telethon.tl.types",
+        "documentation": {}
+    },
+    {
+        "label": "string",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "string",
+        "description": "string",
+        "detail": "string",
         "documentation": {}
     },
     {
@@ -1602,7 +1611,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def human_move_diff(diff_x: int, diff_y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x, y = pag.position()\n    x = x + diff_x\n    y = y + diff_y\n    _human_move(x, y, duration)\n    return x, y\ndef click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):\n    if x == None:\n        x, y = pag.position()\n    else:",
+        "peekOfCode": "def human_move_diff(diff_x: int, diff_y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    x, y = pag.position()\n    x = x + diff_x\n    y = y + diff_y\n    _human_move(x, y, duration)\n    return x, y\ndef click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):\n    if x == None:\n        x, y = pag.position()\n    human_move_and_click(x, y) ",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1611,7 +1620,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):\n    if x == None:\n        x, y = pag.position()\n    else:\n        x = MON_X + x\n    human_move_and_click(x, y) \ndef right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)",
+        "peekOfCode": "def click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):\n    if x == None:\n        x, y = pag.position()\n    human_move_and_click(x, y) \ndef right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1962,25 +1971,16 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess(window):\n    if not gd.click_image(\n        \"last_mess.png\",\n        scope=(720, 910, 790, 980),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):\n        log_and_print(\"Not find name carrier UkrBusTravel\")",
+        "peekOfCode": "def clickLastMess(window, s):\n    if not gd.click_image(\n        f\"{s.name_viber_channel}\\\\last_mess.png\",\n        scope=(720, 910, 790, 980),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):\n        log_and_print(\"Not find name carrier UkrBusTravel\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
     {
-        "label": "klickUkrBus",
+        "label": "klickViberChannel",
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def klickUkrBus(window, clickMessBool):\n    if not gd.click_image(\n        \"ukrbus.png\",\n        scope=(0, 200, 120, 700),\n        confidence=0.88,\n        count_click=1,\n        multiscale=True,\n        is_debug=0,\n    ):\n        log_and_print(\"Not find name chat UkrBusTravel\")",
-        "detail": "dispatcher.dispatch_client",
-        "documentation": {}
-    },
-    {
-        "label": "klickPerevizniki",
-        "kind": 2,
-        "importPath": "dispatcher.dispatch_client",
-        "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def klickPerevizniki(window, clickMessBool):\n    if not gd.click_image(\n        \"pereviz.png\",\n        scope=(0, 200, 120, 700),\n        confidence=0.88,\n        count_click=1,\n        multiscale=True,\n        is_debug=0,\n    ):\n        log_and_print(\"Not find name chat Perevezniki\")",
+        "peekOfCode": "def klickViberChannel(window, clickMessBool, s):\n    if not gd.click_image(\n        s.name_viber_channel + \".png\",\n        scope=(0, 200, 120, 700),\n        confidence=0.88,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):\n        log_and_print(\"Not find name chat Perevezniki\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1989,7 +1989,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def findMessage(window, x, y, s, text):\n    log_and_print(f\"[findMessage] text = {text}\")\n    gd.right_click(x, y)\n    gd.pause(0.5)\n    current_text = click_copy_text_from_image(window, s, x+60, y, is_debug=0)\n    log_and_print(f\"[findMessage] current_text = {current_text}\")\n    if text_includes_fast(text, current_text, 0.7):\n        log_and_print(\"[findMessage] succ message find\")\n        return x, y\n    else:",
+        "peekOfCode": "def findMessage(window, x, y, s, text):\n    log_and_print(f\"[findMessage] text = {text}\")\n    gd.right_click(x, y)\n    gd.pause(0.5)\n    current_text = click_copy_text_from_image(window, s, x+60, y, is_debug=False)\n    log_and_print(f\"[findMessage] current_text = {current_text}\")\n    if text_includes_fast(text, current_text, 0.7):\n        log_and_print(\"[findMessage] succ message find\")\n        return x, y\n    else:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2304,7 +2304,7 @@
         "kind": 6,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "class Context:\n    def __init__(\n        self,\n        #bot_client,\n        #name_viber,\n        #channels,\n        #channel_names,\n        old_text,\n        width_menu=190,\n        height_menu=220,",
+        "peekOfCode": "class Context:\n    def __init__(\n        self,\n        name_viber_channel,\n        old_text,\n        width_menu=190,\n        height_menu=220,\n        height_item_menu=20,\n        x_offset_out_mess=400,\n        search_board_mess_x_start=360,",
         "detail": "pwa",
         "documentation": {}
     },
@@ -2574,7 +2574,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def read_setting(field_path):\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8') as file:\n            settings = json.load(file)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:",
+        "peekOfCode": "def read_setting(field_path) -> str | int | float | bool:\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8') as file:\n            settings = json.load(file)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:",
         "detail": "utils",
         "documentation": {}
     },
