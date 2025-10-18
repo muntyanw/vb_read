@@ -49,6 +49,10 @@ class Decision(BaseModel):
     confidence: Optional[float] = None
     reason: Optional[str] = None
 
+class MatchedContact(BaseModel):
+    order_id: int
+    carrier_id: int
+    viber_contact_name: Optional[str] = None
 
 class DispatchResult(BaseModel):
     message_id: str
@@ -56,6 +60,7 @@ class DispatchResult(BaseModel):
     actions: List[Action] = []
     # опционально: поддержка старого/нового формата
     decision: Optional[Decision] = None
+    matched_contacts: Optional[List[MatchedContact]] = None
 
 
 def _dispatch_base_url() -> str:
@@ -352,7 +357,7 @@ async def send_messages_from_y_mess(window, s):
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
 
-            text = click_copy_text_from_image(window, s, x, y)
+            text = click_copy_text_from_image(window, s, x, y, is_debug=False)
 
             if not text:
                 log_and_print(
@@ -374,16 +379,32 @@ async def send_messages_from_y_mess(window, s):
 
                     # Извлекаем тип первой команды (если есть)
                     action_type = None
+                    viber_names = []
+                    
                     if isinstance(resp, DispatchResult) and resp.actions:
                         first_action = resp.actions[0]
                         action_type = _safe_action_type(first_action)
+                        
+                        # 2) достаём имена перевозчиков, если backend вернул matched_contacts
+                        if hasattr(resp, "matched_contacts") and getattr(resp, "matched_contacts", None):
+                            # resp.matched_contacts — это список объектов или словарей
+                            for mc in resp.matched_contacts or []:
+                                # если это словарь
+                                if isinstance(mc, dict):
+                                    name = mc.get("viber_contact_name")
+                                else:
+                                    # Pydantic-модель MatchedContact
+                                    name = getattr(mc, "viber_contact_name", None)
+
+                                if name and name not in viber_names:
+                                    viber_names.append(name)
 
                     result = True
                     if action_type != "ignore":
                         log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
 
                         result = sendViberMessDispatherToСarrier(
-                            "Віталій", window, xRight, yRight, s, text
+                            viber_names, window, xRight, yRight, s, text
                         )
 
 
@@ -525,7 +546,7 @@ def findMessage(window, x, y, s, text):
                     s.search_board_mess_y_start + 10,
                 )
 
-def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
+def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
     is_debug = False
 
     resultFind = findMessage(window, x, y, s, text)
@@ -553,43 +574,48 @@ def sendViberMessDispatherToСarrier(NameViberCarrier, window, x, y, s, text):
 
     log_and_print("Click Переслать")
 
-    pos = gd.find_image(
-        "find.png", scope=(320, 320, 380, 380), multiscale=False, is_debug=is_debug
-    )
+    for viber_name in viber_names:
+        log_and_print(f"viber_name = {viber_name}")
+        
+        first_name = viber_name.split()[0]
+   
+        pos = gd.find_image(
+            "find.png", scope=(320, 320, 380, 380), multiscale=False, is_debug=is_debug
+        )
 
-    if not pos:
-        log_and_print("Not find field find in resend")
-        return False
+        if not pos:
+            log_and_print("Not find field find in resend")
+            return False
+    
+        gd.click(pos[0] + 100, pos[1])
+        log_and_print("Click field find")
 
-    gd.click(pos[0] + 100, pos[1])
-    log_and_print("Click field find")
+        pyperclip.copy(viber_name)
+        gd.pause(0.5)
+        pag.keyDown("ctrl")
+        gd.pause(0.3)
+        pag.press("v")
+        gd.pause(0.3)
+        pag.keyUp("ctrl")
+        gd.pause(1)
+        log_and_print("Click ctrl v")
+        gd.pause(3)
 
-    pyperclip.copy(NameViberCarrier)
-    gd.pause(0.5)
-    pag.keyDown("ctrl")
-    gd.pause(0.3)
-    pag.press("v")
-    gd.pause(0.3)
-    pag.keyUp("ctrl")
-    gd.pause(1)
-    log_and_print("Click ctrl v")
-    gd.pause(1)
+        if not gd.click_text(
+            [first_name],
+            count_attempt_find=2,
+            pause_attempt=4,
+            lang="ukr",
+            scope=(pos[0], pos[0] + 40, pos[0] + 300, pos[0] + 200),
+            is_debug=False,
+            threshold=0.5,
+            occurrence=1,
+        ):
+            log_and_print(f"Not find NameViberCarrier  {viber_name}")
+            return "repeat"
 
-    if not gd.click_text(
-        [NameViberCarrier],
-        count_attempt_find=2,
-        pause_attempt=4,
-        lang="ukr",
-        scope=(pos[0], pos[0] - 200, pos[0] + 300, pos[0] + 200),
-        is_debug=is_debug,
-        threshold=0.5,
-        occurrence=2,
-    ):
-        log_and_print(f"Not find NameViberCarrier  {NameViberCarrier}")
-        return "repeat"
-
-    log_and_print(f"click name chat {NameViberCarrier}")
-    gd.pause(1)
+        log_and_print(f"click name chat {viber_name}")
+        gd.pause(1)
 
     if not gd.click_image(
         "resend.png",
