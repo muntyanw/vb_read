@@ -570,6 +570,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
         lang="rus",
         scope=(x - 200, y - 50, x + 200, y + 400),
         threshold=0.86,
+        plus_x = -16,
         is_debug=False,
     ):
         log_and_print("Not find menu item Переслать")
@@ -602,7 +603,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
         pag.keyUp("ctrl")
         gd.pause(1)
         log_and_print("Click ctrl v")
-        gd.pause(3)
+        gd.pause(1)
 
         if not gd.click_text(
             [first_name],

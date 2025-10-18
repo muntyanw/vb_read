@@ -936,6 +936,7 @@ def click_text(
     pause_attempt: int = 2,
     scope: tuple[int, int, int, int] = None,
     plus_y: int = 0,
+    plus_x: int = 0,
     is_debug: bool = False,
     threshold: float = 0.7,
     occurrence: int = 1,
@@ -988,7 +989,7 @@ def click_text(
     
     if pos:
         abs_x, abs_y = pos
-        human_move_and_click(abs_x, abs_y + plus_y, duration)
+        human_move_and_click(abs_x + plus_x, abs_y + plus_y, duration)
         return pos
 
     time.sleep(0.2)
