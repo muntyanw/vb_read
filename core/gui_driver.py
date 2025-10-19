@@ -934,7 +934,7 @@ def click_text(
     lang: str,
     count_attempt_find: int = 1,
     pause_attempt: int = 2,
-    scope: tuple[int, int, int, int] = None,
+    scope: tuple[int, int, int, int] | None = None,
     plus_y: int = 0,
     plus_x: int = 0,
     is_debug: bool = False,
@@ -969,7 +969,6 @@ def click_text(
                         count=count_attempt_find, 
                         pause_attempt = pause_attempt, 
                         scope=scope, plus_y = plus_y,
-                        threshold = threshold, 
                         is_debug=is_debug, occurrence = occurrence)
         
     elif isinstance(query, Iterable):
@@ -1129,14 +1128,14 @@ def find_text_any(
     queries: Iterable[str],
     lang: str,
     count: int = 1,
-    pause_attempt_sec: int = 0.5,
+    pause_attempt_sec: int = 1,
     scope: tuple[int, int, int, int] | None = None,
     is_debug: bool = False,
     occurrence: int = 1,
     threshold: float = 0.7,
     font_scale: float = 0.7,
     font_thickness: int = 2,
-) -> Tuple[List[Tuple[int, int]], Optional[Tuple[int, int]]]:
+) -> Tuple[List[Tuple[int, int]], Optional[Tuple[int, int]]] | None:
     """
     Ищет любой из текстов `queries` на экране, визуализирует все нахождения
     и возвращает:

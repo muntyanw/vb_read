@@ -280,7 +280,7 @@ def click_copy_text_from_text(window, s, x, y):
             x + int(s.width_menu * 1.2),
             y + int(s.height_menu * 1.4),
         ),
-        is_debug=0,
+        is_debug=False,
         threshold=0.8,
         occurrence=1,
     ):
@@ -299,39 +299,64 @@ def click_copy_text_from_text(window, s, x, y):
         log_and_print("[send_messages_from_y_mess] right click empty place")
 
     log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
+    
+def is_foto_message(scope):
+
+    pos = gd.find_text_any(queries=["Копировать фото",],
+                            lang="rus", 
+                            count=2, 
+                            pause_attempt_sec =1, 
+                            scope=scope, 
+                            threshold = 0.8,
+                            is_debug=False, 
+                            occurrence = 1)
+    if pos:
+        return True
+    
+    return False
 
 
 def click_copy_text_from_image(window, s, x, y, is_debug = False):
     global count_y_mess_empty
-    if not gd.click_image(
-        "copy.png",
-        scope=(
+    
+    scope=(
             int(x - s.width_menu),
             y - int(s.height_menu),
             x + int(s.width_menu),
             y + int(s.height_menu),
-        ),
+    )
+    
+    if not gd.click_image(
+        "copy.png",
+        scope=scope,
         confidence=0.88,
         count_click=1,
         multiscale=True,
         is_debug=is_debug,
     ):
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
-        count_y_mess_empty = count_y_mess_empty + 1
-        window.set_focus()
-        pag.keyDown("esq")
-        gd.pause(0.4)
-        pag.keyUp("esq")
-        gd.pause(0.4)
-        log_and_print("[send_messages_from_y_mess] press esq")
-        gd.right_click(
-            s.search_board_mess_x_start + s.x_offset_out_mess,
-            s.search_board_mess_y_start + 10,
-        )
-        log_and_print("[send_messages_from_y_mess] right click empty place")
-        return ""
+        
+        if is_foto_message(scope):
+        
+            count_y_mess_empty = count_y_mess_empty + 1
+            window.set_focus()
+            pag.keyDown("esq")
+            gd.pause(0.4)
+            pag.keyUp("esq")
+            gd.pause(0.4)
+            log_and_print("[send_messages_from_y_mess] press esq")
+            gd.right_click(
+                s.search_board_mess_x_start + s.x_offset_out_mess,
+                s.search_board_mess_y_start + 10,
+            )
+            log_and_print("[send_messages_from_y_mess] right click empty place")
+            return "is_foto"
+        
+        else:
+            
+            return None
 
-    log_and_print("[send_messagfrom_y_mess] Повідомлення скопіювано в буфер обміну")
+    log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
     return pyperclip.paste()
 
 
@@ -361,91 +386,97 @@ async def send_messages_from_y_mess(window, s):
             )
 
             text = click_copy_text_from_image(window, s, x, y, is_debug=False)
-
-            if not text:
+            
+            if text == "is_foto":
+                log_and_print("[send_messages_from_y_mess] Фото повідомлення")
+                continue
+            
+            if text is None:
                 log_and_print(
                     "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий"
                 )
-            else:
-                if not text_includes_fast(text, s.old_text, 0.7):
-                    was_new_mess = True
-                    count_old_mess = 0
-                    log_and_print(
-                        "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:"
-                    )
-                    resp = await process_one_message_dispatcher(
-                        text, None, s
-                    )
-                    log_and_print(
-                        f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
-                    )
+                return "repeat"
 
-                    # Извлекаем тип первой команды (если есть)
-                    action_type = None
-                    viber_names = []
+                
+            if not text_includes_fast(text, s.old_text, 0.7):
+                was_new_mess = True
+                count_old_mess = 0
+                log_and_print(
+                    "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:"
+                )
+                resp = await process_one_message_dispatcher(
+                    text, None, s
+                )
+                log_and_print(
+                    f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
+                )
+
+                # Извлекаем тип первой команды (если есть)
+                action_type = None
+                viber_names = []
+                
+                if isinstance(resp, DispatchResult) and resp.actions:
+                    first_action = resp.actions[0]
+                    action_type = _safe_action_type(first_action)
                     
-                    if isinstance(resp, DispatchResult) and resp.actions:
-                        first_action = resp.actions[0]
-                        action_type = _safe_action_type(first_action)
-                        
-                        # 2) достаём имена перевозчиков, если backend вернул matched_contacts
-                        if hasattr(resp, "matched_contacts") and getattr(resp, "matched_contacts", None):
-                            # resp.matched_contacts — это список объектов или словарей
-                            for mc in resp.matched_contacts or []:
-                                # если это словарь
-                                if isinstance(mc, dict):
-                                    name = mc.get("viber_contact_name")
-                                else:
-                                    # Pydantic-модель MatchedContact
-                                    name = getattr(mc, "viber_contact_name", None)
+                    # 2) достаём имена перевозчиков, если backend вернул matched_contacts
+                    if hasattr(resp, "matched_contacts") and getattr(resp, "matched_contacts", None):
+                        # resp.matched_contacts — это список объектов или словарей
+                        for mc in resp.matched_contacts or []:
+                            # если это словарь
+                            if isinstance(mc, dict):
+                                name = mc.get("viber_contact_name")
+                            else:
+                                # Pydantic-модель MatchedContact
+                                name = getattr(mc, "viber_contact_name", None)
 
-                                if name and name not in viber_names:
-                                    viber_names.append(name)
+                            if name and name not in viber_names:
+                                viber_names.append(name)
 
-                    result = True
-                    if action_type != "ignore":
-                        log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
+                result = True
+                if action_type != "ignore":
+                    log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
+
+                    result = sendViberMessDispatherToСarrier(
+                        viber_names, window, xRight, yRight, s, text
+                    )
+
+
+
+                    if not result:
+                        pag.keyDown("esq")
+                        gd.pause(0.2)
+                        pag.keyUp("esq")
+                        gd.pause(0.2)
+
+                        gd.right_click(
+                            s.search_board_mess_x_start + s.x_offset_out_mess,
+                            s.search_board_mess_y_start + 10,
+                        )
 
                         result = sendViberMessDispatherToСarrier(
-                            viber_names, window, xRight, yRight, s, text
-                        )
-
-
-
-                        if not result:
-                            pag.keyDown("esq")
-                            gd.pause(0.2)
-                            pag.keyUp("esq")
-                            gd.pause(0.2)
-
-                            gd.right_click(
-                                s.search_board_mess_x_start + s.x_offset_out_mess,
-                                s.search_board_mess_y_start + 10,
-                            )
-
-                            result = sendViberMessDispatherToСarrier(
-                            "Віталій", window, xRight, yRight, s, text
-                        )
-
-                    else:
-                        log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
-
-                    if result:
-                        save_current_text(text)
-                        s.old_text = load_previous_text()
-                else:
-                    count_old_mess += 1
-                    if count_old_mess >= 3:
-                        was_new_mess = False
-                        count_old_mess = 0
-                        return was_new_mess
-                    sending += 1
-                    log_and_print(
-                        "[send_messages_from_y_mess] Сповіщення вже було відправлено"
+                        "Віталій", window, xRight, yRight, s, text
                     )
-                    if sending >= 2:
-                        # break
-                        pass
+
+                else:
+                    log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+
+                if result:
+                    save_current_text(text)
+                    s.old_text = load_previous_text()
+            else:
+                count_old_mess += 1
+                if count_old_mess >= 3:
+                    was_new_mess = False
+                    count_old_mess = 0
+                    return was_new_mess
+                sending += 1
+                log_and_print(
+                    "[send_messages_from_y_mess] Сповіщення вже було відправлено"
+                )
+                if sending >= 2:
+                    # break
+                    pass
 
     return was_new_mess
 
@@ -453,7 +484,7 @@ async def send_messages_from_y_mess(window, s):
 def clickLastMess(window, s):
     if not gd.click_image(
         f"{s.name_viber_channel}\\last_mess.png",
-        scope=(720, 910, 790, 980),
+        scope=(620, 910, 790, 980),
         confidence=0.7,
         count_click=1,
         multiscale=True,
@@ -472,7 +503,7 @@ def klickViberChannel(window, clickMessBool, s):
         s.name_viber_channel + ".png",
         scope=(0, 200, 120, 700),
         confidence=0.88,
-        count_click=1,
+        count_click=2,
         multiscale=True,
         is_debug=False,
     ):
@@ -493,7 +524,7 @@ def findMessage(window, x, y, s, text):
 
     log_and_print(f"[findMessage] current_text = {current_text}")
 
-    if text_includes_fast(text, current_text, 0.7):
+    if current_text and text_includes_fast(text, current_text, 0.7):
         log_and_print("[findMessage] succ message find")
         return x, y
     else:
@@ -591,7 +622,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
             log_and_print("Not find field find in resend")
             return False
     
-        gd.click(pos[0] + 100, pos[1])
+        gd.click(pos[0] + 100, pos[1] - 10)
         log_and_print("Click field find")
 
         pyperclip.copy(viber_name)
