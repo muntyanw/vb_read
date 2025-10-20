@@ -396,7 +396,7 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
         
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
         
-            
+        press_esq(s)    
         if is_foto_message(scope) or is_link(scope) or is_center_continue():
         
             count_y_mess_empty = count_y_mess_empty + 1
@@ -804,6 +804,10 @@ async def processViberMess(
                         clickLastMess(window, s)
                         
             else:
+
+                is_center_ok()
+                is_center_continue()
+
                 break
 
             window.set_focus()
