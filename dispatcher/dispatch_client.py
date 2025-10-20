@@ -3,7 +3,7 @@ import os
 from typing import Optional, Dict, Any, List, Union
 import asyncio
 import httpx
-from pydantic import BaseModel, Field, field_validator, ConfigDict
+from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigDict
 from datetime import datetime, timezone
 from find_message import load_previous_text, save_current_text
 from log import log_and_print
@@ -281,41 +281,7 @@ async def send_for_analysis(
 
     # теоретически недостижимо
     raise DispatchError(f"Dispatch failed: {last_exc}")
-
-
-def click_copy_text_from_text(window, s, x, y):
-    global count_y_mess_empty
-    if not gd.click_text(
-        ["Скопировать сообщение", "Копировать текст"],
-        count_attempt_find=2,
-        pause_attempt=2,
-        lang="rus",
-        scope=(
-            int(x - s.width_menu),
-            y - int(s.height_menu),
-            x + int(s.width_menu * 1.2),
-            y + int(s.height_menu * 1.4),
-        ),
-        is_debug=False,
-        threshold=0.8,
-        occurrence=1,
-    ):
-        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
-        count_y_mess_empty = count_y_mess_empty + 1
-        window.set_focus()
-        pag.keyDown("esq")
-        gd.pause(0.4)
-        pag.keyUp("esq")
-        gd.pause(0.4)
-        log_and_print("[send_messages_from_y_mess] press esq")
-        gd.right_click(
-            s.search_board_mess_x_start + s.x_offset_out_mess,
-            s.search_board_mess_y_start + 10,
-        )
-        log_and_print("[send_messages_from_y_mess] right click empty place")
-
-    log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
-    
+ 
 def is_foto_message(scope):
 
     pos = gd.find_text_any(queries=["Копировать фото",],
@@ -392,25 +358,42 @@ def press_esq(s):
     )
 
 
-def click_copy_text_from_image(window, s, x, y, is_debug = False):
+def click_copy_text(tp, window, s, x, y, is_debug = False):
     global count_y_mess_empty
     
     scope=(
             int(x - s.width_menu),
-            y - int(s.height_menu/2 - 40),
+            y - int(s.height_menu),
             x + int(s.width_menu),
             y + int(s.height_menu),
     )
     
     gd.pause(1)
-    if not gd.click_image(
-        "copy.png",
-        scope=scope,
-        confidence=0.88,
-        count_click=1,
-        multiscale=False,
-        is_debug=is_debug,
-    ):
+    pos = False
+    if tp == "image":
+        pos = not gd.click_image(
+            "copy.png",
+            scope=scope,
+            confidence=0.88,
+            count_click=1,
+            multiscale=False,
+            is_debug=is_debug,
+        )
+    else:
+        pos = gd.click_text(
+            ["Копировать текст", "Скопировать сообщение", ],
+            count_attempt_find=2,
+            pause_attempt=2,
+            lang="rus",
+            scope=scope,
+            is_debug=is_debug,
+            threshold=0.8,
+            occurrence=1,
+        )
+    
+    log_and_print(f"pos = {pos}", "INFO")
+    if not pos:
+        
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
         
             
@@ -456,7 +439,7 @@ async def send_messages_from_y_mess(window, s):
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
 
-            text = click_copy_text_from_image(window, s, x, y, is_debug=False)
+            text = click_copy_text("text", window, s, x, y, is_debug=False)
             
 
             if text == ".":
@@ -607,7 +590,7 @@ def findMessage(window, x, y, s, text):
     log_and_print(f"[findMessage] text = {text}")
     gd.right_click(x, y)
     gd.pause(0.5)
-    current_text = click_copy_text_from_image(window, s, x+60, y, is_debug=False)
+    current_text = click_copy_text("text", window, s, x+60, y, is_debug=False)
     
     log_and_print(f"[findMessage] current_text = {current_text}")
 
@@ -638,7 +621,7 @@ def findMessage(window, x, y, s, text):
                             f"[findMessage] right_click xRight = {xRight}, yRight = {yRight}"
                         )
 
-                        current_text = click_copy_text_from_image(window, s, x, y)
+                        current_text = click_copy_text("text", window, s, x, y)
                         if current_text == "":
                             continue
 

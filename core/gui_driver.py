@@ -954,7 +954,7 @@ def click_text(
     threshold: float = 0.7,
     occurrence: int = 1,
     duration: Tuple[float, float] = (0.2, 0.3),
-) -> bool:
+) -> bool | Tuple[List[Tuple[int, int]], Tuple[int, int] | None]:
     """
     OCR-based search: найти текст `query` на экране (в пределах MON_X..MON_W, MON_Y..MON_H)
     и кликнуть его центр.
