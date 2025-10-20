@@ -565,14 +565,27 @@ def moveToContactsAndScrollUp():
     gd.scroll(3000)
 
 def klickViberChannel(window, clickMessBool, s):
-    
-    moveToContactsAndScrollUp()
+
+    window.set_focus()
+
+    if not gd.click_image(
+        "close.png",
+        scope=(620, 910, 790, 980),
+        confidence=0.88,
+        count_click=1,
+        multiscale=True,
+        plus_x=10,
+        plus_y=6,
+        is_debug=False,
+    ):
+        log_and_print("Not find icon close", "INFO")
+        return False
 
     if not gd.click_image(
         s.name_viber_channel + ".png",
         scope=(0, 200, 120, 700),
         confidence=0.88,
-        count_click=2,
+        count_click=1,
         multiscale=True,
         is_debug=False,
     ):
@@ -583,6 +596,8 @@ def klickViberChannel(window, clickMessBool, s):
     if clickMessBool:
         clickLastMess(window, s)
         
+    moveToContactsAndScrollUp()
+    
     return True
 
 
