@@ -3,7 +3,7 @@ import os
 from typing import Optional, Dict, Any, List, Union
 import asyncio
 import httpx
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, Field, field_validator, ConfigDict
 from datetime import datetime, timezone
 from find_message import load_previous_text, save_current_text
 from log import log_and_print
@@ -16,7 +16,6 @@ import ctypes
 from vb_utils import scroll_with_mouse
 from recognize_text import text_includes_fast
 import time
-from tg import telegram_channel_name
 
 pag.FAILSAFE = False
 
@@ -44,7 +43,6 @@ class Action(BaseModel):
     type: str
     payload: Optional[Dict[str, Any]] = None
 
-
 class Decision(BaseModel):
     matches: Optional[bool] = None
     confidence: Optional[float] = None
@@ -56,13 +54,31 @@ class MatchedContact(BaseModel):
     viber_contact_name: Optional[str] = None
 
 class DispatchResult(BaseModel):
-    message_id: str
-    extracted: Dict[str, Any] = {}
-    actions: List[Action] = []
-    # опционально: поддержка старого/нового формата
-    decision: Optional[Decision] = None
-    matched_contacts: Optional[List[MatchedContact]] = None
+    # Игнорируем неожиданные поля от бэкенда
+    model_config = ConfigDict(extra='ignore')
 
+    message_id: str
+    # Превращаем null -> {}, и задаём безопасный дефолт через default_factory
+    extracted: Dict[str, Any] = Field(default_factory=dict)
+    # Заодно приводим null -> [] для списков
+    actions: List[Action] = Field(default_factory=list)
+    decision: Optional[Decision] = None
+    matched_contacts: List[MatchedContact] = Field(default_factory=list)
+
+    @field_validator("extracted", mode="before")
+    @classmethod
+    def _coerce_extracted(cls, v):
+        return v or {}
+
+    @field_validator("actions", mode="before")
+    @classmethod
+    def _coerce_actions(cls, v):
+        return v or []
+
+    @field_validator("matched_contacts", mode="before")
+    @classmethod
+    def _coerce_matched_contacts(cls, v):
+        return v or []
 
 def _dispatch_base_url() -> str:
     # из "http://host/api/v1/dispatch/analyze" → "http://host/api/v1/dispatch"
