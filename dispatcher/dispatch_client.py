@@ -382,11 +382,11 @@ def click_copy_text_from_image(window, s, x, y, is_debug = False):
     scope=(
             int(x - s.width_menu),
             y - int(s.height_menu/2 - 40),
-            x + int(s.width_menu/1.6),
+            x + int(s.width_menu),
             y + int(s.height_menu),
     )
     
-    gd.pause(0.5)
+    gd.pause(1)
     if not gd.click_image(
         "copy.png",
         scope=scope,
