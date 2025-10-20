@@ -90,6 +90,18 @@ TARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)
 #         MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
 #         LOGGER.warning("monitor_index=%d is invalid, using primary monitor #%d", MONITOR_INDEX, 1)
 
+def _safe_norm_text(x) -> str:
+    """Convert OCR cell to normalized lowercase string; None -> ''."""
+    if x is None:
+        return ""
+    # у pytesseract может проскочить нестроковый тип
+    try:
+        s = str(x)
+    except Exception:
+        return ""
+    return s.strip().lower()
+
+
 def pause(amount):
     LOGGER.debug(f"pause {amount} second")
     time.sleep(amount)
@@ -886,7 +898,7 @@ def read_text(
     lang: str,
     scope: tuple[int, int, int, int] = None,
     is_debug: bool = False
-) -> bool:
+) -> [str]:
     """
     OCR-based read text
     
@@ -901,7 +913,8 @@ def read_text(
         scr_bgr, lang=lang, output_type=pytesseract.Output.DICT
     )
 
-    texts = [t.strip().lower() for t in data["text"]]
+    raw_texts = data.get("text", []) or []
+    texts = [_safe_norm_text(t) for t in raw_texts]
     LOGGER.debug(f"read texts: {texts}")
     return texts
 
@@ -1051,14 +1064,21 @@ def find_text(
             scr_bgr, lang=lang, output_type=pytesseract.Output.DICT
         )
 
-        texts = [t.strip().lower() for t in data["text"]]
-        ocr_texts = [w for w in texts if w != ""]
+        raw_texts = data.get("text", []) or []
+        texts = [_safe_norm_text(t) for t in raw_texts]
+        ocr_texts = [w for w in texts if w]  # отбрасываем пустые
         LOGGER.debug(f"OCR texts: {ocr_texts}")
 
         if len(ocr_texts) == 0 and attempts == count:
             return None
 
-        n_boxes = len(texts)
+        n_boxes = min(
+            len(data.get("text", [])),
+            len(data.get("left", [])),
+            len(data.get("top", [])),
+            len(data.get("width", [])),
+            len(data.get("height", [])),
+        )
         found_count = 0  # счётчик совпадений
 
         for i in range(n_boxes - n_words + 1):
@@ -1069,10 +1089,11 @@ def find_text(
                 found_count += 1
 
                 if found_count == occurrence:
-                    x_left = min(int(data["left"][j]) for j in range(i, i + n_words))
-                    y_top = min(int(data["top"][j]) for j in range(i, i + n_words))
-                    x_right = max(int(data["left"][j]) + int(data["width"][j]) for j in range(i, i + n_words))
-                    y_bottom = max(int(data["top"][j]) + int(data["height"][j]) for j in range(i, i + n_words))
+                    x_left = min(int(data["left"][j]) for j in range(i, i + n_words) if j < n_boxes)
+                    y_top = min(int(data["top"][j]) for j in range(i, i + n_words) if j < n_boxes)
+                    x_right = max(int(data["left"][j]) + int(data["width"][j]) for j in range(i, i + n_words) if j < n_boxes)
+                    y_bottom = max(int(data["top"][j]) + int(data["height"][j]) for j in range(i, i + n_words) if j < n_boxes)
+
 
                     center_x_rel = (x_left + x_right) // 2
                     center_y_rel = (y_top + y_bottom) // 2
@@ -1152,6 +1173,8 @@ def find_text_any(
     
     if occurrence < 1:
         occurrence = 1
+        
+    queries = [q for q in queries if isinstance(q, str) and q.strip()]
 
     queries_words = [q.lower().split() for q in queries]
     attempts = 0
@@ -1166,17 +1189,23 @@ def find_text_any(
         # 2) OCR
         data = pytesseract.image_to_data(scr_bgr, lang=lang, output_type=Output.DICT)
 
-        # 3) Сбор слов
         texts: List[str] = []
-        n_boxes = len(data["text"])
+        n_boxes = min(
+            len(data.get("text", [])),
+            len(data.get("left", [])),
+            len(data.get("top", [])),
+            len(data.get("width", [])),
+            len(data.get("height", [])),
+        )
+
         for i in range(n_boxes):
-            txt = data["text"][i].strip().lower()
+            txt = _safe_norm_text(data["text"][i] if i < len(data["text"]) else "")
             texts.append(txt)
 
-        ocr_texts = [w for w in texts if w != ""]
-        if len(ocr_texts) == 0 and attempts == count:
-            # На последней попытке OCR пуст — возвращаем пустой список
+        ocr_texts = [w for w in texts if w]
+        if not ocr_texts and attempts == count:
             return None
+
 
         # 4) Поиск совпадений
         matches: List[Tuple[int, int]] = []  # абсолютные центры всех совпадений

@@ -343,8 +343,37 @@ def is_center_ok():
         log_and_print("[is_center_ok] Not find center OK")
         return False
     
-    return True
+    log_and_print("[is_center_ok] Find center OK")
     
+    return True
+
+def is_center_continue():
+    
+    if not gd.click_image(
+        "continue.png",
+        scope=(300, 450, 800, 800),
+        confidence=0.88,
+        count_click=2,
+        multiscale=True,
+        is_debug=False,
+        ):
+        log_and_print("[is_center_continue] Not find center Continue")
+        return False
+    
+    log_and_print("[is_center_continue] Find center Continue")
+    return True
+
+def press_esq(s):
+    
+    pag.keyDown("esq")
+    gd.pause(0.4)
+    pag.keyUp("esq")
+    gd.pause(0.4)
+    log_and_print("[send_messages_from_y_mess] press esq", "INFO")
+    gd.right_click(
+        s.search_board_mess_x_start + s.x_offset_out_mess,
+        s.search_board_mess_y_start + 10,
+    )
 
 
 def click_copy_text_from_image(window, s, x, y, is_debug = False):
@@ -352,40 +381,35 @@ def click_copy_text_from_image(window, s, x, y, is_debug = False):
     
     scope=(
             int(x - s.width_menu),
-            y - int(s.height_menu),
+            y - int(s.height_menu/2),
             x + int(s.width_menu),
             y + int(s.height_menu),
     )
     
+    gd.pause(0.5)
     if not gd.click_image(
         "copy.png",
         scope=scope,
         confidence=0.88,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
+        plus_y = -10,
         is_debug=is_debug,
     ):
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
         
             
-        if is_foto_message(scope) or is_link(scope):
+        if is_foto_message(scope) or is_link(scope) or is_center_continue():
         
             count_y_mess_empty = count_y_mess_empty + 1
             window.set_focus()
-            pag.keyDown("esq")
-            gd.pause(0.4)
-            pag.keyUp("esq")
-            gd.pause(0.4)
-            log_and_print("[send_messages_from_y_mess] press esq", "INFO")
-            gd.right_click(
-                s.search_board_mess_x_start + s.x_offset_out_mess,
-                s.search_board_mess_y_start + 10,
-            )
+            press_esq(s)
+           
             log_and_print("[send_messages_from_y_mess] right click empty place", "INFO")
             return "is_foto"
         
         else:
-            
+            press_esq(s)
             return None
 
     log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну", "INFO")
@@ -417,8 +441,12 @@ async def send_messages_from_y_mess(window, s):
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
 
-            text = click_copy_text_from_image(window, s, x, y, is_debug=False)
+            text = click_copy_text_from_image(window, s, x, y, is_debug=True)
             
+
+            if text == ".":
+                continue
+    
             if text == "is_foto":
                 log_and_print("[send_messages_from_y_mess] Фото повідомлення", "INFO")
                 continue
@@ -553,9 +581,10 @@ def klickViberChannel(window, clickMessBool, s):
         log_and_print(f"Not find name chat {s.name_viber_channel}")
         return False
 
-    log_and_print("Click name chat Perevezniki")
+    log_and_print(f"Click name chat {s.name_viber_channel}")
     if clickMessBool:
         clickLastMess(window, s)
+        
     return True
 
 
@@ -564,7 +593,7 @@ def findMessage(window, x, y, s, text):
     gd.right_click(x, y)
     gd.pause(0.5)
     current_text = click_copy_text_from_image(window, s, x+60, y, is_debug=False)
-
+    
     log_and_print(f"[findMessage] current_text = {current_text}")
 
     if current_text and text_includes_fast(text, current_text, 0.7):
@@ -596,7 +625,6 @@ def findMessage(window, x, y, s, text):
 
                         current_text = click_copy_text_from_image(window, s, x, y)
                         if current_text == "":
-                            clickLastMess(window, s)
                             continue
 
                         if text_includes_fast(text, current_text, 0.7):
@@ -779,7 +807,7 @@ async def processViberMess(
                 break
 
             window.set_focus()
-            if not klickViberChannel(window, True, s):
+            if not klickViberChannel(window, False, s):
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
             
             log_and_print(f"click chat {s.name_viber_channel}", "INFO")
