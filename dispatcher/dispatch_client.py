@@ -382,7 +382,7 @@ def click_copy_text_from_image(window, s, x, y, is_debug = False):
     scope=(
             int(x - s.width_menu),
             y - int(s.height_menu/2 - 40),
-            x + int(s.width_menu/2),
+            x + int(s.width_menu/1.6),
             y + int(s.height_menu),
     )
     
@@ -393,7 +393,6 @@ def click_copy_text_from_image(window, s, x, y, is_debug = False):
         confidence=0.88,
         count_click=1,
         multiscale=False,
-        plus_y = -10,
         is_debug=is_debug,
     ):
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
@@ -435,7 +434,7 @@ async def send_messages_from_y_mess(window, s):
             y = y + s.search_board_mess_y_start
 
             xRight = x - 140
-            yRight = y
+            yRight = y - 10
             gd.right_click(xRight, yRight)
             log_and_print(
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
