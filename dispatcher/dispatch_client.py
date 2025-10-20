@@ -547,7 +547,7 @@ def clickLastMess(window, s):
     if not gd.click_image(
         f"{s.name_viber_channel}\\last_mess.png",
         scope=(620, 910, 790, 980),
-        confidence=0.7,
+        confidence=0.8,
         count_click=1,
         multiscale=False,
         is_debug=False,
