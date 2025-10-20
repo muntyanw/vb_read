@@ -625,6 +625,7 @@ def findMessage(window, x, y, s, text):
 
                         current_text = click_copy_text("text", window, s, x, y)
                         if current_text == "":
+                            press_esq(s)
                             continue
 
                         if text_includes_fast(text, str(current_text), 0.7):
@@ -801,10 +802,12 @@ async def processViberMess(
                             window, count_scroll=count_scroll_up, direction="up"
                         )
                     else:
+                        press_esq(s)
                         clickLastMess(window, s)
                         
             else:
-
+                
+                press_esq(s)
                 is_center_ok()
                 is_center_continue()
 
