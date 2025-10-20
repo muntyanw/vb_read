@@ -787,6 +787,8 @@ async def processViberMess(
     )
 
     count_repeat = int(read_setting("count_repeat"))
+    break_flag = False
+
     for i in range(count_repeat):
         ctypes.windll.user32.LockWindowUpdate(hwnd)
         while True:
@@ -807,7 +809,7 @@ async def processViberMess(
 
                 is_center_ok()
                 is_center_continue()
-
+                break_flag = True
                 break
 
             window.set_focus()
@@ -817,27 +819,28 @@ async def processViberMess(
             
             # gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
 
+        
+        if break_flag:
+            break
+
         ctypes.windll.user32.LockWindowUpdate(0)
 
         log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
 
     window.set_focus()
 
-    pag.keyDown("esq")
-    gd.pause(0.2)
-    pag.keyUp("esq")
-    gd.pause(0.2)
+    press_esq(s)
 
-    gd.right_click(
-        s.search_board_mess_x_start + s.x_offset_out_mess,
-        s.search_board_mess_y_start + 10,
-    )
+    # gd.right_click(
+    #     s.search_board_mess_x_start + s.x_offset_out_mess,
+    #     s.search_board_mess_y_start + 10,
+    # )
 
-    if not klickViberChannel(window, True, s):
-        log_and_print(f"Not find chat {s.name_viber_channel}")
-        return None
+    # if not klickViberChannel(window, True, s):
+    #     log_and_print(f"Not find chat {s.name_viber_channel}")
+    #     return None
 
-    scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
+    # scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
 
     log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
-    gd.pause(pause_cycle_read)
+    #gd.pause(pause_cycle_read)
