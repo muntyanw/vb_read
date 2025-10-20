@@ -381,8 +381,8 @@ def click_copy_text_from_image(window, s, x, y, is_debug = False):
     
     scope=(
             int(x - s.width_menu),
-            y - int(s.height_menu/2),
-            x + int(s.width_menu),
+            y - int(s.height_menu/2 - 40),
+            x + int(s.width_menu/2),
             y + int(s.height_menu),
     )
     
@@ -441,7 +441,7 @@ async def send_messages_from_y_mess(window, s):
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
 
-            text = click_copy_text_from_image(window, s, x, y, is_debug=True)
+            text = click_copy_text_from_image(window, s, x, y, is_debug=False)
             
 
             if text == ".":
