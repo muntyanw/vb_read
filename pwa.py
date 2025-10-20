@@ -312,6 +312,19 @@ async def main():
             if not klickViberChannel(window, True, s):
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
                 return None
+            
+            if not gd.click_image(
+                "close.png",
+                scope=(620, 910, 790, 980),
+                confidence=0.88,
+                count_click=1,
+                multiscale=True,
+                plus_x=10,
+                plus_y=6,
+                is_debug=False,
+            ):
+                log_and_print("Not find icon close", "INFO")
+                
             log_and_print(f"click chat {s.name_viber_channel}", "INFO")
 
             await processViberMess(

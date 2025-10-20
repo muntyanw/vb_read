@@ -1,23 +1,33 @@
 import logging
 from datetime import datetime
 
-# Настройка логирования
+FMT = '%(asctime)s - %(levelname)s - %(message)s'
+
 logging.basicConfig(
-    filename= "log.log" ,
-    filemode='w',
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    level=logging.INFO,
-    encoding='utf-8'
+    level=logging.INFO,           # корневой логгер: только INFO и выше
+    format=FMT,
+    handlers=[
+        logging.FileHandler("log.log", mode='w', encoding='utf-8'),  # файл
+        logging.StreamHandler(),                                      # консоль
+    ],
+    force=True  # ВАЖНО: сбрасывает ВСЕ ранее добавленные хендлеры/настройки
 )
 
-def log_and_print(message, level='DEBUG'):
-    current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    print(f"[{current_time}] {message}")
+def log_and_print(message: str, level: str = 'debug'):
+    level = level.lower()
+    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+
+    # Печатаем в консоль только если уровень не ниже INFO
+    if level in ('info', 'warning', 'error', 'critical'):
+        print(f"[{now}] {message}")
+
     if level == 'info':
         logging.info(message)
     elif level == 'warning':
         logging.warning(message)
     elif level == 'error':
         logging.error(message)
+    elif level == 'critical':
+        logging.critical(message)
     elif level == 'debug':
-        logging.debug(message)
+        logging.debug(message)  # не попадёт ни в файл, ни в консоль при level=INFO

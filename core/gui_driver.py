@@ -53,7 +53,7 @@ pag.FAILSAFE = False
 pag.PAUSE = 0.2
 
 logging.basicConfig(
-    level=logging.DEBUG,
+    level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.FileHandler('log.log', mode='w', encoding='utf-8'),
@@ -298,8 +298,8 @@ def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,
     result_find = find_image(name, timeout, confidence, scope, is_debug, multiscale)
     end = time.perf_counter()
     tm = end - start
-    print(f"time find image (multiscale={multiscale}) = {tm}")
-    LOGGER.debug(f"result_find = {result_find}")
+    print(f"time find image {name} (multiscale={multiscale}) = {tm}")
+    LOGGER.debug(f"result_find {name} = {result_find}")
     if result_find:
         
         LOGGER.debug(f"Foud image {name}")

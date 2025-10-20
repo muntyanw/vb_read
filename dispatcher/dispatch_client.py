@@ -569,19 +569,6 @@ def klickViberChannel(window, clickMessBool, s):
     window.set_focus()
 
     if not gd.click_image(
-        "close.png",
-        scope=(620, 910, 790, 980),
-        confidence=0.88,
-        count_click=1,
-        multiscale=True,
-        plus_x=10,
-        plus_y=6,
-        is_debug=False,
-    ):
-        log_and_print("Not find icon close", "INFO")
-        return False
-
-    if not gd.click_image(
         s.name_viber_channel + ".png",
         scope=(0, 200, 120, 700),
         confidence=0.88,
@@ -823,7 +810,7 @@ async def processViberMess(
             if not klickViberChannel(window, False, s):
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
             
-            log_and_print(f"click chat {s.name_viber_channel}", "INFO")
+            
             # gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
 
         ctypes.windll.user32.LockWindowUpdate(0)
