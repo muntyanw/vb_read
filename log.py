@@ -10,7 +10,7 @@ logging.basicConfig(
     encoding='utf-8'
 )
 
-def log_and_print(message, level='info'):
+def log_and_print(message, level='DEBUG'):
     current_time = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     print(f"[{current_time}] {message}")
     if level == 'info':

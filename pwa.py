@@ -1,4 +1,3 @@
-from tg import startTgClient
 from log import log_and_print
 import pyperclip
 from find_message import (
@@ -311,9 +310,9 @@ async def main():
             #     )
 
             if not klickViberChannel(window, True, s):
-                log_and_print(f"Not find chat {s.name_viber_channel}")
+                log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
                 return None
-            log_and_print(f"click chat {s.name_viber_channel}")
+            log_and_print(f"click chat {s.name_viber_channel}", "INFO")
 
             await processViberMess(
                 window, s, count_scroll_up, count_scroll_down, pause_cycle_read

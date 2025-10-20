@@ -315,6 +315,37 @@ def is_foto_message(scope):
     
     return False
 
+def is_link(scope):
+
+    pos = gd.find_text_any(queries=["Копировать ссылку",],
+                            lang="rus", 
+                            count=2, 
+                            pause_attempt_sec =1, 
+                            scope=scope, 
+                            threshold = 0.8,
+                            is_debug=False, 
+                            occurrence = 1)
+    if pos:
+        return True
+    
+    return False
+
+def is_center_ok():
+    
+    if not gd.click_image(
+        "center_ok.png",
+        scope=(350, 450, 800, 800),
+        confidence=0.88,
+        count_click=2,
+        multiscale=True,
+        is_debug=False,
+        ):
+        log_and_print("[is_center_ok] Not find center OK")
+        return False
+    
+    return True
+    
+
 
 def click_copy_text_from_image(window, s, x, y, is_debug = False):
     global count_y_mess_empty
@@ -334,9 +365,10 @@ def click_copy_text_from_image(window, s, x, y, is_debug = False):
         multiscale=True,
         is_debug=is_debug,
     ):
-        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение")
+        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
         
-        if is_foto_message(scope):
+            
+        if is_foto_message(scope) or is_link(scope):
         
             count_y_mess_empty = count_y_mess_empty + 1
             window.set_focus()
@@ -344,19 +376,19 @@ def click_copy_text_from_image(window, s, x, y, is_debug = False):
             gd.pause(0.4)
             pag.keyUp("esq")
             gd.pause(0.4)
-            log_and_print("[send_messages_from_y_mess] press esq")
+            log_and_print("[send_messages_from_y_mess] press esq", "INFO")
             gd.right_click(
                 s.search_board_mess_x_start + s.x_offset_out_mess,
                 s.search_board_mess_y_start + 10,
             )
-            log_and_print("[send_messages_from_y_mess] right click empty place")
+            log_and_print("[send_messages_from_y_mess] right click empty place", "INFO")
             return "is_foto"
         
         else:
             
             return None
 
-    log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну")
+    log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну", "INFO")
     return pyperclip.paste()
 
 
@@ -388,21 +420,25 @@ async def send_messages_from_y_mess(window, s):
             text = click_copy_text_from_image(window, s, x, y, is_debug=False)
             
             if text == "is_foto":
-                log_and_print("[send_messages_from_y_mess] Фото повідомлення")
+                log_and_print("[send_messages_from_y_mess] Фото повідомлення", "INFO")
                 continue
             
             if text is None:
                 log_and_print(
-                    "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий"
+                    "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий", "INFO"
                 )
-                return "repeat"
+                
+                if is_center_ok():
+                    continue
+                else:
+                    return "repeat"
 
                 
             if not text_includes_fast(text, s.old_text, 0.7):
                 was_new_mess = True
                 count_old_mess = 0
                 log_and_print(
-                    "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу:"
+                    "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу", "INFO"
                 )
                 resp = await process_one_message_dispatcher(
                     text, None, s
@@ -435,7 +471,7 @@ async def send_messages_from_y_mess(window, s):
 
                 result = True
                 if action_type != "ignore":
-                    log_and_print("++++++++++++++++++++++++++++++++++++++++++++++")
+                    log_and_print("++++++++++++++++++++++++++++++++++++++++++++++", "INFO")
 
                     result = sendViberMessDispatherToСarrier(
                         viber_names, window, xRight, yRight, s, text
@@ -459,7 +495,7 @@ async def send_messages_from_y_mess(window, s):
                     )
 
                 else:
-                    log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx")
+                    log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "INFO")
 
                 if result:
                     save_current_text(text)
@@ -472,7 +508,7 @@ async def send_messages_from_y_mess(window, s):
                     return was_new_mess
                 sending += 1
                 log_and_print(
-                    "[send_messages_from_y_mess] Сповіщення вже було відправлено"
+                    "[send_messages_from_y_mess] ------------------------------------- Сповіщення вже було відправлено", "INFO"
                 )
                 if sending >= 2:
                     # break
@@ -490,14 +526,21 @@ def clickLastMess(window, s):
         multiscale=True,
         is_debug=False,
     ):
-        log_and_print("Not find name carrier UkrBusTravel")
+        log_and_print("Not find icon LastMessage", "INFO")
         return False
-    log_and_print("Click down to last messages")
+    log_and_print("Click down to last messages", "INFO")
     #scroll_with_mouse(window, count_scroll=2, direction="up")
     return True
 
+def moveToContactsAndScrollUp():
+    log_and_print("[moveToContactsAndScrollUp] scroll up contacts")
+    
+    gd.human_move(140, 400)
+    gd.scroll(3000)
 
 def klickViberChannel(window, clickMessBool, s):
+    
+    moveToContactsAndScrollUp()
 
     if not gd.click_image(
         s.name_viber_channel + ".png",
@@ -736,6 +779,10 @@ async def processViberMess(
                 break
 
             window.set_focus()
+            if not klickViberChannel(window, True, s):
+                log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
+            
+            log_and_print(f"click chat {s.name_viber_channel}", "INFO")
             # gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
 
         ctypes.windll.user32.LockWindowUpdate(0)
