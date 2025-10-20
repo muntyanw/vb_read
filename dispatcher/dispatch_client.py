@@ -319,7 +319,7 @@ def is_center_ok():
         scope=(350, 450, 800, 800),
         confidence=0.88,
         count_click=2,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
         ):
         log_and_print("[is_center_ok] Not find center OK")
@@ -336,7 +336,7 @@ def is_center_continue():
         scope=(300, 450, 800, 800),
         confidence=0.88,
         count_click=2,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
         ):
         log_and_print("[is_center_continue] Not find center Continue")
@@ -549,7 +549,7 @@ def clickLastMess(window, s):
         scope=(620, 910, 790, 980),
         confidence=0.7,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
     ):
         log_and_print("Not find icon LastMessage", "INFO")
@@ -573,7 +573,7 @@ def klickViberChannel(window, clickMessBool, s):
         scope=(0, 200, 120, 700),
         confidence=0.88,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
     ):
         log_and_print(f"Not find name chat {s.name_viber_channel}")
@@ -627,7 +627,7 @@ def findMessage(window, x, y, s, text):
                         if current_text == "":
                             continue
 
-                        if text_includes_fast(text, current_text, 0.7):
+                        if text_includes_fast(text, str(current_text), 0.7):
                             log_and_print("succ message find")
                             return x, y
                         else:

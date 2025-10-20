@@ -220,7 +220,7 @@ async def send_video(window, s, menu_items, x, y):
     textFind = remove_service_symbols_and_spaces(file_name)
     if textFind in s.old_text:
         count_y_mess_empty = count_y_mess_empty + 1
-        log_and_print(f"[send_image] Файл уже был отправлен!")
+        log_and_print("[send_image] Файл уже был отправлен!")
         pag.press("tab", presses=4, interval=0.1)
         # cv2.waitKey(1000)
         pag.press("enter")
@@ -230,7 +230,7 @@ async def send_video(window, s, menu_items, x, y):
     save_current_text(textFind)
     s.old_text = load_previous_text()
 
-    file = path_files_downloads + file_name + ".mp4"
+    file = str(path_files_downloads) + file_name + ".mp4"
     log_and_print(f"[send_video] file = {file}")
 
     if os.path.isfile(file):
@@ -318,7 +318,7 @@ async def main():
                 scope=(620, 910, 790, 980),
                 confidence=0.88,
                 count_click=1,
-                multiscale=True,
+                multiscale=False,
                 plus_x=10,
                 plus_y=6,
                 is_debug=False,
