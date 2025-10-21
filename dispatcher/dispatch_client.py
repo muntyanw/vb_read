@@ -564,27 +564,22 @@ def moveToContactsAndScrollUp():
     
     gd.human_move(140, 400)
     gd.scroll(3000)
-
-def klickViberChannel(tp, window, clickMessBool, s):
-
-    window.set_focus()
-    press_esq(s)
     
-    if tp == "image":
 
-        if not gd.click_image(
+def click_viber_channel_image(s):
+    
+    return gd.click_image(
             s.name_viber_channel + ".png",
             scope=(0, 200, 120, 700),
             confidence=0.88,
             count_click=1,
             multiscale=True,
             is_debug=False,
-        ):
-            log_and_print(f"Not find name chat {s.name_viber_channel}", "INFO")
-            #return False
-        
-    else:
-        if not gd.click_text(
+    )
+    
+def click_viber_channel_text(s):
+    
+    return gd.click_text(
             [s.name_viber_contact,],
             count_attempt_find=2,
             pause_attempt=4,
@@ -594,9 +589,36 @@ def klickViberChannel(tp, window, clickMessBool, s):
             plus_x = -16,
             is_debug=False,
             count_click=2
-        ):
-            log_and_print(f"Not find {s.name_viber_contact}")
-            #return False
+    )
+
+def klickViberChannel(tp, window, clickMessBool, s):
+
+    window.set_focus()
+    press_esq(s)
+    
+    if tp == "image":
+
+        pos = click_viber_channel_image(s)
+        
+        if not pos:       
+            log_and_print(f"Not find image chat {s.name_viber_channel}", "INFO")
+                
+            pos = click_viber_channel_text(s)
+            
+            if not pos:  
+                log_and_print(f"Not find text name chat {s.name_viber_channel}", "INFO")
+            
+        
+    else:
+        pos = click_viber_channel_text(s)
+        
+        if not pos:       
+            log_and_print(f"Not find text name chat {s.name_viber_channel}", "INFO")
+                
+            pos = click_viber_channel_image(s)
+            
+            if not pos:  
+                log_and_print(f"Not find image chat {s.name_viber_channel}", "INFO")
             
 
     log_and_print(f"Click name chat {s.name_viber_channel}")
