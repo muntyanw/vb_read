@@ -554,8 +554,8 @@ def clickLastMess(window, s):
         is_debug=False,
     ):
         log_and_print("Not find icon LastMessage", "INFO")
-        click_close_hitlite()  
-        return clickLastMess(window, s)              
+        clickLastMess(window, s)              
+        return False
         
     
     log_and_print("Click down to last messages", "INFO")
@@ -861,7 +861,7 @@ async def processViberMess(
         ctypes.windll.user32.LockWindowUpdate(hwnd)
         while True:
             if empty_send_count > 7:
-                
+                click_close_hitlite()
                 scroll_with_mouse(
                                 window, count_scroll=random.randint(1, 3), direction="up"
                             )
