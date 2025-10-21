@@ -290,7 +290,6 @@ async def main():
 
         gd.pause(0.5)
 
-        scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
 
         while True:
             # has_any, approx_count = await has_active_orders(
@@ -308,24 +307,18 @@ async def main():
             #         f"[guard] есть активные заказы (окно 2 дня){' — count~'+str(approx_count) if approx_count is not None else ''}",
             #         "info",
             #     )
-
-            if not klickViberChannel(window, True, s):
-                log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
-                return None
-            
-            if not gd.click_image(
-                "close.png",
-                scope=(620, 910, 790, 980),
-                confidence=0.88,
-                count_click=1,
-                multiscale=False,
-                plus_x=10,
-                plus_y=6,
-                is_debug=False,
-            ):
-                log_and_print("Not find icon close", "INFO")
                 
-            log_and_print(f"click chat {s.name_viber_channel}", "INFO")
+            if not gd.click_image(
+                            "close.png",
+                            scope=(620, 910, 790, 980),
+                            confidence=0.88,
+                            count_click=1,
+                            multiscale=False,
+                            plus_x=10,
+                            plus_y=6,
+                            is_debug=False,
+                        ):
+                            log_and_print("Not find icon close", "INFO")
 
             await processViberMess(
                 window, s, count_scroll_up, count_scroll_down, pause_cycle_read

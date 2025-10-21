@@ -16,6 +16,7 @@ import ctypes
 from vb_utils import scroll_with_mouse
 from recognize_text import text_includes_fast
 import time
+import random
 
 pag.FAILSAFE = False
 
@@ -567,16 +568,17 @@ def moveToContactsAndScrollUp():
 def klickViberChannel(window, clickMessBool, s):
 
     window.set_focus()
+    press_esq(s)
 
     if not gd.click_image(
         s.name_viber_channel + ".png",
         scope=(0, 200, 120, 700),
         confidence=0.88,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
     ):
-        log_and_print(f"Not find name chat {s.name_viber_channel}")
+        log_and_print(f"Not find name chat {s.name_viber_channel}", "INFO")
         return False
 
     log_and_print(f"Click name chat {s.name_viber_channel}")
@@ -782,6 +784,12 @@ async def processViberMess(
 
     window.set_focus()
 
+    if not klickViberChannel(window, True, s):
+                log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
+                return None
+            
+    log_and_print(f"click chat {s.name_viber_channel}", "INFO")
+
     gd.right_click(
         s.search_board_mess_x_start + s.x_offset_out_mess,
         s.search_board_mess_y_start + 10,
@@ -793,6 +801,9 @@ async def processViberMess(
     for i in range(count_repeat):
         ctypes.windll.user32.LockWindowUpdate(hwnd)
         while True:
+            scroll_with_mouse(
+                            window, count_scroll=random.randint(1, 3), direction="up"
+                        )
 
             fill_y_mess(window, s)
 
