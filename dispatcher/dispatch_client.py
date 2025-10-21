@@ -585,14 +585,14 @@ def klickViberChannel(tp, window, clickMessBool, s):
         
     else:
         if not gd.click_text(
-            s.name_viber_contact,
+            [s.name_viber_contact,],
             count_attempt_find=2,
             pause_attempt=4,
-            lang="eng",
+            lang="ukr",
             scope=(0, 200, 320, 700),
-            threshold=0.86,
+            threshold=0.6,
             plus_x = -16,
-            is_debug=True,
+            is_debug=False,
             count_click=2
         ):
             log_and_print(f"Not find {s.name_viber_contact}")

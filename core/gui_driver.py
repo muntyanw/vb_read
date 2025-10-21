@@ -996,14 +996,17 @@ def click_text(
                             occurrence = occurrence)
         end = time.perf_counter()
         tm = end - start
-        print(f"time find_text_any queries= {query}  : {tm}")
+        
     else:
         print("click_text error value query")
     
     if pos:
+        print(f"time find_text_any queries= {query}  : {tm}")
         abs_x, abs_y = pos
         human_move_and_click(abs_x + plus_x, abs_y + plus_y, duration, count_click=count_click)
         return pos
+    else:
+        print(f"Not find time find_text_any queries= {query}  : {tm}")
 
     time.sleep(0.2)
 
