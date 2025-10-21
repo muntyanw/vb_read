@@ -995,7 +995,7 @@ def click_text(
                             occurrence = occurrence)
         end = time.perf_counter()
         tm = end - start
-        print(f"time find_text_any = {tm}")
+        print(f"time find_text_any queries= {query}  : {tm}")
     else:
         print("click_text error value query")
     
