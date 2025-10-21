@@ -554,7 +554,6 @@ def clickLastMess(window, s):
         is_debug=False,
     ):
         log_and_print("Not find icon LastMessage", "INFO")
-        clickLastMess(window, s)              
         return False
         
     
