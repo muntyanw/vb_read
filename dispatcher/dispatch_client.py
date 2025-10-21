@@ -353,10 +353,10 @@ def press_esq(s):
     pag.keyUp("esq")
     gd.pause(0.4)
     log_and_print("[send_messages_from_y_mess] press esq", "INFO")
-    gd.right_click(
-        s.search_board_mess_x_start + s.x_offset_out_mess,
-        s.search_board_mess_y_start + 10,
-    )
+    # gd.right_click(
+    #     s.search_board_mess_x_start + s.x_offset_out_mess,
+    #     s.search_board_mess_y_start + 10,
+    # )
 
 
 def click_copy_text(tp, window, s, x, y, is_debug = False):
@@ -518,7 +518,7 @@ async def send_messages_from_y_mess(window, s):
                         )
 
                         result = sendViberMessDispatherToСarrier(
-                        "Віталій", window, xRight, yRight, s, text
+                        viber_names, window, xRight, yRight, s, text
                     )
 
                 else:
@@ -781,7 +781,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
     save_current_text(text)
     s.old_text = load_previous_text()
 
-    klickViberChannel("image",window, True, s)
+    klickViberChannel("image", window, True, s)
     return True
 
 
