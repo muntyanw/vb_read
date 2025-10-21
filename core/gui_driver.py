@@ -298,11 +298,13 @@ def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,
     result_find = find_image(name, timeout, confidence, scope, is_debug, multiscale)
     end = time.perf_counter()
     tm = end - start
-    print(f"time find image {name} (multiscale={multiscale}) = {tm}")
+    #print(f"time find image {name} (multiscale={multiscale}) = {tm}")
     LOGGER.debug(f"result_find {name} = {result_find}")
     if result_find:
         
         LOGGER.debug(f"Foud image {name}")
+        #print(f"Foud image {name}")
+        #print(f"result_find {result_find}")
         abs_x, abs_y = result_find
         if abs_x is not None and abs_y is not None:
             draw_click_circle(abs_x + plus_x, abs_y + plus_y)

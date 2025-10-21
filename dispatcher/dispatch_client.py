@@ -550,11 +550,14 @@ def clickLastMess(window, s):
         scope=(620, 910, 790, 980),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
     ):
         log_and_print("Not find icon LastMessage", "INFO")
-        return False
+        click_close_hitlite()  
+        return clickLastMess(window, s)              
+        
+    
     log_and_print("Click down to last messages", "INFO")
     #scroll_with_mouse(window, count_scroll=2, direction="up")
     return True
@@ -815,6 +818,21 @@ def fill_y_mess(window, s):
     s.y_mess = [(coord[0], coord[1]) for coord in coordinates]
     log_and_print(f"s.y_mess = {s.y_mess}")
 
+def click_close_hitlite():
+    log_and_print("Find hitlite", "INFO")
+    if not gd.click_image(
+        "close.png",
+        scope=(750, 945, 800, 990),
+        confidence=0.88,
+        count_click=1,
+        multiscale=False,
+        plus_x=10,
+        plus_y=6,
+        is_debug=True,
+    ):
+        log_and_print("Not find icon close", "INFO")
+
+    log_and_print("Find success hitlite and click close", "INFO")
 
 async def processViberMess(
     window, s, count_scroll_up, count_scroll_down, pause_cycle_read
