@@ -550,7 +550,7 @@ def clickLastMess(window, s):
         scope=(620, 910, 790, 980),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
     ):
         log_and_print("Not find icon LastMessage", "INFO")
@@ -581,22 +581,22 @@ def klickViberChannel(tp, window, clickMessBool, s):
             is_debug=False,
         ):
             log_and_print(f"Not find name chat {s.name_viber_channel}", "INFO")
-            return False
+            #return False
         
     else:
         if not gd.click_text(
             [s.name_viber_contact,],
             count_attempt_find=2,
             pause_attempt=4,
-            lang="ukr",
+            lang=s.name_viber_contact_lang,
             scope=(0, 200, 320, 700),
-            threshold=0.6,
+            threshold=0.5,
             plus_x = -16,
             is_debug=False,
             count_click=2
         ):
             log_and_print(f"Not find {s.name_viber_contact}")
-            return False
+            #return False
             
 
     log_and_print(f"Click name chat {s.name_viber_channel}")

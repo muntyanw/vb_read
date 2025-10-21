@@ -33,5 +33,6 @@
     "dispatch_timeout_s": 15,
     "dispatch_retries": 2,
     "name_viber_channel":"pereviz",
-    "name_viber_contact":"Перевізникі"
+    "name_viber_contact":"Перевізникі",
+    "name_viber_contact_lang":"ukr"
 }

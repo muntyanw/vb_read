@@ -74,6 +74,7 @@ class Context:
         self,
         name_viber_channel,
         name_viber_contact,
+        name_viber_contact_lang,
         old_text,
         width_menu=190,
         height_menu=220,
@@ -87,6 +88,7 @@ class Context:
 
         self.name_viber_channel = name_viber_channel
         self.name_viber_contact = name_viber_contact
+        self.name_viber_contact_lang = name_viber_contact_lang
         self.old_text = old_text
 
         self.width_menu = width_menu
@@ -111,6 +113,7 @@ async def init():
     s = Context(
         name_viber_channel = read_setting("name_viber_channel"),
         name_viber_contact = read_setting("name_viber_contact"),
+        name_viber_contact_lang = read_setting("name_viber_contact_lang"),
         old_text =  load_previous_text(),
         width_menu=190,
         height_menu=220,
