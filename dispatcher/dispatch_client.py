@@ -550,7 +550,7 @@ def clickLastMess(window, s):
         scope=(620, 910, 790, 980),
         confidence=0.8,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
     ):
         log_and_print("Not find icon LastMessage", "INFO")
