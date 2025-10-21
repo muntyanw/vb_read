@@ -398,18 +398,18 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
         
         press_esq(s)    
-        if is_foto_message(scope) or is_link(scope) or is_center_continue():
+        #if is_foto_message(scope) or is_link(scope) or is_center_continue():
+    
+        count_y_mess_empty = count_y_mess_empty + 1
+        window.set_focus()
+        press_esq(s)
         
-            count_y_mess_empty = count_y_mess_empty + 1
-            window.set_focus()
-            press_esq(s)
-           
-            log_and_print("[send_messages_from_y_mess] right click empty place", "INFO")
-            return "is_foto"
+        #log_and_print("[send_messages_from_y_mess] right click empty place", "INFO")
+        return "is_foto"
         
-        else:
-            press_esq(s)
-            return None
+        #else:
+        #    press_esq(s)
+        #    return None
 
     log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну", "INFO")
     return pyperclip.paste()
@@ -565,21 +565,39 @@ def moveToContactsAndScrollUp():
     gd.human_move(140, 400)
     gd.scroll(3000)
 
-def klickViberChannel(window, clickMessBool, s):
+def klickViberChannel(tp, window, clickMessBool, s):
 
     window.set_focus()
     press_esq(s)
+    
+    if tp == "image":
 
-    if not gd.click_image(
-        s.name_viber_channel + ".png",
-        scope=(0, 200, 120, 700),
-        confidence=0.88,
-        count_click=1,
-        multiscale=True,
-        is_debug=False,
-    ):
-        log_and_print(f"Not find name chat {s.name_viber_channel}", "INFO")
-        return False
+        if not gd.click_image(
+            s.name_viber_channel + ".png",
+            scope=(0, 200, 120, 700),
+            confidence=0.88,
+            count_click=1,
+            multiscale=True,
+            is_debug=False,
+        ):
+            log_and_print(f"Not find name chat {s.name_viber_channel}", "INFO")
+            return False
+        
+    else:
+        if not gd.click_text(
+            s.name_viber_contact,
+            count_attempt_find=2,
+            pause_attempt=4,
+            lang="eng",
+            scope=(0, 200, 320, 700),
+            threshold=0.86,
+            plus_x = -16,
+            is_debug=True,
+            count_click=2
+        ):
+            log_and_print(f"Not find {s.name_viber_contact}")
+            return False
+            
 
     log_and_print(f"Click name chat {s.name_viber_channel}")
     if clickMessBool:
@@ -643,7 +661,7 @@ def findMessage(window, x, y, s, text):
                 count_scroll_up = read_setting("count_scroll_up")
                 scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
             else:
-                klickViberChannel(window, True, s)
+                klickViberChannel("text", window, True, s)
                 pag.keyDown("esq")
                 gd.pause(0.2)
                 pag.keyUp("esq")
@@ -741,7 +759,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
     save_current_text(text)
     s.old_text = load_previous_text()
 
-    klickViberChannel(window, True, s)
+    klickViberChannel("text",window, True, s)
     return True
 
 
@@ -785,7 +803,7 @@ async def processViberMess(
 
     window.set_focus()
 
-    if not klickViberChannel(window, True, s):
+    if not klickViberChannel("text",window, True, s):
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
                 return None
             
@@ -832,7 +850,7 @@ async def processViberMess(
                 break
 
             window.set_focus()
-            if not klickViberChannel(window, False, s):
+            if not klickViberChannel("text", window, False, s):
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
             
             

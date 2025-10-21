@@ -32,5 +32,6 @@
     "indent_down": 200,
     "dispatch_timeout_s": 15,
     "dispatch_retries": 2,
-    "name_viber_channel":"ukrbus"
+    "name_viber_channel":"pereviz",
+    "name_viber_contact":"DECPEAPT"
 }
