@@ -828,7 +828,7 @@ def click_close_hitlite():
         multiscale=False,
         plus_x=10,
         plus_y=6,
-        is_debug=True,
+        is_debug=False,
     ):
         log_and_print("Not find icon close", "INFO")
 
