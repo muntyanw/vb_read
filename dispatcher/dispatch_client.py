@@ -780,6 +780,7 @@ async def processViberMess(
     window, s, count_scroll_up, count_scroll_down, pause_cycle_read
 ):
     global count_y_mess_empty
+    empty_send_count = 0
     hwnd = window.handle
 
     window.set_focus()
@@ -801,9 +802,11 @@ async def processViberMess(
     for i in range(count_repeat):
         ctypes.windll.user32.LockWindowUpdate(hwnd)
         while True:
-            scroll_with_mouse(
-                            window, count_scroll=random.randint(1, 3), direction="up"
-                        )
+            if empty_send_count > 7:
+                
+                scroll_with_mouse(
+                                window, count_scroll=random.randint(1, 3), direction="up"
+                            )
 
             fill_y_mess(window, s)
 
@@ -811,10 +814,12 @@ async def processViberMess(
                 was_send = await send_messages_from_y_mess(window, s)
                 if was_send != "repeat":
                     if was_send:
+                        empty_send_count = 0
                         scroll_with_mouse(
                             window, count_scroll=count_scroll_up, direction="up"
                         )
                     else:
+                        empty_send_count += 1
                         press_esq(s)
                         clickLastMess(window, s)
                         
@@ -831,9 +836,6 @@ async def processViberMess(
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
             
             
-            # gd.right_click(s.search_board_mess_x_start + s.x_offset_out_mess, s.search_board_mess_y_start + 10)
-
-        
         if break_flag:
             break
 
@@ -845,16 +847,4 @@ async def processViberMess(
 
     press_esq(s)
 
-    # gd.right_click(
-    #     s.search_board_mess_x_start + s.x_offset_out_mess,
-    #     s.search_board_mess_y_start + 10,
-    # )
-
-    # if not klickViberChannel(window, True, s):
-    #     log_and_print(f"Not find chat {s.name_viber_channel}")
-    #     return None
-
-    # scroll_with_mouse(window, count_scroll=count_scroll_down, direction="down")
-
     log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
-    #gd.pause(pause_cycle_read)
