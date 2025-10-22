@@ -1,73 +1,18 @@
 from log import log_and_print
-import pyperclip
 from find_message import (
     load_previous_text,
-    save_current_text,
-    remove_service_symbols_and_spaces,
 )
-from pywinauto import Application
-import cv2
-from PIL import Image, ImageGrab
-from io import BytesIO
-import hashlib
 from utils import read_setting
-import pyautogui as pag
-import os
 from core import gui_driver as gd
 from dispatcher.dispatch_client import (
     processViberMess,
-    klickViberChannel,
 )
 import asyncio
-from vb_utils import scroll_with_mouse, left_click
+from pywinauto import Application
 
-pag.FAILSAFE = False
-
-# Константы WinAPI
-SWP_NOSIZE = 0x0001
-SWP_NOMOVE = 0x0002
-SWP_NOACTIVATE = 0x0010
-SWP_DRAWFRAME = 0x0020
 
 s = {}
 count_y_mess_empty = 0
-
-
-def get_image_hash(image, size=(8, 8)):
-    """
-    Возвращает хэш для изображения, снижая его разрешение до size
-    и переводя в градации серого. Подходит для быстрого сравнения изображений.
-
-    Параметры:
-    - image: объект PIL.Image или любой формат, который PIL может прочитать
-      (BytesIO, путь к файлу)
-    - size: кортеж (ширина, высота) для уменьшения изображения
-
-    Возвращает:
-    - строку с хэшем (hex-формат)
-    """
-    # Если передан не PIL.Image, пытаемся открыть
-    if not isinstance(image, Image.Image):
-        if hasattr(image, "read"):
-            # Если это поток (например BytesIO)
-            img = Image.open(image)
-        else:
-            # Если это путь к файлу
-            img = Image.open(str(image))
-    else:
-        img = image
-
-    # Преобразуем в градации серого и уменьшаем до маленького размера с LANCZOS-ресемплингом
-    img = img.convert("L").resize(size, Image.Resampling.LANCZOS)
-
-    # Извлекаем байты пикселей
-    pixel_data = img.tobytes()
-
-    # Получаем хэш от байтов пикселей
-    hash_hex = hashlib.md5(pixel_data).hexdigest()
-
-    return hash_hex
-
 
 class Context:
     def __init__(
@@ -125,157 +70,7 @@ async def init():
         search_board_mess_y_end=int(read_setting("search_board_mess_y_end")),
     )
 
-    # Создаем экземпляр и запускаем
-    # log_and_print(f"Нажмить клавишу r щоб виділити область єкрана з сповіщеннями вайбєр, чи Enter щоб залишити старі")
-    # while True:
-    #    if keyboard.is_pressed('enter'):
-    #        log_and_print("Нажата клавиша Enter")
-    #        s.search_board_mess_x_start = read_setting("search_board_mess_x_start")
-    #        s.search_board_mess_x_end = read_setting("search_board_mess_x_end")
-    #        s.search_board_mess_y_start = read_setting("search_board_mess_y_start")
-    #        s.search_board_mess_y_end = read_setting("search_board_mess_y_end")
-    #        break
-
-    #    elif keyboard.is_pressed('r'):
-    #        print("Нажата клавиша R")
-    #        screen_selector = ScreenRegionSelector()
-    #        screen_selector.run()
-
-    # После того как окно будет закрыто, получаем координаты выделенной области
-    #        selected_region = screen_selector.get_selected_region()
-    #        if selected_region:
-    #            start_x, start_y, end_x, end_y = selected_region
-    #            log_and_print(
-    #                f"Координаты области с сообщениями для дальнейшего использования: ({start_x}, {start_y}) до ({end_x}, {end_y})")
-
-    #            s.search_board_mess_x_start = start_x
-    #            s.search_board_mess_x_end = end_x
-    #            s.search_board_mess_y_start = start_y
-    #            s.search_board_mess_y_end = end_y
-
-    #            write_setting("search_board_mess_x_start", start_x)
-    #            write_setting("search_board_mess_x_end", end_x)
-    #            write_setting("search_board_mess_y_start", start_y)
-    #            write_setting("search_board_mess_y_end", end_y)
-
-    #        break
-
     return s
-
-
-async def send_image(window, s, menu_items, x, y):
-    global count_y_mess_empty
-    x2, y2, w, h = menu_items["isImage"]
-    x = x + x2 + int(w / 2)
-    y = y + y2 + int(h / 2)
-    # show_position(x, y, duration=10, size=40, color="blue")
-    left_click(window, x, y)
-    cv2.waitKey(100)
-    log_and_print(f"[send_image] Зображення скопиювовано в буфер обміну")
-
-    img = ImageGrab.grabclipboard()
-    if img is None:
-        log_and_print(f"[send_image] В буфере обмена нет изображения!")
-        return
-
-    hash = get_image_hash(img)
-
-    if hash in s.old_text:
-        log_and_print(f"[send_image] Картинка уже была отправлена!")
-        count_y_mess_empty = count_y_mess_empty + 1
-        return
-
-    save_current_text(hash)
-    s.old_text = load_previous_text()
-
-    # Преобразуем изображение в поток байтов
-    bio = BytesIO()
-    bio.name = hash + ".png"
-    file_path = os.getcwd() + "\\images\\" + bio.name
-
-    if not os.path.isfile(file_path):
-        img.save(file_path, "PNG")
-
-    # img.save(bio, 'PNG')
-
-    bio.seek(0)
-
-    log_and_print(f"[send_message] Отправка нового имиджа в tg: {bio.name}")
-    # for channel_name in s.channel_names:
-    # await process_one_message_dispatcher("", s.name_viber, file_path)
-
-
-async def send_video(window, s, menu_items, x, y):
-    global count_y_mess_empty
-    path_files_downloads = read_setting("path_files_downloads")
-
-    window.set_focus()
-
-    x2, y2, w, h = menu_items["isVideo"]
-    x = x + x2 + int(w / 2)
-    y = y + y2 + int(h / 2)
-    # show_position(x, y, duration=10, size=40, color="blue")
-    left_click(window, x, y)
-    cv2.waitKey(1000)
-
-    pag.hotkey("ctrl", "c")
-    cv2.waitKey(300)
-    file_name = pyperclip.paste()
-    log_and_print(f"[send_video] Буфер обмена {file_name}")
-
-    textFind = remove_service_symbols_and_spaces(file_name)
-    if textFind in s.old_text:
-        count_y_mess_empty = count_y_mess_empty + 1
-        log_and_print("[send_image] Файл уже был отправлен!")
-        pag.press("tab", presses=4, interval=0.1)
-        # cv2.waitKey(1000)
-        pag.press("enter")
-        cv2.waitKey(1000)
-        return
-
-    save_current_text(textFind)
-    s.old_text = load_previous_text()
-
-    file = str(path_files_downloads) + file_name + ".mp4"
-    log_and_print(f"[send_video] file = {file}")
-
-    if os.path.isfile(file):
-        log_and_print(f"[send_message_to_tg_channel] Файл уже сохранен: {file}")
-        pag.press("tab", presses=4, interval=0.1)
-        # cv2.waitKey(1000)
-        pag.press("enter")
-        cv2.waitKey(1000)
-        return
-
-    pyperclip.copy(path_files_downloads)
-    pag.press("tab", presses=6, interval=0.1)
-    # cv2.waitKey(1000)
-    pag.press("enter")
-    # cv2.waitKey(1000)
-    pag.hotkey("ctrl", "v")
-    # cv2.waitKey(1000)
-    pag.press("enter")
-    # cv2.waitKey(1000)
-    pag.press("tab", presses=8, interval=0.1)
-    # cv2.waitKey(1000)
-    pag.press("enter")
-
-    cv2.waitKey(1000)
-
-    # file = get_latest_file(path_files_downloads)
-
-    # if not file:
-    #     log_and_print(f"[send_image] Не смогли сохранить файл!")
-    #     return
-
-    # file_name = Path(file).stem
-
-    save_current_text(file_name)
-    s.old_text = load_previous_text()
-
-    log_and_print(f"[send_message] Отправка нового файла в tg: {file}")
-    # for channel_name in s.channel_names:
-    # await process_one_message_dispatcher("", s.name_viber, file)
 
 
 async def main():
@@ -292,39 +87,9 @@ async def main():
         app = Application(backend="uia").connect(title="Rakuten Viber")
         window = app.window(title="Rakuten Viber")
 
-        window.set_focus()
-
         gd.pause(0.5)
 
-
         while True:
-            # has_any, approx_count = await has_active_orders(
-            #     window_days=2, include_count=False
-            # )
-
-            # if not has_any:
-            #     log_and_print(
-            #         "[guard] актуальных заказов нет — пропускаю чтение вайбера", "info"
-            #     )
-            #     gd.pause(60)
-            #     continue
-            # else:
-            #     log_and_print(
-            #         f"[guard] есть активные заказы (окно 2 дня){' — count~'+str(approx_count) if approx_count is not None else ''}",
-            #         "info",
-            #     )
-                
-            if not gd.click_image(
-                            "close.png",
-                            scope=(620, 910, 790, 980),
-                            confidence=0.88,
-                            count_click=1,
-                            multiscale=False,
-                            plus_x=10,
-                            plus_y=6,
-                            is_debug=False,
-                        ):
-                            log_and_print("Not find icon close", "INFO")
 
             await processViberMess(
                 window, s, count_scroll_up, count_scroll_down, pause_cycle_read

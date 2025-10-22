@@ -17,6 +17,9 @@ from vb_utils import scroll_with_mouse
 from recognize_text import text_includes_fast
 import time
 import random
+import win32gui
+import win32con
+from pywinauto import keyboard
 
 pag.FAILSAFE = False
 
@@ -550,7 +553,7 @@ def clickLastMess(window, s):
         scope=(620, 910, 790, 980),
         confidence=0.8,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
     ):
         log_and_print("Not find icon LastMessage", "INFO")
@@ -840,7 +843,7 @@ async def processViberMess(
     empty_send_count = 0
     hwnd = window.handle
 
-    window.set_focus()
+    window_place(window)
 
     if not klickViberChannel("image",window, True, s):
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
@@ -881,7 +884,7 @@ async def processViberMess(
                         clickLastMess(window, s)
                         
             else:
-                
+                window_place(window)
                 press_esq(s)
                 is_center_ok()
                 is_center_continue()
@@ -905,3 +908,16 @@ async def processViberMess(
     press_esq(s)
 
     log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
+    
+def window_place(window):
+    hwnd = window.handle
+
+    # Устанавливаем флаг "всегда поверх остальных"
+    win32gui.SetWindowPos(
+        hwnd,
+        win32con.HWND_TOPMOST,  # верх всех окон
+        0, 0, 0, 0,
+        win32con.SWP_NOMOVE | win32con.SWP_NOSIZE
+    )
+    
+    keyboard.send_keys('{LWIN down}{LEFT}{LWIN up}')
