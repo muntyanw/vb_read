@@ -510,10 +510,7 @@ async def send_messages_from_y_mess(window, s):
 
 
                     if not result:
-                        pag.keyDown("esq")
-                        gd.pause(0.2)
-                        pag.keyUp("esq")
-                        gd.pause(0.2)
+                        press_esq(s)
 
                         gd.right_click(
                             s.search_board_mess_x_start + s.x_offset_out_mess,
@@ -786,7 +783,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
     save_current_text(text)
     s.old_text = load_previous_text()
 
-    klickViberChannel("image", window, True, s)
+    #klickViberChannel("image", window, True, s)
     return True
 
 
@@ -870,6 +867,7 @@ async def processViberMess(
 
             if len(s.y_mess) > 0:
                 was_send = await send_messages_from_y_mess(window, s)
+                log_and_print(f"was_send: {was_send}", "INFO")
                 if was_send != "repeat":
                     if was_send:
                         empty_send_count = 0
