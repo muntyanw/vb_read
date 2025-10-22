@@ -860,7 +860,8 @@ async def processViberMess(
 
     for i in range(count_repeat):
         while True:
-            if empty_send_count > 7:
+            log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
+            if empty_send_count > 4:
                 click_close_hitlite()
                 scroll_with_mouse(
                                 window, count_scroll=random.randint(1, 3), direction="up"
@@ -873,6 +874,7 @@ async def processViberMess(
                 if was_send != "repeat":
                     if was_send:
                         empty_send_count = 0
+                        
                         scroll_with_mouse(
                             window, count_scroll=count_scroll_up, direction="up"
                         )
@@ -882,6 +884,7 @@ async def processViberMess(
                         clickLastMess(window, s)
                         
             else:
+                empty_send_count += 1
                 window_top_focus(window)
                 press_esq(s)
                 is_center_ok()
