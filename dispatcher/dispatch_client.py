@@ -783,7 +783,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
     save_current_text(text)
     s.old_text = load_previous_text()
 
-    #klickViberChannel("image", window, True, s)
+    klickViberChannel("image", window, True, s)
     return True
 
 
