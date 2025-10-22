@@ -32,7 +32,9 @@
     "indent_down": 200,
     "dispatch_timeout_s": 15,
     "dispatch_retries": 2,
+    "1name_viber_channel":"ukrbus",
     "name_viber_channel":"pereviz",
-    "name_viber_contact":"Перевізникі",
-    "name_viber_contact_lang":"ukr"
+    "1name_viber_contact":"UkrBusTravel",
+    "name_viber_contact":"DECPEAT",
+    "name_viber_contact_lang":"eng"
 }
