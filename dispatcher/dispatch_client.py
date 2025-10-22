@@ -841,9 +841,8 @@ async def processViberMess(
 ):
     global count_y_mess_empty
     empty_send_count = 0
-    hwnd = window.handle
 
-    window_place(window)
+    window_top_focus(window)
 
     if not klickViberChannel("image",window, True, s):
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
@@ -860,7 +859,6 @@ async def processViberMess(
     break_flag = False
 
     for i in range(count_repeat):
-        ctypes.windll.user32.LockWindowUpdate(hwnd)
         while True:
             if empty_send_count > 7:
                 click_close_hitlite()
@@ -884,14 +882,14 @@ async def processViberMess(
                         clickLastMess(window, s)
                         
             else:
-                window_place(window)
+                window_top_focus(window)
                 press_esq(s)
                 is_center_ok()
                 is_center_continue()
                 break_flag = True
                 break
 
-            window.set_focus()
+            window_top_focus(window)
             if not klickViberChannel("image", window, False, s):
                 log_and_print(f"Not find chat {s.name_viber_channel}", "INFO")
             
@@ -903,13 +901,14 @@ async def processViberMess(
 
         log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
 
-    window.set_focus()
+    window_top_focus(window)
 
     press_esq(s)
 
     log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
     
-def window_place(window):
+def window_top_focus(window):
+    
     hwnd = window.handle
 
     # Устанавливаем флаг "всегда поверх остальных"
@@ -919,5 +918,11 @@ def window_place(window):
         0, 0, 0, 0,
         win32con.SWP_NOMOVE | win32con.SWP_NOSIZE
     )
+    window.set_focus()
     
+def window_left(window):
+    hwnd = window.handle
+    win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
     keyboard.send_keys('{LWIN down}{LEFT}{LWIN up}')
+    
+    

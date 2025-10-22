@@ -6,6 +6,8 @@ from utils import read_setting
 from core import gui_driver as gd
 from dispatcher.dispatch_client import (
     processViberMess,
+    window_left,
+    window_top_focus
 )
 import asyncio
 from pywinauto import Application
@@ -86,6 +88,8 @@ async def main():
 
         app = Application(backend="uia").connect(title="Rakuten Viber")
         window = app.window(title="Rakuten Viber")
+        window_top_focus(window)
+        window_left(window)
 
         gd.pause(0.5)
 
