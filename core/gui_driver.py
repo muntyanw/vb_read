@@ -673,22 +673,22 @@ def _human_move(x: int, y: int,
     
     x = x + MON_X
     
-    cx, cy = pag.position()  # текущая абсолютная позиция мыши
+    #cx, cy = pag.position()  # текущая абсолютная позиция мыши
 
     # Точки для кривой Безье: старт → 2 случайные опоры → цель
-    anchors = [
-        (cx, cy),
-        _rand_near(cx, cy, 100),
-        _rand_near(x, y, 100),
-        (x, y),
-    ]
-    steps = 3
-    for t in np.linspace(0, 1, steps):
-        bx, by = _bezier_point(anchors, t)
-        pag.moveTo(bx, by, duration=0)
-        time.sleep(0.0001)
+    # anchors = [
+    #     (cx, cy),
+    #     _rand_near(cx, cy, 100),
+    #     _rand_near(x, y, 100),
+    #     (x, y),
+    # ]
+    # steps = 3
+    # for t in np.linspace(0, 1, steps):
+    #     bx, by = _bezier_point(anchors, t)
+    #     pag.moveTo(bx, by, duration=0)
+    #     time.sleep(0.0001)
 
-    pag.moveTo(x, y, duration=random.uniform(*duration))
+    pag.moveTo(x, y)#, duration=random.uniform(*duration)
 
 def draw_click_circle(x, y, radius=20, duration=0.2):
     class_name = "ClickCircleClass"
