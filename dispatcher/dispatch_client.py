@@ -547,8 +547,8 @@ async def send_messages_from_y_mess(window, s):
 def clickLastMess(window, s):
     if not gd.click_image(
         f"{s.name_viber_channel}\\last_mess.png",
-        scope=(620, 910, 790, 980),
-        confidence=0.8,
+        scope=(680, 910, 880, 980),
+        confidence=0.7,
         count_click=1,
         multiscale=False,
         is_debug=False,
@@ -822,7 +822,7 @@ def click_close_hitlite():
     if not gd.click_image(
         "close.png",
         scope=(750, 945, 800, 990),
-        confidence=0.88,
+        confidence=0.8,
         count_click=1,
         multiscale=False,
         plus_x=10,
@@ -830,8 +830,58 @@ def click_close_hitlite():
         is_debug=False,
     ):
         log_and_print("Not find icon close", "INFO")
+        return False
 
     log_and_print("Find success hitlite and click close", "INFO")
+    return True
+
+def click_close_image():
+    log_and_print("Find hitlite", "INFO")
+    if not gd.click_image(
+        "close_image.png",
+        scope=(930, 40, 1080, 100),
+        confidence=0.8,
+        count_click=1,
+        multiscale=False,
+        plus_x=10,
+        plus_y=6,
+        is_debug=False,
+    ):
+        log_and_print("Not find icon close image", "INFO")
+        return False
+    
+    log_and_print("Find success image close and click close", "INFO")
+    return True
+
+def click_open_info():
+    log_and_print("Find info", "INFO")
+    if not gd.click_image(
+        "info.png",
+        scope=(1050, 70, 1100, 120),
+        confidence=0.8,
+        count_click=1,
+        multiscale=False,
+        plus_x=10,
+        plus_y=6,
+        is_debug=True,
+    ):
+        
+        if not gd.click_image(
+        "info.png",
+        scope=(910, 70, 950, 120),
+        confidence=0.7,
+        count_click=1,
+        multiscale=False,
+        plus_x=10,
+        plus_y=6,
+        is_debug=False,
+        ):
+            
+            log_and_print("Not find icon open info", "INFO")
+            return False
+        
+    log_and_print("Find success image open info and click close", "INFO")
+    return True
 
 async def processViberMess(
     window, s, count_scroll_up, count_scroll_down, pause_cycle_read
@@ -859,7 +909,10 @@ async def processViberMess(
         while True:
             log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
             if empty_send_count > 4:
+                click_open_info()
                 click_close_hitlite()
+                click_close_image()
+                
                 scroll_with_mouse(
                                 window, count_scroll=random.randint(1, 3), direction="up"
                             )
