@@ -705,7 +705,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):
     else:
         return False
 
-    xRight = x - 60
+    xRight = x - 90
     yRight = y + 20
 
     gd.right_click(xRight, yRight)
@@ -835,6 +835,22 @@ def click_close_hitlite():
     log_and_print("Find success hitlite and click close", "INFO")
     return True
 
+def click_folder():
+    log_and_print("Find button folder", "INFO")
+    if not gd.click_image(
+        "folder.png",
+        scope=(66, 154, 175, 207),
+        confidence=0.8,
+        count_click=1,
+        multiscale=False,
+        is_debug=False,
+    ):
+        log_and_print("Not find button folder", "INFO")
+        return False
+
+    log_and_print("Find success button folder and click", "INFO")
+    return True
+
 def click_close_image():
     log_and_print("Find hitlite", "INFO")
     if not gd.click_image(
@@ -860,27 +876,49 @@ def click_open_info():
         scope=(1050, 70, 1100, 120),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
-        plus_x=10,
-        plus_y=6,
-        is_debug=True,
+        multiscale=True,
+        is_debug=False,
     ):
-        
+        log_and_print("Not find icon open info, attempt 2", "INFO")
         if not gd.click_image(
         "info.png",
         scope=(910, 70, 950, 120),
-        confidence=0.7,
+        confidence=0.8,
         count_click=1,
-        multiscale=False,
-        plus_x=10,
-        plus_y=6,
+        multiscale=True,
         is_debug=False,
         ):
             
-            log_and_print("Not find icon open info", "INFO")
+            log_and_print("Not find icon open info atte,pt2", "INFO")
             return False
         
-    log_and_print("Find success image open info and click close", "INFO")
+    log_and_print("Find success image open info and click", "INFO")
+    return True
+
+def click_cancel_window_save_as():
+    log_and_print("Find window_save_as", "INFO")
+    if not gd.click_image(
+        "cancel.png",
+        scope=(800, 500, 960, 580),
+        confidence=0.8,
+        count_click=1,
+        multiscale=True,
+        is_debug=False,
+    ):
+        log_and_print("Not findwindow_save_as - attempt 2", "INFO")
+        if not gd.click_image(
+        "cancel_close.png",
+        scope=(800, 20, 970, 100),
+        confidence=0.8,
+        count_click=1,
+        multiscale=True,
+        is_debug=False,
+        ):
+            
+            log_and_print("Not find window_save_as attempt2", "INFO")
+            return False
+        
+    log_and_print("Find success window_save_as and click", "INFO")
     return True
 
 async def processViberMess(
@@ -909,13 +947,23 @@ async def processViberMess(
         while True:
             log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
             if empty_send_count > 4:
+                is_center_continue()
+                click_folder()
                 click_open_info()
                 click_close_hitlite()
                 click_close_image()
+                scroll_with_mouse(
+                                window, count_scroll=random.randint(1, 3), direction="up"
+                            )
+
+            if empty_send_count > 8:
+
+                click_cancel_window_save_as()
                 
                 scroll_with_mouse(
                                 window, count_scroll=random.randint(1, 3), direction="up"
                             )
+                empty_send_count = 0
 
             fill_y_mess(window, s)
 
