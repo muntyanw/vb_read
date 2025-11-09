@@ -410,6 +410,30 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
     log_and_print(f"pos = {pos}", "INFO")
     if not pos:
         
+        if tp == "image":
+        
+            pos = gd.click_text(
+                ["Копировать текст", "Скопировать сообщение", ],
+                count_attempt_find=2,
+                pause_attempt=2,
+                lang="rus",
+                scope=scope,
+                is_debug=is_debug,
+                threshold=0.8,
+                occurrence=1,
+            )
+        else:
+            pos = gd.click_image(
+                "copy.png",
+                scope=scope,
+                confidence=0.88,
+                count_click=1,
+                multiscale=False,
+                is_debug=is_debug,
+            )
+            
+    if not pos:
+        
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
         
         press_esq()    
@@ -603,7 +627,7 @@ def click_viber_channel_text(viber_channel):
             count_click=2
     )
 
-def klickViberChannel(tp, window, clickMessBool, viber_channel):
+def klickViberChannel(tp, window, clickLastMessBool, viber_channel):
 
     log_and_print(f"start click {viber_channel["name_viber_channel"]}", "DEBUG")
     window.set_focus()
@@ -635,7 +659,7 @@ def klickViberChannel(tp, window, clickMessBool, viber_channel):
             
 
     log_and_print(f"Click name chat {viber_channel["name_viber_channel"]}")
-    if clickMessBool:
+    if clickLastMessBool:
         clickLastMess(window, viber_channel["name_viber_channel"])
         
     moveToContactsAndScrollUp()
@@ -878,7 +902,7 @@ def click_close_image():
     log_and_print("Find success image close and click close", "INFO")
     return True
 
-def click_exist_mess():
+def click_exist_mess(window, viber_channel):
     log_and_print("Find exist mrssages", "INFO")
     
     for number in range(5):
@@ -888,17 +912,19 @@ def click_exist_mess():
             confidence=0.7,
             count_click=1,
             multiscale=False,
-            plus_x=10,
-            plus_y=6,
+            plus_x=0,
+            plus_y=0,
             is_debug=False,
         ):
             log_and_print(f"Not find exist mrssages{number}", "INFO")
             
         else:
+            log_and_print("Success find and click images exist messages", "INFO")
             
+            clickLastMess(window, viber_channel["name_viber_channel"])
             return True
         
-    log_and_print("Not find images exist mrssages", "INFO")
+    log_and_print("Not find images exist messages", "INFO")
     return False
 
 def click_open_info():
@@ -937,7 +963,7 @@ def click_cancel_window_save_as():
         multiscale=True,
         is_debug=False,
     ):
-        log_and_print("Not findwindow_save_as - attempt 2", "INFO")
+        log_and_print("Not find window_save_as - attempt 2", "INFO")
         if not gd.click_image(
         "cancel_close.png",
         scope=(800, 20, 970, 100),
@@ -982,7 +1008,7 @@ async def processViberMess(
     for i in range(count_repeat):
         while True:
             log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
-            if empty_send_count > 3:
+            if empty_send_count > 2:
                 is_center_continue()
                 click_folder()
                 click_open_info()
@@ -992,25 +1018,25 @@ async def processViberMess(
                                 window, count_scroll=random.randint(1, 3), direction="up"
                             )
 
-            if empty_send_count > 4:
+            if empty_send_count > 3:
                 click_cancel_window_save_as()
                 scroll_with_mouse(
                                 window, count_scroll=random.randint(1, 3), direction="up"
                             )
                 
-            if empty_send_count > 5:
+            if empty_send_count > 4:
                 
-                if not click_exist_mess():
-                    log_and_print(f"empty_send_count > 10 change channel to : {s.viber_channels[numberViberChannel]}", "INFO")
-                    viber_channel = s.viber_channels[numberViberChannel]
+                if not click_exist_mess(window, viber_channel):
                     
                     if numberViberChannel + 1 >= len(s.viber_channels):
                         numberViberChannel = 0
                     else:
                         numberViberChannel = numberViberChannel + 1
+                    
+                    log_and_print(f"empty_send_count > 10 change channel to : {s.viber_channels[numberViberChannel]}", "INFO")
+                    viber_channel = s.viber_channels[numberViberChannel]
                 
-                
-                    if not klickViberChannel("image",window, True, viber_channel):
+                    if not klickViberChannel("image", window, True, viber_channel):
                         log_and_print(f"Not find chat {viber_channel["name_viber_channel"]}", "INFO")
                         
                         empty_send_count = 0
@@ -1045,8 +1071,8 @@ async def processViberMess(
 
             window_top_focus(window)
             
-            if not klickViberChannel("image", window, False, viber_channel):
-                log_and_print(f"Not find chat {viber_channel["name_viber_channel"]}", "INFO")
+            #if not klickViberChannel("image", window, False, viber_channel):
+            #    log_and_print(f"Not find chat {viber_channel["name_viber_channel"]}", "INFO")
             
             
         if break_flag:
