@@ -1,4 +1,3 @@
-from log import log_and_print
 from find_message import (
     load_previous_text,
 )
@@ -19,9 +18,7 @@ count_y_mess_empty = 0
 class Context:
     def __init__(
         self,
-        name_viber_channel,
-        name_viber_contact,
-        name_viber_contact_lang,
+        viber_channels,
         old_text,
         width_menu=190,
         height_menu=220,
@@ -33,9 +30,7 @@ class Context:
         search_board_mess_y_end=1000,
     ):
 
-        self.name_viber_channel = name_viber_channel
-        self.name_viber_contact = name_viber_contact
-        self.name_viber_contact_lang = name_viber_contact_lang
+        self.viber_channels = viber_channels
         self.old_text = old_text
 
         self.width_menu = width_menu
@@ -58,9 +53,7 @@ class Context:
 async def init():
 
     s = Context(
-        name_viber_channel = read_setting("name_viber_channel"),
-        name_viber_contact = read_setting("name_viber_contact"),
-        name_viber_contact_lang = read_setting("name_viber_contact_lang"),
+        viber_channels = read_setting("viber_channels"),
         old_text =  load_previous_text(),
         width_menu=190,
         height_menu=220,
