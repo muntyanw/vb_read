@@ -336,7 +336,7 @@ def is_center_ok():
         scope=(350, 450, 800, 800),
         confidence=0.88,
         count_click=2,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
         ):
         log_and_print("[is_center_ok] Not find center OK")
@@ -353,7 +353,7 @@ def is_center_continue():
         scope=(300, 450, 800, 800),
         confidence=0.88,
         count_click=2,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
         ):
         log_and_print("[is_center_continue] Not find center Continue")
@@ -362,8 +362,8 @@ def is_center_continue():
     log_and_print("[is_center_continue] Find center Continue")
     return True
 
-def press_esq():
-    
+def press_esq(window):
+    window.set_focus()
     pag.keyDown("esq")
     gd.pause(0.4)
     pag.keyUp("esq")
@@ -392,7 +392,7 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
             scope=scope,
             confidence=0.88,
             count_click=1,
-            multiscale=False,
+            multiscale=True,
             is_debug=is_debug,
         )
     else:
@@ -428,7 +428,7 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
                 scope=scope,
                 confidence=0.88,
                 count_click=1,
-                multiscale=False,
+                multiscale=True,
                 is_debug=is_debug,
             )
             
@@ -436,18 +436,16 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
         
         log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
         
-        press_esq()    
+        press_esq(window)    
         #if is_foto_message(scope) or is_link(scope) or is_center_continue():
     
         #count_y_mess_empty = count_y_mess_empty + 1
-        window.set_focus()
-        press_esq()
         
         #log_and_print("[send_messages_from_y_mess] right click empty place", "INFO")
         return "is_foto"
         
         #else:
-        #    press_esq()
+        #    press_esq(window)
         #    return None
 
     log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну", "INFO")
@@ -545,7 +543,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 
 
                     if not result:
-                        press_esq()
+                        press_esq(window)
 
                         gd.right_click(
                             s.search_board_mess_x_start + s.x_offset_out_mess,
@@ -582,10 +580,10 @@ def clickLastMess(window, name_viber_channel):
     window.set_focus()
     if not gd.click_image(
         f"{name_viber_channel}\\last_mess.png",
-        scope=(1000, 910, 1100, 980),
+        scope=(880, 910, 1000, 980),
         confidence=0.7,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
     ):
         log_and_print("Not find icon LastMessage", "INFO")
@@ -630,8 +628,7 @@ def click_viber_channel_text(viber_channel):
 def klickViberChannel(tp, window, clickLastMessBool, viber_channel):
 
     log_and_print(f"start click {viber_channel["name_viber_channel"]}", "DEBUG")
-    window.set_focus()
-    press_esq()
+    press_esq(window)
     
     if tp == "image":
 
@@ -703,7 +700,7 @@ def findMessage(window, x, y, viber_channel, text, s):
 
                         current_text = click_copy_text("text", window, s, x, y)
                         if current_text == "":
-                            press_esq()
+                            press_esq(window)
                             continue
 
                         if text_includes_fast(text, str(current_text), 0.7):
@@ -765,7 +762,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
         first_name = viber_name.split()[0]
    
         pos = gd.find_image(
-            "find.png", scope=(320, 320, 380, 380), multiscale=False, is_debug=is_debug
+            "find.png", scope=(320, 320, 380, 380), multiscale=True, is_debug=is_debug
         )
 
         if not pos:
@@ -857,7 +854,7 @@ def click_close_hitlite():
         scope=(750, 945, 800, 990),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         plus_x=10,
         plus_y=6,
         is_debug=False,
@@ -875,7 +872,7 @@ def click_folder():
         scope=(66, 154, 175, 207),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
     ):
         log_and_print("Not find button folder", "INFO")
@@ -891,7 +888,7 @@ def click_close_image():
         scope=(930, 40, 1080, 100),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         plus_x=10,
         plus_y=6,
         is_debug=False,
@@ -911,7 +908,7 @@ def click_exist_mess(window, viber_channel):
             scope=(245, 220, 300, 700),
             confidence=0.7,
             count_click=1,
-            multiscale=False,
+            multiscale=True,
             plus_x=0,
             plus_y=0,
             is_debug=False,
@@ -931,12 +928,12 @@ def click_close_info():
     log_and_print("Find info", "INFO")
     if not gd.click_image(
         "info.png",
-        scope=(730, 70, 780, 120),
-        confidence=0.8,
-        plus_y=12,
-        plus_x=16,
+        scope=(760, 70, 800, 120),
+        confidence=0.9,
+        plus_y=0,
+        plus_x=0,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
     ):
         log_and_print("Not find icon close info, attempt 2", "INFO")
@@ -951,7 +948,7 @@ def click_open_info():
         scope=(1050, 70, 1100, 120),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
     ):
         log_and_print("Not find icon open info, attempt 2", "INFO")
@@ -960,7 +957,7 @@ def click_open_info():
         scope=(910, 70, 950, 120),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
         ):
             
@@ -977,7 +974,7 @@ def click_cancel_window_save_as():
         scope=(800, 500, 1060, 580),
         confidence=0.9,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
     ):
         log_and_print("Not find window_save_as - attempt 2", "INFO")
@@ -986,7 +983,7 @@ def click_cancel_window_save_as():
         scope=(800, 20, 970, 100),
         confidence=0.8,
         count_click=1,
-        multiscale=False,
+        multiscale=True,
         is_debug=False,
         ):
             
@@ -1078,13 +1075,13 @@ async def processViberMess(
                         )
                     else:
                         empty_send_count += 1
-                        press_esq()
+                        press_esq(window)
                         clickLastMess(window, viber_channel["name_viber_channel"])
                         
             else:
                 empty_send_count += 1
                 window_top_focus(window)
-                press_esq()
+                press_esq(window)
                 is_center_ok()
                 is_center_continue()
                 break_flag = True
@@ -1105,7 +1102,7 @@ async def processViberMess(
 
     window_top_focus(window)
 
-    press_esq()
+    press_esq(window)
 
     log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
     
