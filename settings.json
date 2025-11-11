@@ -33,7 +33,12 @@
     "dispatch_timeout_s": 15,
     "dispatch_retries": 2,
     "viber_channels":[
-         {
+        {
+            "name_viber_channel":"pereviz",
+            "name_viber_contact":"DECPEAT",
+            "name_viber_contact_lang":"eng"
+        },
+        {
             "name_viber_channel":"begb",
             "name_viber_contact":"BEGB",
             "name_viber_contact_lang":"eng"
@@ -47,11 +52,7 @@
             "name_viber_channel":"pereviznichok",
             "name_viber_contact":"ПЕРЕВІЗНИЧОК",
             "name_viber_contact_lang":"ukr"
-        }, 
-        {
-            "name_viber_channel":"pereviz",
-            "name_viber_contact":"DECPEAT",
-            "name_viber_contact_lang":"eng"
         }
+        
     ]
 }

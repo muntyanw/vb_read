@@ -479,7 +479,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
             text = click_copy_text("text", window, s, x, y, is_debug=False)
             
 
-            if text == ".":
+            if len(text) == 1:
                 continue
     
             if text == "is_foto":
@@ -582,7 +582,7 @@ def clickLastMess(window, name_viber_channel):
     window.set_focus()
     if not gd.click_image(
         f"{name_viber_channel}\\last_mess.png",
-        scope=(680, 910, 880, 980),
+        scope=(1000, 910, 1100, 980),
         confidence=0.7,
         count_click=1,
         multiscale=False,
@@ -832,7 +832,7 @@ def fill_y_mess(window, viber_channel, s):
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
 
     coordinates = gd.capture_and_find_image_boundary_coordinates(
-        (x, y, 320, height),
+        (x, y, 800, height),
         [
             f"images\\{viber_channel["name_viber_channel"]}\\heart.png",
             f"images\\{viber_channel["name_viber_channel"]}\\heart2.png",
@@ -927,6 +927,23 @@ def click_exist_mess(window, viber_channel):
     log_and_print("Not find images exist messages", "INFO")
     return False
 
+def click_close_info():
+    log_and_print("Find info", "INFO")
+    if not gd.click_image(
+        "info.png",
+        scope=(730, 70, 780, 120),
+        confidence=0.8,
+        plus_y=12,
+        plus_x=16,
+        count_click=1,
+        multiscale=False,
+        is_debug=False,
+    ):
+        log_and_print("Not find icon close info, attempt 2", "INFO")
+        
+    log_and_print("Find success image close info and click", "INFO")
+    return True
+
 def click_open_info():
     log_and_print("Find info", "INFO")
     if not gd.click_image(
@@ -934,7 +951,7 @@ def click_open_info():
         scope=(1050, 70, 1100, 120),
         confidence=0.8,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
     ):
         log_and_print("Not find icon open info, attempt 2", "INFO")
@@ -943,7 +960,7 @@ def click_open_info():
         scope=(910, 70, 950, 120),
         confidence=0.8,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
         ):
             
@@ -957,10 +974,10 @@ def click_cancel_window_save_as():
     log_and_print("Find window_save_as", "INFO")
     if not gd.click_image(
         "cancel.png",
-        scope=(800, 500, 960, 580),
-        confidence=0.8,
+        scope=(800, 500, 1060, 580),
+        confidence=0.9,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
     ):
         log_and_print("Not find window_save_as - attempt 2", "INFO")
@@ -969,7 +986,7 @@ def click_cancel_window_save_as():
         scope=(800, 20, 970, 100),
         confidence=0.8,
         count_click=1,
-        multiscale=True,
+        multiscale=False,
         is_debug=False,
         ):
             
@@ -990,6 +1007,8 @@ async def processViberMess(
     window_top_focus(window)
     
     click_folder()
+    click_close_info()
+    click_cancel_window_save_as()
 
     if not klickViberChannel("image",window, True, viber_channel):
                 log_and_print(f"Not find chat {viber_channel["name_viber_channel"]}", "INFO")
@@ -1009,9 +1028,11 @@ async def processViberMess(
         while True:
             log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
             if empty_send_count > 2:
+                window_top_focus(window)
+                window_left(window)
                 is_center_continue()
                 click_folder()
-                click_open_info()
+                click_close_info()
                 click_close_hitlite()
                 click_close_image()
                 scroll_with_mouse(
