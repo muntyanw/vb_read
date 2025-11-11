@@ -54,7 +54,7 @@ def preprocess_image(image_np):
     return opened
 
 
-def read_setting(field_path) -> str | int | float | bool:
+def read_setting(field_path) -> str | int | float | bool | list[str] | dict | None:
 
     file_path = "settings.json"
     try:

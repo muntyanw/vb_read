@@ -25,13 +25,9 @@
         "isImage": "\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c",
         "isVideo": "\u0421\u043e\u0445\u0440\u0430\u043d\u0438\u0442\u044c"
     },
-    "path_files_downloads": "C:\\Users\\mvv\\Documents\\ViberDownloads\\",
-    "comment_height": 20,
-    "comment_width": 142,
-    "indent_up": 200,
-    "indent_down": 200,
     "dispatch_timeout_s": 15,
     "dispatch_retries": 2,
+    "IPS": ["46.63.40.211", "192.168.1.223"],
     "viber_channels":[
         {
             "name_viber_channel":"pereviz",

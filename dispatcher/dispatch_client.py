@@ -23,7 +23,7 @@ from pywinauto import keyboard
 
 pag.FAILSAFE = False
 
-IPS = ["46.63.40.211", "127.0.0.1"]
+IPS: list[str]=read_setting("IPS")  or []
 ip_numbber = 0
 
 def get_dispatch_url():
@@ -928,7 +928,7 @@ def click_close_info():
     log_and_print("Find info", "INFO")
     if not gd.click_image(
         "info.png",
-        scope=(760, 70, 800, 120),
+        scope=(720, 70, 800, 120),
         confidence=0.9,
         plus_y=0,
         plus_x=0,
@@ -1024,7 +1024,7 @@ async def processViberMess(
     for i in range(count_repeat):
         while True:
             log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
-            if empty_send_count > 2:
+            if empty_send_count > 4:
                 window_top_focus(window)
                 window_left(window)
                 is_center_continue()
@@ -1042,7 +1042,7 @@ async def processViberMess(
                                 window, count_scroll=random.randint(1, 3), direction="up"
                             )
                 
-            if empty_send_count > 4:
+            if empty_send_count > 2:
                 
                 if not click_exist_mess(window, viber_channel):
                     
@@ -1054,10 +1054,13 @@ async def processViberMess(
                     log_and_print(f"empty_send_count > 10 change channel to : {s.viber_channels[numberViberChannel]}", "INFO")
                     viber_channel = s.viber_channels[numberViberChannel]
                 
-                    if not klickViberChannel("image", window, True, viber_channel):
+                    if klickViberChannel("image", window, True, viber_channel):
                         log_and_print(f"Not find chat {viber_channel["name_viber_channel"]}", "INFO")
                         
                         empty_send_count = 0
+                
+                else:
+                    empty_send_count = 0
                     
                 
 
