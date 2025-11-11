@@ -906,7 +906,7 @@ def click_exist_mess(window, viber_channel):
         if not gd.click_image(
             f"exist_mess{number}.png",
             scope=(245, 220, 300, 700),
-            confidence=0.7,
+            confidence=0.9,
             count_click=1,
             multiscale=True,
             plus_x=0,
