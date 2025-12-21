@@ -1,32 +1,40 @@
 import pywinauto
 from pywinauto import Application, mouse
+from pywinauto.findwindows import ElementNotFoundError
 from log import log_and_print
 import cv2
 import numpy as np
 from typing import Optional, Tuple, Union, Dict
 
 
-ImageLike = Union[str, np.ndarray] 
+ImageLike = Union[str, np.ndarray]
+
 
 def scroll_with_mouse(window, count_scroll, direction="down"):
     window.set_focus()
 
-    # Находим панель с сообщениями
-    chat_pane = window.child_window(control_type="Pane", found_index=0)
+    try:
+        # Locate the chat pane so scrolling is aligned to message area.
+        chat_pane = window.child_window(control_type="Pane", found_index=0)
+        rect = chat_pane.rectangle()
+    except ElementNotFoundError:
+        log_and_print("[scroll_with_mouse] chat pane not found, using window bounds", "error")
+        rect = window.rectangle()
+    except Exception as e:
+        log_and_print(f"[scroll_with_mouse] unexpected pane lookup error: {e}", "error")
+        rect = window.rectangle()
 
-    # Получаем координаты панели
-    rect = chat_pane.rectangle()
     center_x = (rect.left + rect.right) // 2
     center_y = (rect.top + rect.bottom) // 2
 
-    # Прокручиваем вниз
-    for _ in range(count_scroll):  # Повторяем несколько раз
+    for _ in range(count_scroll):  # Repeat scroll attempts
         if direction == "down":
-            mouse.scroll(coords=(center_x, center_y), wheel_dist=-1)  # Отрицательное значение для скроллинга вниз
+            mouse.scroll(coords=(center_x, center_y), wheel_dist=-1)
             print("Scrolled down with mouse wheel")
         else:
             mouse.scroll(coords=(center_x, center_y), wheel_dist=1)
             print("Scrolled up with mouse wheel")
+
 
 def right_click_on_panel(x_offset=0, y_offset=0):
     """
@@ -52,6 +60,7 @@ def right_click_on_panel(x_offset=0, y_offset=0):
     mouse.click(button="right", coords=(center_x, center_y))
     log_and_print(f"Right-clicked at ({center_x}, {center_y}) on the chat panel")
     return center_x, center_y
+
 
 def right_click(app, window_title, x=0, y=0):
     """
@@ -79,6 +88,7 @@ def right_click(app, window_title, x=0, y=0):
     except Exception as e:
         print(f"Error during right-click: {e}")
 
+
 def left_click(window, x=0, y=0):
     """
     Кликает левой кнопкой мыши
@@ -87,6 +97,7 @@ def left_click(window, x=0, y=0):
     # Выполняем клик левой кнопкой мыши
     mouse.click(button="left", coords=(x, y))
     log_and_print(f"Left-clicked at ({x}, {y}) on the chat panel")
+
 
 def _load_bgr(img: ImageLike) -> np.ndarray:
     """Завантажує зображення з файлу або прийнятого масиву у BGR."""
@@ -101,6 +112,7 @@ def _load_bgr(img: ImageLike) -> np.ndarray:
         if img.ndim == 3:
             return img
     raise TypeError("img must be filepath or np.ndarray (H,W[,3])")
+
 
 def find_message_bottom_by_image(
     screenshot: ImageLike,
@@ -190,4 +202,3 @@ def find_message_bottom_by_image(
         best["debug_bgr"] = dbg
 
     return best
-

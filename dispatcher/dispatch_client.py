@@ -364,9 +364,11 @@ def is_center_continue():
 
 def press_esq(window):
     window.set_focus()
-    pag.keyDown("esq")
+    
+    # Escape closes context menus; pyautogui uses "esc" as key name.
+    pag.keyDown("esc")
     gd.pause(0.4)
-    pag.keyUp("esq")
+    pag.keyUp("esc")
     gd.pause(0.4)
     log_and_print("[press_esq] press esq", "INFO")
     # gd.right_click(
