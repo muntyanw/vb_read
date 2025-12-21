@@ -821,14 +821,6 @@
         "documentation": {}
     },
     {
-        "label": "log_and_print",
-        "importPath": "log",
-        "description": "log",
-        "isExtraImport": true,
-        "detail": "log",
-        "documentation": {}
-    },
-    {
         "label": "gui_driver",
         "importPath": "core",
         "description": "core",
@@ -1934,6 +1926,15 @@
         "documentation": {}
     },
     {
+        "label": "get_dispatch_url",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def get_dispatch_url():\n    return f\"http://{IPS[ip_numbber]}:8888/api/v1/dispatch/analyze\"\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
         "label": "is_foto_message",
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
@@ -1956,7 +1957,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_center_ok():\n    if not gd.click_image(\n        \"center_ok.png\",\n        scope=(350, 450, 800, 800),\n        confidence=0.88,\n        count_click=2,\n        multiscale=False,\n        is_debug=False,\n        ):\n        log_and_print(\"[is_center_ok] Not find center OK\")",
+        "peekOfCode": "def is_center_ok():\n    if not gd.click_image(\n        \"center_ok.png\",\n        scope=(350, 450, 800, 800),\n        confidence=0.88,\n        count_click=2,\n        multiscale=True,\n        is_debug=False,\n        ):\n        log_and_print(\"[is_center_ok] Not find center OK\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1965,7 +1966,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_center_continue():\n    if not gd.click_image(\n        \"continue.png\",\n        scope=(300, 450, 800, 800),\n        confidence=0.88,\n        count_click=2,\n        multiscale=False,\n        is_debug=False,\n        ):\n        log_and_print(\"[is_center_continue] Not find center Continue\")",
+        "peekOfCode": "def is_center_continue():\n    if not gd.click_image(\n        \"continue.png\",\n        scope=(300, 450, 800, 800),\n        confidence=0.88,\n        count_click=2,\n        multiscale=True,\n        is_debug=False,\n        ):\n        log_and_print(\"[is_center_continue] Not find center Continue\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1974,7 +1975,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def press_esq(s):\n    # Escape closes context menus; pyautogui uses \"esc\" as key name.\n    pag.keyDown(\"esc\")\n    gd.pause(0.4)\n    pag.keyUp(\"esc\")\n    gd.pause(0.4)\n    log_and_print(\"[send_messages_from_y_mess] press esq\", \"INFO\")\n    # gd.right_click(\n    #     s.search_board_mess_x_start + s.x_offset_out_mess,\n    #     s.search_board_mess_y_start + 10,",
+        "peekOfCode": "def press_esq(window):\n    window.set_focus()\n    # Escape closes context menus; pyautogui uses \"esc\" as key name.\n    pag.keyDown(\"esc\")\n    gd.pause(0.4)\n    pag.keyUp(\"esc\")\n    gd.pause(0.4)\n    log_and_print(\"[press_esq] press esq\", \"INFO\")\n    # gd.right_click(\n    #     s.search_board_mess_x_start + s.x_offset_out_mess,",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1983,7 +1984,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_copy_text(tp, window, s, x, y, is_debug = False):\n    global count_y_mess_empty\n    scope=(\n            int(x - s.width_menu),\n            y - int(s.height_menu),\n            x + int(s.width_menu),\n            y + int(s.height_menu),\n    )\n    gd.pause(1)\n    pos = False",
+        "peekOfCode": "def click_copy_text(tp, window, s, x, y, is_debug = False):\n    #global count_y_mess_empty\n    scope=(\n            int(x - s.width_menu),\n            y - int(s.height_menu),\n            x + int(s.width_menu),\n            y + int(s.height_menu),\n    )\n    gd.pause(1)\n    pos = False",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -1992,7 +1993,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess(window, s):\n    if not gd.click_image(\n        f\"{s.name_viber_channel}\\\\last_mess.png\",\n        scope=(620, 910, 790, 980),\n        confidence=0.8,\n        count_click=1,\n        multiscale=False,\n        is_debug=False,\n    ):\n        log_and_print(\"Not find icon LastMessage\", \"INFO\")",
+        "peekOfCode": "def clickLastMess(window, name_viber_channel):\n    window.set_focus()\n    if not gd.click_image(\n        f\"{name_viber_channel}\\\\last_mess.png\",\n        scope=(880, 910, 1000, 980),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2001,7 +2002,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def moveToContactsAndScrollUp():\n    log_and_print(\"[moveToContactsAndScrollUp] scroll up contacts\")\n    gd.human_move(140, 400)\n    gd.scroll(3000)\ndef click_viber_channel_image(s):\n    return gd.click_image(\n            s.name_viber_channel + \".png\",\n            scope=(0, 200, 120, 700),\n            confidence=0.88,\n            count_click=1,",
+        "peekOfCode": "def moveToContactsAndScrollUp():\n    log_and_print(\"[moveToContactsAndScrollUp] scroll up contacts\")\n    gd.human_move(140, 400)\n    gd.scroll(3000)\ndef click_viber_channel_image(name_viber_channel ):\n    return gd.click_image(\n            name_viber_channel + \".png\",\n            scope=(0, 200, 120, 700),\n            confidence=0.88,\n            count_click=1,",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2010,7 +2011,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_viber_channel_image(s):\n    return gd.click_image(\n            s.name_viber_channel + \".png\",\n            scope=(0, 200, 120, 700),\n            confidence=0.88,\n            count_click=1,\n            multiscale=True,\n            is_debug=False,\n    )\ndef click_viber_channel_text(s):",
+        "peekOfCode": "def click_viber_channel_image(name_viber_channel ):\n    return gd.click_image(\n            name_viber_channel + \".png\",\n            scope=(0, 200, 120, 700),\n            confidence=0.88,\n            count_click=1,\n            multiscale=True,\n            is_debug=False,\n    )\ndef click_viber_channel_text(viber_channel):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2019,7 +2020,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_viber_channel_text(s):\n    return gd.click_text(\n            [s.name_viber_contact,],\n            count_attempt_find=2,\n            pause_attempt=4,\n            lang=s.name_viber_contact_lang,\n            scope=(0, 200, 320, 700),\n            threshold=0.5,\n            plus_x = -16,\n            is_debug=False,",
+        "peekOfCode": "def click_viber_channel_text(viber_channel):\n    return gd.click_text(\n            [viber_channel[\"name_viber_contact\"],],\n            count_attempt_find=2,\n            pause_attempt=4,\n            lang=viber_channel[\"name_viber_contact_lang\"],\n            scope=(0, 200, 320, 700),\n            threshold=0.5,\n            plus_x = -16,\n            is_debug=False,",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2028,7 +2029,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def klickViberChannel(tp, window, clickMessBool, s):\n    window.set_focus()\n    press_esq(s)\n    if tp == \"image\":\n        pos = click_viber_channel_image(s)\n        if not pos:       \n            log_and_print(f\"Not find image chat {s.name_viber_channel}\", \"INFO\")\n            pos = click_viber_channel_text(s)\n            if not pos:  \n                log_and_print(f\"Not find text name chat {s.name_viber_channel}\", \"INFO\")",
+        "peekOfCode": "def klickViberChannel(tp, window, clickLastMessBool, viber_channel):\n    log_and_print(f\"start click {viber_channel[\"name_viber_channel\"]}\", \"DEBUG\")\n    press_esq(window)\n    if tp == \"image\":\n        pos = click_viber_channel_image(viber_channel[\"name_viber_channel\"])\n        if not pos:       \n            log_and_print(f\"Not find image chat {viber_channel[\"name_viber_channel\"]}\", \"INFO\")\n            pos = click_viber_channel_text(viber_channel)\n            if not pos:  \n                log_and_print(f\"Not find text name chat {viber_channel[\"name_viber_channel\"]}\", \"INFO\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2037,7 +2038,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def findMessage(window, x, y, s, text):\n    log_and_print(f\"[findMessage] text = {text}\")\n    gd.right_click(x, y)\n    gd.pause(0.5)\n    current_text = click_copy_text(\"text\", window, s, x+60, y, is_debug=False)\n    log_and_print(f\"[findMessage] current_text = {current_text}\")\n    if current_text and text_includes_fast(text, current_text, 0.7):\n        log_and_print(\"[findMessage] succ message find\")\n        return x, y\n    else:",
+        "peekOfCode": "def findMessage(window, x, y, viber_channel, text, s):\n    log_and_print(f\"[findMessage] text = {text}\")\n    gd.right_click(x, y)\n    gd.pause(0.5)\n    current_text = click_copy_text(\"text\", window, s, x+60, y, is_debug=False)\n    log_and_print(f\"[findMessage] current_text = {current_text}\")\n    if current_text and text_includes_fast(text, current_text, 0.7):\n        log_and_print(\"[findMessage] succ message find\")\n        return x, y\n    else:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2046,7 +2047,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def sendViberMessDispatherToСarrier(viber_names, window, x, y, s, text):\n    is_debug = False\n    resultFind = findMessage(window, x, y, s, text)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 60\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
+        "peekOfCode": "def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, text, s):\n    is_debug = False\n    resultFind = findMessage(window, x, y, viber_channel, text, s)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 90\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2055,7 +2056,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def fill_y_mess(window, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = gd.capture_and_find_image_boundary_coordinates(\n        (x, y, 320, height),",
+        "peekOfCode": "def fill_y_mess(window, viber_channel, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = gd.capture_and_find_image_boundary_coordinates(\n        (x, y, 800, height),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2064,7 +2065,61 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_close_hitlite():\n    log_and_print(\"Find hitlite\", \"INFO\")\n    if not gd.click_image(\n        \"close.png\",\n        scope=(750, 945, 800, 990),\n        confidence=0.88,\n        count_click=1,\n        multiscale=False,\n        plus_x=10,\n        plus_y=6,",
+        "peekOfCode": "def click_close_hitlite():\n    log_and_print(\"Find hitlite\", \"INFO\")\n    if not gd.click_image(\n        \"close.png\",\n        scope=(750, 945, 800, 990),\n        confidence=0.8,\n        count_click=1,\n        multiscale=True,\n        plus_x=10,\n        plus_y=6,",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "click_folder",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def click_folder():\n    log_and_print(\"Find button folder\", \"INFO\")\n    if not gd.click_image(\n        \"folder.png\",\n        scope=(66, 154, 175, 207),\n        confidence=0.8,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "click_close_image",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def click_close_image():\n    log_and_print(\"Find hitlite\", \"INFO\")\n    if not gd.click_image(\n        \"close_image.png\",\n        scope=(930, 40, 1080, 100),\n        confidence=0.8,\n        count_click=1,\n        multiscale=True,\n        plus_x=10,\n        plus_y=6,",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "click_exist_mess",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def click_exist_mess(window, viber_channel):\n    log_and_print(\"Find exist mrssages\", \"INFO\")\n    for number in range(5):\n        if not gd.click_image(\n            f\"exist_mess{number}.png\",\n            scope=(245, 220, 300, 700),\n            confidence=0.9,\n            count_click=1,\n            multiscale=True,\n            plus_x=0,",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "click_close_info",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def click_close_info():\n    log_and_print(\"Find info\", \"INFO\")\n    if not gd.click_image(\n        \"info.png\",\n        scope=(720, 70, 800, 120),\n        confidence=0.9,\n        plus_y=0,\n        plus_x=0,\n        count_click=1,\n        multiscale=True,",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "click_open_info",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def click_open_info():\n    log_and_print(\"Find info\", \"INFO\")\n    if not gd.click_image(\n        \"info.png\",\n        scope=(1050, 70, 1100, 120),\n        confidence=0.8,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "click_cancel_window_save_as",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def click_cancel_window_save_as():\n    log_and_print(\"Find window_save_as\", \"INFO\")\n    if not gd.click_image(\n        \"cancel.png\",\n        scope=(800, 500, 1060, 580),\n        confidence=0.9,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2091,16 +2146,16 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "pag.FAILSAFE = False\nDISPATCH_URL = os.getenv(\n    \"DISPATCH_URL\", \"http://46.63.40.211:8888/api/v1/dispatch/analyze\"\n)\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()",
+        "peekOfCode": "pag.FAILSAFE = False\nIPS: list[str]=read_setting(\"IPS\")  or []\nip_numbber = 0\ndef get_dispatch_url():\n    return f\"http://{IPS[ip_numbber]}:8888/api/v1/dispatch/analyze\"\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
     {
-        "label": "DISPATCH_URL",
+        "label": "ip_numbber",
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_URL = os.getenv(\n    \"DISPATCH_URL\", \"http://46.63.40.211:8888/api/v1/dispatch/analyze\"\n)\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений",
+        "peekOfCode": "ip_numbber = 0\ndef get_dispatch_url():\n    return f\"http://{IPS[ip_numbber]}:8888/api/v1/dispatch/analyze\"\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2145,7 +2200,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "count_old_mess = 0\nasync def send_messages_from_y_mess(window, s):\n    global count_y_mess_empty\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:\n            log_and_print(f\"[send_messages_from_y_mess] Меседж y = {y}\")",
+        "peekOfCode": "count_old_mess = 0\nasync def send_messages_from_y_mess(window, viber_channel, s):\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:\n            log_and_print(f\"[send_messages_from_y_mess] Меседж y = {y}\")\n            window.set_focus()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2154,7 +2209,7 @@
         "kind": 2,
         "importPath": "find_message",
         "description": "find_message",
-        "peekOfCode": "def load_previous_text(file_name='previous_text.txt'):\n    log_and_print(f\"Загрузка предыдущего текста из файла {file_name}\")\n    if os.path.exists(file_name):\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:\n                text = f.read()\n            log_and_print(\"Предыдущий текст успешно загружен\")\n            return text\n        except Exception as e:\n            log_and_print(f\"Ошибка при чтении файла {file_name}: {e}\")",
+        "peekOfCode": "def load_previous_text(file_name='previous_text.txt'):\n    log_and_print(f\"Загрузка предыдущего текста из файла {file_name}\")\n    if os.path.exists(file_name):\n        try:\n            with open(file_name, 'r', encoding='utf-8') as f:\n                text = f.read()\n            log_and_print(\"[load_previous_text] Предыдущий текст успешно загружен\")\n            return text\n        except Exception as e:\n            log_and_print(f\"[load_previous_text] Ошибка при чтении файла {file_name}: {e}\")",
         "detail": "find_message",
         "documentation": {}
     },
@@ -2226,7 +2281,7 @@
         "kind": 2,
         "importPath": "log",
         "description": "log",
-        "peekOfCode": "def log_and_print(message: str, level: str = 'debug'):\n    level = level.lower()\n    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')\n    # Печатаем в консоль только если уровень не ниже INFO\n    if level in ('info', 'warning', 'error', 'critical'):\n        print(f\"[{now}] {message}\")\n    if level == 'info':\n        logging.info(message)\n    elif level == 'warning':\n        logging.warning(message)",
+        "peekOfCode": "def log_and_print(message: str, level: str = 'debug'):\n    level = level.lower()\n    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')\n    if level in ('info', 'warning', 'error', 'critical'): #, 'debug'\n        print(f\"[{now}] {message}\")\n    if level == 'info':\n        logging.info(message)\n    elif level == 'warning':\n        logging.warning(message)\n    elif level == 'error':",
         "detail": "log",
         "documentation": {}
     },
@@ -2388,7 +2443,7 @@
         "kind": 6,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "class Context:\n    def __init__(\n        self,\n        name_viber_channel,\n        name_viber_contact,\n        name_viber_contact_lang,\n        old_text,\n        width_menu=190,\n        height_menu=220,\n        height_item_menu=20,",
+        "peekOfCode": "class Context:\n    def __init__(\n        self,\n        viber_channels,\n        old_text,\n        width_menu=190,\n        height_menu=220,\n        height_item_menu=20,\n        x_offset_out_mess=400,\n        search_board_mess_x_start=360,",
         "detail": "pwa",
         "documentation": {}
     },
@@ -2397,7 +2452,7 @@
         "kind": 5,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "s = {}\ncount_y_mess_empty = 0\nclass Context:\n    def __init__(\n        self,\n        name_viber_channel,\n        name_viber_contact,\n        name_viber_contact_lang,\n        old_text,\n        width_menu=190,",
+        "peekOfCode": "s = {}\ncount_y_mess_empty = 0\nclass Context:\n    def __init__(\n        self,\n        viber_channels,\n        old_text,\n        width_menu=190,\n        height_menu=220,\n        height_item_menu=20,",
         "detail": "pwa",
         "documentation": {}
     },
@@ -2406,7 +2461,7 @@
         "kind": 5,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "count_y_mess_empty = 0\nclass Context:\n    def __init__(\n        self,\n        name_viber_channel,\n        name_viber_contact,\n        name_viber_contact_lang,\n        old_text,\n        width_menu=190,\n        height_menu=220,",
+        "peekOfCode": "count_y_mess_empty = 0\nclass Context:\n    def __init__(\n        self,\n        viber_channels,\n        old_text,\n        width_menu=190,\n        height_menu=220,\n        height_item_menu=20,\n        x_offset_out_mess=400,",
         "detail": "pwa",
         "documentation": {}
     },
@@ -2604,7 +2659,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def read_setting(field_path) -> str | int | float | bool:\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8') as file:\n            settings = json.load(file)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:",
+        "peekOfCode": "def read_setting(field_path) -> str | int | float | bool | list[str] | dict | None:\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8') as file:\n            settings = json.load(file)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:",
         "detail": "utils",
         "documentation": {}
     },
