@@ -1993,7 +1993,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess(window, name_viber_channel):\n    window.set_focus()\n    if not gd.click_image(\n        f\"{name_viber_channel}\\\\last_mess.png\",\n        scope=(880, 910, 1000, 980),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
+        "peekOfCode": "def clickLastMess(window, name_viber_channel):\n    window.set_focus()\n    if not gd.click_image(\n        f\"{name_viber_channel}\\\\last_mess.png\",\n        scope=(880, 910, 1100, 990),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },

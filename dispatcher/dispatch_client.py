@@ -362,7 +362,6 @@ def is_center_continue():
     log_and_print("[is_center_continue] Find center Continue")
     return True
 
-<<<<<<< HEAD
 def press_esq(window):
     window.set_focus()
     
@@ -583,7 +582,7 @@ def clickLastMess(window, name_viber_channel):
     window.set_focus()
     if not gd.click_image(
         f"{name_viber_channel}\\last_mess.png",
-        scope=(880, 910, 1000, 980),
+        scope=(880, 910, 1100, 990),
         confidence=0.7,
         count_click=1,
         multiscale=True,
