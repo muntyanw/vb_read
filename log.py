@@ -17,8 +17,7 @@ def log_and_print(message: str, level: str = 'debug'):
     level = level.lower()
     now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
 
-    # Печатаем в консоль только если уровень не ниже INFO
-    if level in ('info', 'warning', 'error', 'critical'):
+    if level in ('info', 'warning', 'error', 'critical'): #, 'debug'
         print(f"[{now}] {message}")
 
     if level == 'info':
@@ -30,4 +29,4 @@ def log_and_print(message: str, level: str = 'debug'):
     elif level == 'critical':
         logging.critical(message)
     elif level == 'debug':
-        logging.debug(message)  # не попадёт ни в файл, ни в консоль при level=INFO
+        logging.debug(message)

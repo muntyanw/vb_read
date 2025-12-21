@@ -9,13 +9,13 @@ def load_previous_text(file_name='previous_text.txt'):
         try:
             with open(file_name, 'r', encoding='utf-8') as f:
                 text = f.read()
-            log_and_print("Предыдущий текст успешно загружен")
+            log_and_print("[load_previous_text] Предыдущий текст успешно загружен")
             return text
         except Exception as e:
-            log_and_print(f"Ошибка при чтении файла {file_name}: {e}")
+            log_and_print(f"[load_previous_text] Ошибка при чтении файла {file_name}: {e}")
             return ""
     else:
-        log_and_print(f"Файл {file_name} не найден. Будет создан новый файл.")
+        log_and_print(f"[load_previous_text] Файл {file_name} не найден. Будет создан новый файл.")
         return ""
 
 def remove_service_symbols_and_spaces(text):
