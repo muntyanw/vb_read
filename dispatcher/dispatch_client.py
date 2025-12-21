@@ -350,7 +350,7 @@ def is_center_continue():
     
     if not gd.click_image(
         "continue.png",
-        scope=(300, 450, 800, 800),
+        scope=(300, 550, 600, 700),
         confidence=0.88,
         count_click=2,
         multiscale=True,
@@ -1005,6 +1005,7 @@ async def processViberMess(
 
     window_top_focus(window)
     
+    is_center_continue()
     click_folder()
     click_close_info()
     click_cancel_window_save_as()
