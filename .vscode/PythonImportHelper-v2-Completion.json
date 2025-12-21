@@ -1966,7 +1966,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_center_continue():\n    if not gd.click_image(\n        \"continue.png\",\n        scope=(300, 450, 800, 800),\n        confidence=0.88,\n        count_click=2,\n        multiscale=True,\n        is_debug=False,\n        ):\n        log_and_print(\"[is_center_continue] Not find center Continue\")",
+        "peekOfCode": "def is_center_continue():\n    if not gd.click_image(\n        \"continue.png\",\n        scope=(300, 550, 600, 700),\n        confidence=0.88,\n        count_click=2,\n        multiscale=True,\n        is_debug=False,\n        ):\n        log_and_print(\"[is_center_continue] Not find center Continue\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
