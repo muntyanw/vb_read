@@ -284,7 +284,7 @@ async def send_for_analysis(
         except Exception as e:
             last_exc = e
             log_and_print(
-                f"[dispatch] attempt {attempt+1}/{retries+1} failed: {e}", "error"
+                f"[dispatch] attempt {attempt+1}/{retries+1} failed from {IPS[ip_numbber]}: {e}", "error"
             )
             ip_numbber = (ip_numbber + 1) % len(IPS)
             log_and_print(f"[dispatch] change ip to {IPS[ip_numbber]}", "INFO")
