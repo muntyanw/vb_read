@@ -140,6 +140,14 @@
         "documentation": {}
     },
     {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
         "label": "datetime",
         "kind": 6,
         "isExtraImport": true,
@@ -2452,7 +2460,7 @@
         "kind": 5,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "s = {}\ncount_y_mess_empty = 0\nclass Context:\n    def __init__(\n        self,\n        viber_channels,\n        old_text,\n        width_menu=190,\n        height_menu=220,\n        height_item_menu=20,",
+        "peekOfCode": "s = {}\ncount_y_mess_empty = 0\nSTOP_FILE = Path(\"stop.txt\")\ndef _to_int(val, default):\n    try:\n        return int(val)\n    except Exception:\n        return default\ndef _to_float(val, default):\n    try:",
         "detail": "pwa",
         "documentation": {}
     },
@@ -2461,7 +2469,16 @@
         "kind": 5,
         "importPath": "pwa",
         "description": "pwa",
-        "peekOfCode": "count_y_mess_empty = 0\nclass Context:\n    def __init__(\n        self,\n        viber_channels,\n        old_text,\n        width_menu=190,\n        height_menu=220,\n        height_item_menu=20,\n        x_offset_out_mess=400,",
+        "peekOfCode": "count_y_mess_empty = 0\nSTOP_FILE = Path(\"stop.txt\")\ndef _to_int(val, default):\n    try:\n        return int(val)\n    except Exception:\n        return default\ndef _to_float(val, default):\n    try:\n        return float(val)",
+        "detail": "pwa",
+        "documentation": {}
+    },
+    {
+        "label": "STOP_FILE",
+        "kind": 5,
+        "importPath": "pwa",
+        "description": "pwa",
+        "peekOfCode": "STOP_FILE = Path(\"stop.txt\")\ndef _to_int(val, default):\n    try:\n        return int(val)\n    except Exception:\n        return default\ndef _to_float(val, default):\n    try:\n        return float(val)\n    except Exception:",
         "detail": "pwa",
         "documentation": {}
     },

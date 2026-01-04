@@ -11,6 +11,8 @@
     "count_scroll_up": 10,
     "count_scroll_down": 10,
     "count_repeat": 4,
+    "cycle_timeout_s": 120,
+    "restart_delay_s": 5,
     "word_comment": [
         "Скопировать",
         "Комментарии",
