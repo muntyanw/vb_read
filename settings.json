@@ -29,7 +29,7 @@
     },
     "dispatch_timeout_s": 15,
     "dispatch_retries": 2,
-    "IPS": ["46.63.40.211", "192.168.1.223"],
+    "IPS": ["100.66.74.41", "46.63.40.211", "192.168.1.223"],
     "viber_channels":[
         {
             "name_viber_channel":"pereviz",
