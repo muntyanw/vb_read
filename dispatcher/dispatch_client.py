@@ -284,7 +284,7 @@ async def send_for_analysis(
         except Exception as e:
             last_exc = e
             log_and_print(
-                f"[dispatch] attempt {attempt+1}/{retries+1} failed: {e}", "error"
+                f"[dispatch] attempt {attempt+1}/{retries+1} failed from {IPS[ip_numbber]}: {e}", "error"
             )
             ip_numbber = (ip_numbber + 1) % len(IPS)
             log_and_print(f"[dispatch] change ip to {IPS[ip_numbber]}", "INFO")
@@ -981,16 +981,25 @@ def click_cancel_window_save_as():
     ):
         log_and_print("Not find window_save_as - attempt 2", "INFO")
         if not gd.click_image(
-        "cancel_close.png",
-        scope=(800, 20, 970, 100),
-        confidence=0.8,
-        count_click=1,
-        multiscale=True,
-        is_debug=False,
+            "cancel2.png",
+            scope=(800, 500, 1060, 580),
+            confidence=0.9,
+            count_click=1,
+            multiscale=True,
+            is_debug=False,
         ):
-            
-            log_and_print("Not find window_save_as attempt2", "INFO")
-            return False
+            log_and_print("Not find window_save_as - attempt 3", "INFO")
+            if not gd.click_image(
+                "cancel_close.png",
+                scope=(800, 20, 970, 100),
+                confidence=0.8,
+                count_click=1,
+                multiscale=True,
+                is_debug=False,
+                ):
+                    
+                    log_and_print("Not find window_save_as attempt2", "INFO")
+                    return False
         
     log_and_print("Find success window_save_as and click", "INFO")
     return True

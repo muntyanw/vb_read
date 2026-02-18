@@ -8,6 +8,8 @@ from dispatcher.dispatch_client import (
     window_left,
     window_top_focus
 )
+from dispatcher.periodic_broadcast_config import load_periodic_broadcast_config
+from dispatcher.periodic_broadcast_sender import PeriodicBroadcastSender
 import asyncio
 from pywinauto import Application
 from pathlib import Path
@@ -131,8 +133,10 @@ async def main():
             return True
         return False
 
+
     async def run_worker():
         s = await init()
+        periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
 
         _, window = await ensure_viber_ready()
         window_top_focus(window)
@@ -143,6 +147,9 @@ async def main():
         while True:
             if stop_requested():
                 break
+
+            periodic_sender.send_if_due(window, s)
+
             await asyncio.wait_for(
                 processViberMess(
                     window, s, count_scroll_up, count_scroll_down, pause_cycle_read
