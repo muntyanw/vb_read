@@ -7,3 +7,4 @@ build/
 dist/
 previous_text.txt
 settings.json
+.vscode/
