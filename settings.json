@@ -15,7 +15,7 @@
     "restart_delay_s": 5,
 
     "periodic_broadcast_text": "Автоматичний пошук поіздок https://web.tailda4cd0.ts.net/",
-    "periodic_broadcast_interval_minutes": 60,
+    "periodic_broadcast_interval_minutes": 120,
 
     "word_comment": [
         "Скопировать",
