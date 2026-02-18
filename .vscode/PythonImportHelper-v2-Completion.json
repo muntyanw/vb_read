@@ -2307,7 +2307,7 @@
         "kind": 6,
         "importPath": "dispatcher.periodic_broadcast_sender",
         "description": "dispatcher.periodic_broadcast_sender",
-        "peekOfCode": "class PeriodicBroadcastSender:\n    def __init__(self, config: PeriodicBroadcastConfig):\n        self._config = config\n        self._next_send_at = time.monotonic() if config.enabled else float(\"inf\")\n    def send_if_due(self, window, s) -> None:\n        if not self._config.enabled:\n            return\n        now = time.monotonic()\n        if now < self._next_send_at:\n            return",
+        "peekOfCode": "class PeriodicBroadcastSender:\n    def __init__(self, config: PeriodicBroadcastConfig):\n        self._config = config\n        self._next_send_at = (\n            time.monotonic() + (config.interval_minutes * 60.0)\n            if config.enabled\n            else float(\"inf\")\n        )\n    def send_if_due(self, window, s) -> None:\n        if not self._config.enabled:",
         "detail": "dispatcher.periodic_broadcast_sender",
         "documentation": {}
     },

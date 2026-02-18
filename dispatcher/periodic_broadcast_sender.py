@@ -12,7 +12,11 @@ from dispatcher.periodic_broadcast_config import PeriodicBroadcastConfig
 class PeriodicBroadcastSender:
     def __init__(self, config: PeriodicBroadcastConfig):
         self._config = config
-        self._next_send_at = time.monotonic() if config.enabled else float("inf")
+        self._next_send_at = (
+            time.monotonic() + (config.interval_minutes * 60.0)
+            if config.enabled
+            else float("inf")
+        )
 
     def send_if_due(self, window, s) -> None:
         if not self._config.enabled:
@@ -53,4 +57,3 @@ class PeriodicBroadcastSender:
         gd.pause(0.5)
 
         log_and_print("[periodic_broadcast] message sent", "info")
-
