@@ -122,6 +122,7 @@ async def main():
     restart_delay_s = _to_int(read_setting("restart_delay_s"), 5)
 
     gd.ensure_layout()
+    periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
 
     def stop_requested():
         if STOP_FILE.exists():
@@ -136,7 +137,6 @@ async def main():
 
     async def run_worker():
         s = await init()
-        periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
 
         _, window = await ensure_viber_ready()
         window_top_focus(window)

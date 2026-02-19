@@ -148,6 +148,14 @@
         "documentation": {}
     },
     {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
         "label": "datetime",
         "kind": 6,
         "isExtraImport": true,
@@ -174,6 +182,14 @@
     },
     {
         "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
         "importPath": "datetime",
         "description": "datetime",
         "isExtraImport": true,
@@ -1021,6 +1037,14 @@
         "description": "dataclasses",
         "isExtraImport": true,
         "detail": "dataclasses",
+        "documentation": {}
+    },
+    {
+        "label": "log_sent_message",
+        "importPath": "dispatcher.message_send_logger",
+        "description": "dispatcher.message_send_logger",
+        "isExtraImport": true,
+        "detail": "dispatcher.message_send_logger",
         "documentation": {}
     },
     {
@@ -2285,6 +2309,24 @@
         "documentation": {}
     },
     {
+        "label": "log_sent_message",
+        "kind": 2,
+        "importPath": "dispatcher.message_send_logger",
+        "description": "dispatcher.message_send_logger",
+        "peekOfCode": "def log_sent_message(channel_name: str | None, text: str, source: str = \"periodic\") -> None:\n    ts = datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")\n    channel = channel_name or \"unknown\"\n    payload = text.replace(\"\\r\", \" \").replace(\"\\n\", \" \")\n    line = f\"[{ts}] source={source}; channel={channel}; text={payload}\\n\"\n    with SEND_LOG_FILE.open(\"a\", encoding=\"utf-8\") as fh:\n        fh.write(line)",
+        "detail": "dispatcher.message_send_logger",
+        "documentation": {}
+    },
+    {
+        "label": "SEND_LOG_FILE",
+        "kind": 5,
+        "importPath": "dispatcher.message_send_logger",
+        "description": "dispatcher.message_send_logger",
+        "peekOfCode": "SEND_LOG_FILE = Path(\"sent_messages.log\")\ndef log_sent_message(channel_name: str | None, text: str, source: str = \"periodic\") -> None:\n    ts = datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")\n    channel = channel_name or \"unknown\"\n    payload = text.replace(\"\\r\", \" \").replace(\"\\n\", \" \")\n    line = f\"[{ts}] source={source}; channel={channel}; text={payload}\\n\"\n    with SEND_LOG_FILE.open(\"a\", encoding=\"utf-8\") as fh:\n        fh.write(line)",
+        "detail": "dispatcher.message_send_logger",
+        "documentation": {}
+    },
+    {
         "label": "PeriodicBroadcastConfig",
         "kind": 6,
         "importPath": "dispatcher.periodic_broadcast_config",
@@ -2307,7 +2349,7 @@
         "kind": 6,
         "importPath": "dispatcher.periodic_broadcast_sender",
         "description": "dispatcher.periodic_broadcast_sender",
-        "peekOfCode": "class PeriodicBroadcastSender:\n    def __init__(self, config: PeriodicBroadcastConfig):\n        self._config = config\n        self._next_send_at = (\n            time.monotonic() + (config.interval_minutes * 60.0)\n            if config.enabled\n            else float(\"inf\")\n        )\n    def send_if_due(self, window, s) -> None:\n        if not self._config.enabled:",
+        "peekOfCode": "class PeriodicBroadcastSender:\n    def __init__(self, config: PeriodicBroadcastConfig):\n        self._config = config\n        self._last_wait_log_at = 0.0\n        self._next_send_at = (\n            time.monotonic() + (config.interval_minutes * 60.0)\n            if config.enabled\n            else float(\"inf\")\n        )\n        if config.enabled:",
         "detail": "dispatcher.periodic_broadcast_sender",
         "documentation": {}
     },
