@@ -15,23 +15,23 @@
     "restart_delay_s": 5,
     "settings_reload_interval_s": 30,
 
-    "periodic_broadcast_text": "РђРІС‚РѕРјР°С‚РёС‡РЅРёР№ РїРѕС€СѓРє РїРѕС–Р·РґРѕРє https://web.tailda4cd0.ts.net/",
+    "periodic_broadcast_text": "Автоматичний пошук поїздок https://web.tailda4cd0.ts.net/",
     "periodic_broadcast_interval_minutes": 120,
     "periodic_broadcast_send_on_startup": false,
 
     "word_comment": [
-        "РЎРєРѕРїРёСЂРѕРІР°С‚СЊ",
-        "РљРѕРјРјРµРЅС‚Р°СЂРёРё",
-        "РєРѕРјРјРµРЅС‚Р°СЂРёР№"
+        "Скопировать",
+        "Комментарии",
+        "комментарий"
     ],
     "image_border_down": "images\\border-down.png",
     "image_border_down2": "images\\border-down2.png",
     "max_chars_member": 20000,
     "pause_read_messages_second": 5,
     "search_phrases": {
-        "isText": "РЎРєРѕРїРёСЂРѕРІР°С‚СЊ",
-        "isImage": "РљРѕРїРёСЂРѕРІР°С‚СЊ",
-        "isVideo": "РЎРѕС…СЂР°РЅРёС‚СЊ"
+        "isText": "Скопировать",
+        "isImage": "Копировать",
+        "isVideo": "Сохранить"
     },
     "dispatch_timeout_s": 15,
     "dispatch_retries": 2,
@@ -58,7 +58,7 @@
         },
         {
             "name_viber_channel": "pereviznichok",
-            "name_viber_contact": "РџР•Р Р•Р’Р†Р—РќРР§РћРљ",
+            "name_viber_contact": "ПЕРЕВІЗНИЧОК",
             "name_viber_contact_lang": "ukr"
         }
     ]
