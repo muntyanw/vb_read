@@ -619,6 +619,14 @@
         "documentation": {}
     },
     {
+        "label": "write_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
         "label": "read_setting",
         "importPath": "utils",
         "description": "utils",
@@ -2340,7 +2348,7 @@
         "kind": 6,
         "importPath": "dispatcher.periodic_broadcast_config",
         "description": "dispatcher.periodic_broadcast_config",
-        "peekOfCode": "class PeriodicBroadcastConfig:\n    message_text: str\n    interval_minutes: float\n    @property\n    def enabled(self) -> bool:\n        return bool(self.message_text.strip()) and self.interval_minutes > 0\ndef load_periodic_broadcast_config() -> PeriodicBroadcastConfig:\n    raw_text = read_setting(\"periodic_broadcast_text\") or \"\"\n    raw_interval = read_setting(\"periodic_broadcast_interval_minutes\")\n    try:",
+        "peekOfCode": "class PeriodicBroadcastConfig:\n    message_text: str\n    interval_minutes: float\n    send_on_startup: bool\n    @property\n    def enabled(self) -> bool:\n        return bool(self.message_text.strip()) and self.interval_minutes > 0\ndef load_periodic_broadcast_config() -> PeriodicBroadcastConfig:\n    raw_text = read_setting(\"periodic_broadcast_text\") or \"\"\n    raw_interval = read_setting(\"periodic_broadcast_interval_minutes\")",
         "detail": "dispatcher.periodic_broadcast_config",
         "documentation": {}
     },
@@ -2349,7 +2357,7 @@
         "kind": 2,
         "importPath": "dispatcher.periodic_broadcast_config",
         "description": "dispatcher.periodic_broadcast_config",
-        "peekOfCode": "def load_periodic_broadcast_config() -> PeriodicBroadcastConfig:\n    raw_text = read_setting(\"periodic_broadcast_text\") or \"\"\n    raw_interval = read_setting(\"periodic_broadcast_interval_minutes\")\n    try:\n        interval_minutes = float(raw_interval)\n    except Exception:\n        interval_minutes = 0.0\n    return PeriodicBroadcastConfig(\n        message_text=str(raw_text),\n        interval_minutes=interval_minutes,",
+        "peekOfCode": "def load_periodic_broadcast_config() -> PeriodicBroadcastConfig:\n    raw_text = read_setting(\"periodic_broadcast_text\") or \"\"\n    raw_interval = read_setting(\"periodic_broadcast_interval_minutes\")\n    raw_send_on_startup = read_setting(\"periodic_broadcast_send_on_startup\")\n    if raw_send_on_startup is None:\n        write_setting(\"periodic_broadcast_send_on_startup\", False)\n        raw_send_on_startup = False\n    try:\n        interval_minutes = float(raw_interval)\n    except Exception:",
         "detail": "dispatcher.periodic_broadcast_config",
         "documentation": {}
     },
@@ -2358,7 +2366,7 @@
         "kind": 6,
         "importPath": "dispatcher.periodic_broadcast_sender",
         "description": "dispatcher.periodic_broadcast_sender",
-        "peekOfCode": "class PeriodicBroadcastSender:\n    def __init__(self, config: PeriodicBroadcastConfig):\n        self._config = config\n        self._last_wait_log_at = 0.0\n        self._next_send_at = float(\"inf\")\n        self.update_config(config)\n    def update_config(self, config: PeriodicBroadcastConfig) -> None:\n        if config == self._config and self._next_send_at != float(\"inf\"):\n            return\n        self._config = config",
+        "peekOfCode": "class PeriodicBroadcastSender:\n    def __init__(self, config: PeriodicBroadcastConfig):\n        self._config = config\n        self._last_wait_log_at = 0.0\n        self._next_send_at = float(\"inf\")\n        self.update_config(config, is_startup=True)\n    def update_config(self, config: PeriodicBroadcastConfig, is_startup: bool = False) -> None:\n        if config == self._config and self._next_send_at != float(\"inf\"):\n            return\n        self._config = config",
         "detail": "dispatcher.periodic_broadcast_sender",
         "documentation": {}
     },

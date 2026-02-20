@@ -17,6 +17,7 @@
 
     "periodic_broadcast_text": "РђРІС‚РѕРјР°С‚РёС‡РЅРёР№ РїРѕС€СѓРє РїРѕС–Р·РґРѕРє https://web.tailda4cd0.ts.net/",
     "periodic_broadcast_interval_minutes": 120,
+    "periodic_broadcast_send_on_startup": false,
 
     "word_comment": [
         "РЎРєРѕРїРёСЂРѕРІР°С‚СЊ",

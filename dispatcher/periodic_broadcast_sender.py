@@ -15,19 +15,26 @@ class PeriodicBroadcastSender:
         self._config = config
         self._last_wait_log_at = 0.0
         self._next_send_at = float("inf")
-        self.update_config(config)
+        self.update_config(config, is_startup=True)
 
-    def update_config(self, config: PeriodicBroadcastConfig) -> None:
+    def update_config(self, config: PeriodicBroadcastConfig, is_startup: bool = False) -> None:
         if config == self._config and self._next_send_at != float("inf"):
             return
 
         self._config = config
         if config.enabled:
-            self._next_send_at = time.monotonic() + (config.interval_minutes * 60.0)
-            log_and_print(
-                f"[periodic_broadcast] enabled: every {config.interval_minutes} min",
-                "info",
-            )
+            if is_startup and config.send_on_startup:
+                self._next_send_at = time.monotonic()
+                log_and_print(
+                    f"[periodic_broadcast] enabled: send on startup, then every {config.interval_minutes} min",
+                    "info",
+                )
+            else:
+                self._next_send_at = time.monotonic() + (config.interval_minutes * 60.0)
+                log_and_print(
+                    f"[periodic_broadcast] enabled: every {config.interval_minutes} min",
+                    "info",
+                )
         else:
             self._next_send_at = float("inf")
             log_and_print("[periodic_broadcast] disabled", "info")
