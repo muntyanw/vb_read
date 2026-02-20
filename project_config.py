@@ -11,11 +11,15 @@ def resource_path(filename: str) -> Path:
     Возвращает абсолютный путь к ресурсу, который работает как в .py, так и в .exe (PyInstaller).
     """
     if hasattr(sys, "_MEIPASS"):
-        # если исполняется как .exe
-        return Path(sys._MEIPASS) / filename
-    else:
-        # обычный путь при запуске из .py
-        return Path(__file__).resolve().parent / filename
+        # 1) путь внутри PyInstaller bundle
+        bundle_path = Path(sys._MEIPASS) / filename
+        if bundle_path.exists():
+            return bundle_path
+        # 2) fallback: рядом с exe (для внешних конфигов)
+        return Path(sys.executable).resolve().parent / filename
+
+    # обычный путь при запуске из .py
+    return Path(__file__).resolve().parent / filename
 
 # -------------------------------------------------------------------
 # 1) Определяем путь до settings.yaml (корень проекта)

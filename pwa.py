@@ -14,6 +14,8 @@ import asyncio
 from pywinauto import Application
 from pathlib import Path
 import subprocess
+import traceback
+import time
 
 
 s = {}
@@ -114,12 +116,40 @@ async def ensure_viber_ready():
 
 
 async def main():
+    def load_runtime_settings():
+        return {
+            "count_scroll_up": _to_int(read_setting("count_scroll_up"), 2),
+            "count_scroll_down": _to_int(read_setting("count_scroll_down"), 2),
+            "pause_cycle_read": _to_float(read_setting("pause_read_messages_second"), 1.0),
+            "cycle_timeout_s": _to_int(read_setting("cycle_timeout_s"), 120),
+            "restart_delay_s": _to_int(read_setting("restart_delay_s"), 5),
+            "settings_reload_interval_s": _to_int(read_setting("settings_reload_interval_s"), 30),
+        }
 
-    count_scroll_up = _to_int(read_setting("count_scroll_up"), 2)
-    count_scroll_down = _to_int(read_setting("count_scroll_down"), 2)
-    pause_cycle_read = _to_float(read_setting("pause_read_messages_second"), 1.0)
-    cycle_timeout_s = _to_int(read_setting("cycle_timeout_s"), 120)
-    restart_delay_s = _to_int(read_setting("restart_delay_s"), 5)
+    def refresh_context_from_settings(ctx):
+        viber_channels = read_setting("viber_channels")
+        if isinstance(viber_channels, list) and viber_channels:
+            ctx.viber_channels = viber_channels
+
+        ctx.search_board_mess_x_start = _to_int(
+            read_setting("search_board_mess_x_start"),
+            ctx.search_board_mess_x_start,
+        )
+        ctx.search_board_mess_x_end = _to_int(
+            read_setting("search_board_mess_x_end"),
+            ctx.search_board_mess_x_end,
+        )
+        ctx.search_board_mess_y_start = _to_int(
+            read_setting("search_board_mess_y_start"),
+            ctx.search_board_mess_y_start,
+        )
+        ctx.search_board_mess_y_end = _to_int(
+            read_setting("search_board_mess_y_end"),
+            ctx.search_board_mess_y_end,
+        )
+
+    runtime_settings = load_runtime_settings()
+    last_settings_reload_at = time.monotonic()
 
     gd.ensure_layout()
     periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
@@ -136,6 +166,7 @@ async def main():
 
 
     async def run_worker():
+        nonlocal runtime_settings, last_settings_reload_at, periodic_sender
         s = await init()
 
         _, window = await ensure_viber_ready()
@@ -148,28 +179,46 @@ async def main():
             if stop_requested():
                 break
 
+            now = time.monotonic()
+            if now - last_settings_reload_at >= runtime_settings["settings_reload_interval_s"]:
+                runtime_settings = load_runtime_settings()
+                refresh_context_from_settings(s)
+                periodic_sender.update_config(load_periodic_broadcast_config())
+                last_settings_reload_at = now
+
             periodic_sender.send_if_due(window, s)
 
             await asyncio.wait_for(
                 processViberMess(
-                    window, s, count_scroll_up, count_scroll_down, pause_cycle_read
+                    window,
+                    s,
+                    runtime_settings["count_scroll_up"],
+                    runtime_settings["count_scroll_down"],
+                    runtime_settings["pause_cycle_read"],
                 ),
-                timeout=cycle_timeout_s,
+                timeout=runtime_settings["cycle_timeout_s"],
             )
 
     while True:
         try:
             await run_worker()
         except asyncio.TimeoutError:
-            print(f"[pwa] timeout (> {cycle_timeout_s}s) - restarting worker")
+            print(f"[pwa] timeout (> {runtime_settings['cycle_timeout_s']}s) - restarting worker")
         except Exception as e:
             print(f"[pwa] error: {e}, restarting worker")
 
         if stop_requested():
             break
 
-        await asyncio.sleep(restart_delay_s)
+        await asyncio.sleep(runtime_settings["restart_delay_s"])
 
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nInterrupted by user.")
+    except Exception:
+        traceback.print_exc()
+    finally:
+        input("\nPress Enter to close...")

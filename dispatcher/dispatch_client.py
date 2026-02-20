@@ -23,12 +23,23 @@ from pywinauto import keyboard
 
 pag.FAILSAFE = False
 
-IPS: list[str]=read_setting("IPS")  or []
 ip_numbber = 0
 
+def _get_ips() -> list[str]:
+    ips = read_setting("IPS") or []
+    if not isinstance(ips, list):
+        return []
+    return [str(ip).strip() for ip in ips if str(ip).strip()]
+
+
 def get_dispatch_url():
-    
-    return f"http://{IPS[ip_numbber]}:8888/api/v1/dispatch/analyze"
+    ips = _get_ips()
+    if not ips:
+        return "http://127.0.0.1:8888/api/v1/dispatch/analyze"
+
+    global ip_numbber
+    ip_numbber = ip_numbber % len(ips)
+    return f"http://{ips[ip_numbber]}:8888/api/v1/dispatch/analyze"
 
 
 DISPATCH_API_KEY = os.getenv(
@@ -283,11 +294,16 @@ async def send_for_analysis(
 
         except Exception as e:
             last_exc = e
+            ips = _get_ips()
+            current_ip = ips[ip_numbber % len(ips)] if ips else "no-ip-configured"
             log_and_print(
-                f"[dispatch] attempt {attempt+1}/{retries+1} failed from {IPS[ip_numbber]}: {e}", "error"
+                f"[dispatch] attempt {attempt+1}/{retries+1} failed from {current_ip}: {e}", "error"
             )
-            ip_numbber = (ip_numbber + 1) % len(IPS)
-            log_and_print(f"[dispatch] change ip to {IPS[ip_numbber]}", "INFO")
+            if ips:
+                ip_numbber = (ip_numbber + 1) % len(ips)
+                log_and_print(f"[dispatch] change ip to {ips[ip_numbber]}", "INFO")
+            else:
+                log_and_print("[dispatch] IPS is empty in settings.json", "ERROR")
             
             if attempt < retries:
                 await asyncio.sleep(0.7 * (attempt + 1))  # легкий backoff

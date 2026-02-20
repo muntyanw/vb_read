@@ -14,17 +14,22 @@ class PeriodicBroadcastSender:
     def __init__(self, config: PeriodicBroadcastConfig):
         self._config = config
         self._last_wait_log_at = 0.0
-        self._next_send_at = (
-            time.monotonic() + (config.interval_minutes * 60.0)
-            if config.enabled
-            else float("inf")
-        )
+        self._next_send_at = float("inf")
+        self.update_config(config)
+
+    def update_config(self, config: PeriodicBroadcastConfig) -> None:
+        if config == self._config and self._next_send_at != float("inf"):
+            return
+
+        self._config = config
         if config.enabled:
+            self._next_send_at = time.monotonic() + (config.interval_minutes * 60.0)
             log_and_print(
                 f"[periodic_broadcast] enabled: every {config.interval_minutes} min",
                 "info",
             )
         else:
+            self._next_send_at = float("inf")
             log_and_print("[periodic_broadcast] disabled", "info")
 
     def send_if_due(self, window, s) -> None:

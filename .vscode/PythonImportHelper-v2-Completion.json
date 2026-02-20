@@ -1124,6 +1124,15 @@
         "documentation": {}
     },
     {
+        "label": "traceback",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "traceback",
+        "description": "traceback",
+        "detail": "traceback",
+        "documentation": {}
+    },
+    {
         "label": "fuzz",
         "importPath": "rapidfuzz",
         "description": "rapidfuzz",
@@ -2034,7 +2043,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def get_dispatch_url():\n    return f\"http://{IPS[ip_numbber]}:8888/api/v1/dispatch/analyze\"\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)",
+        "peekOfCode": "def get_dispatch_url():\n    ips = _get_ips()\n    if not ips:\n        return \"http://127.0.0.1:8888/api/v1/dispatch/analyze\"\n    global ip_numbber\n    ip_numbber = ip_numbber % len(ips)\n    return f\"http://{ips[ip_numbber]}:8888/api/v1/dispatch/analyze\"\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2250,7 +2259,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "pag.FAILSAFE = False\nIPS: list[str]=read_setting(\"IPS\")  or []\nip_numbber = 0\ndef get_dispatch_url():\n    return f\"http://{IPS[ip_numbber]}:8888/api/v1/dispatch/analyze\"\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции",
+        "peekOfCode": "pag.FAILSAFE = False\nip_numbber = 0\ndef _get_ips() -> list[str]:\n    ips = read_setting(\"IPS\") or []\n    if not isinstance(ips, list):\n        return []\n    return [str(ip).strip() for ip in ips if str(ip).strip()]\ndef get_dispatch_url():\n    ips = _get_ips()\n    if not ips:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2259,7 +2268,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "ip_numbber = 0\ndef get_dispatch_url():\n    return f\"http://{IPS[ip_numbber]}:8888/api/v1/dispatch/analyze\"\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений",
+        "peekOfCode": "ip_numbber = 0\ndef _get_ips() -> list[str]:\n    ips = read_setting(\"IPS\") or []\n    if not isinstance(ips, list):\n        return []\n    return [str(ip).strip() for ip in ips if str(ip).strip()]\ndef get_dispatch_url():\n    ips = _get_ips()\n    if not ips:\n        return \"http://127.0.0.1:8888/api/v1/dispatch/analyze\"",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2349,7 +2358,7 @@
         "kind": 6,
         "importPath": "dispatcher.periodic_broadcast_sender",
         "description": "dispatcher.periodic_broadcast_sender",
-        "peekOfCode": "class PeriodicBroadcastSender:\n    def __init__(self, config: PeriodicBroadcastConfig):\n        self._config = config\n        self._last_wait_log_at = 0.0\n        self._next_send_at = (\n            time.monotonic() + (config.interval_minutes * 60.0)\n            if config.enabled\n            else float(\"inf\")\n        )\n        if config.enabled:",
+        "peekOfCode": "class PeriodicBroadcastSender:\n    def __init__(self, config: PeriodicBroadcastConfig):\n        self._config = config\n        self._last_wait_log_at = 0.0\n        self._next_send_at = float(\"inf\")\n        self.update_config(config)\n    def update_config(self, config: PeriodicBroadcastConfig) -> None:\n        if config == self._config and self._next_send_at != float(\"inf\"):\n            return\n        self._config = config",
         "detail": "dispatcher.periodic_broadcast_sender",
         "documentation": {}
     },
@@ -2574,7 +2583,7 @@
         "kind": 2,
         "importPath": "project_config",
         "description": "project_config",
-        "peekOfCode": "def resource_path(filename: str) -> Path:\n    \"\"\"\n    Возвращает абсолютный путь к ресурсу, который работает как в .py, так и в .exe (PyInstaller).\n    \"\"\"\n    if hasattr(sys, \"_MEIPASS\"):\n        # если исполняется как .exe\n        return Path(sys._MEIPASS) / filename\n    else:\n        # обычный путь при запуске из .py\n        return Path(__file__).resolve().parent / filename",
+        "peekOfCode": "def resource_path(filename: str) -> Path:\n    \"\"\"\n    Возвращает абсолютный путь к ресурсу, который работает как в .py, так и в .exe (PyInstaller).\n    \"\"\"\n    if hasattr(sys, \"_MEIPASS\"):\n        # 1) путь внутри PyInstaller bundle\n        bundle_path = Path(sys._MEIPASS) / filename\n        if bundle_path.exists():\n            return bundle_path\n        # 2) fallback: рядом с exe (для внешних конфигов)",
         "detail": "project_config",
         "documentation": {}
     },
