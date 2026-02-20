@@ -2834,7 +2834,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def read_setting(field_path) -> str | int | float | bool | list[str] | dict | None:\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8') as file:\n            settings = json.load(file)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:",
+        "peekOfCode": "def read_setting(field_path) -> str | int | float | bool | list[str] | dict | None:\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8-sig') as file:\n            settings = json.load(file)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:",
         "detail": "utils",
         "documentation": {}
     },
@@ -2843,7 +2843,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def write_setting(field_path, new_value):\n    \"\"\"\n    Writes a new value to a specific field in a JSON settings file.\n    :param field_path: Dot-separated path to the field (e.g., \"capture_and_recognize.lang\").\n    :param new_value: The new value to set for the specified field.\n    \"\"\"\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8') as file:",
+        "peekOfCode": "def write_setting(field_path, new_value):\n    \"\"\"\n    Writes a new value to a specific field in a JSON settings file.\n    :param field_path: Dot-separated path to the field (e.g., \"capture_and_recognize.lang\").\n    :param new_value: The new value to set for the specified field.\n    \"\"\"\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8-sig') as file:",
         "detail": "utils",
         "documentation": {}
     },
@@ -2852,7 +2852,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')\n        return None",
+        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8-sig') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')\n        return None",
         "detail": "utils",
         "documentation": {}
     },

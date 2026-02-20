@@ -59,7 +59,7 @@ def read_setting(field_path) -> str | int | float | bool | list[str] | dict | No
     file_path = "settings.json"
     try:
         # Open and load the JSON file
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, 'r', encoding='utf-8-sig') as file:
             settings = json.load(file)
 
         # Navigate to the desired field
@@ -84,7 +84,7 @@ def write_setting(field_path, new_value):
 
     try:
         # Open and load the JSON file
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, 'r', encoding='utf-8-sig') as file:
             settings = json.load(file)
 
         # Navigate to the desired field and set the new value
@@ -106,7 +106,7 @@ def write_setting(field_path, new_value):
 def load_json(file_path):
     log_and_print(f"Загрузка данных из JSON файла {file_path}.", 'info')
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
+        with open(file_path, 'r', encoding='utf-8-sig') as file:
             data = json.load(file)
         log_and_print(f"Данные успешно загружены из {file_path}.", 'info')
         return data
