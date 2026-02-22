@@ -188,22 +188,17 @@ async def main():
 
             periodic_sender.send_if_due(window, s)
 
-            await asyncio.wait_for(
-                processViberMess(
-                    window,
-                    s,
-                    runtime_settings["count_scroll_up"],
-                    runtime_settings["count_scroll_down"],
-                    runtime_settings["pause_cycle_read"],
-                ),
-                timeout=runtime_settings["cycle_timeout_s"],
+            await processViberMess(
+                window,
+                s,
+                runtime_settings["count_scroll_up"],
+                runtime_settings["count_scroll_down"],
+                runtime_settings["pause_cycle_read"],
             )
 
     while True:
         try:
             await run_worker()
-        except asyncio.TimeoutError:
-            print(f"[pwa] timeout (> {runtime_settings['cycle_timeout_s']}s) - restarting worker")
         except Exception as e:
             print(f"[pwa] error: {e}, restarting worker")
 
