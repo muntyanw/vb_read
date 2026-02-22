@@ -2168,7 +2168,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, text, s):\n    is_debug = False\n    resultFind = findMessage(window, x, y, viber_channel, text, s)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 90\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
+        "peekOfCode": "def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, text, s):\n    is_debug = False\n    resultFind = findMessage(window, x, y, viber_channel, text, s)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 70\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },

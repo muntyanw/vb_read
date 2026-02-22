@@ -754,7 +754,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
     else:
         return False
 
-    xRight = x - 90
+    xRight = x - 70
     yRight = y + 20
 
     gd.right_click(xRight, yRight)
