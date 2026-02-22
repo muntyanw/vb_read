@@ -1,4 +1,4 @@
-{
+﻿{
     "capture_and_recognize": {
         "lang": "ukr",
         "custom_config": "--oem 3 --psm 6"
@@ -15,8 +15,8 @@
     "restart_delay_s": 5,
     "settings_reload_interval_s": 30,
     "copy_stall_restart_seconds": 3600,
-    "periodic_broadcast_text": "Автоматичний пошук поїздок https://web.tailda4cd0.ts.net/",
-    "periodic_broadcast_interval_minutes": 120,
+    "periodic_broadcast_text": "Автоматичний пошук поїздок https://web.tailda4cd0.ts.net:8443/",
+    "periodic_broadcast_interval_minutes": 0,
     "periodic_broadcast_send_on_startup": false,
     "word_comment": [
         "Скопировать",
