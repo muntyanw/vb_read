@@ -52,10 +52,19 @@ processed_messages = set()
 # Семафор для последовательной обработки сообщений
 processing_semaphore = asyncio.Semaphore(1)
 count_y_mess_empty = 0
+copied_message_counter = 0
+last_message_copy_monotonic = time.monotonic()
 
 
 class DispatchError(Exception):
     pass
+
+
+def mark_message_copied() -> None:
+    global copied_message_counter, last_message_copy_monotonic
+    copied_message_counter += 1
+    last_message_copy_monotonic = time.monotonic()
+    log_and_print(f"[copy_watchdog] copied_message_counter={copied_message_counter}", "info")
 
 
 # ---- Клиентские модели под ответ сервера ----
@@ -467,6 +476,7 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
         #    return None
 
     log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну", "INFO")
+    mark_message_copied()
     return pyperclip.paste()
 
 count_old_mess = 0
@@ -1061,6 +1071,15 @@ async def processViberMess(
 
     for i in range(count_repeat):
         while True:
+            copy_stall_restart_seconds = int(read_setting("copy_stall_restart_seconds") or 3600)
+            if copy_stall_restart_seconds > 0:
+                idle_seconds = time.monotonic() - last_message_copy_monotonic
+                if idle_seconds >= copy_stall_restart_seconds:
+                    raise RuntimeError(
+                        f"[copy_watchdog] no message copies for {int(idle_seconds)}s "
+                        f"(limit {copy_stall_restart_seconds}s)"
+                    )
+
             log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
             if empty_send_count > 4:
                 window_top_focus(window)

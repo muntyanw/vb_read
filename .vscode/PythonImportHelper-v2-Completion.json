@@ -2006,7 +2006,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None\n    reason: Optional[str] = None",
+        "peekOfCode": "class DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2052,6 +2052,15 @@
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
         "peekOfCode": "def get_dispatch_url():\n    ips = _get_ips()\n    if not ips:\n        return \"http://127.0.0.1:8888/api/v1/dispatch/analyze\"\n    global ip_numbber\n    ip_numbber = ip_numbber % len(ips)\n    return f\"http://{ips[ip_numbber]}:8888/api/v1/dispatch/analyze\"\nDISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "mark_message_copied",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2285,7 +2294,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):",
+        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2294,7 +2303,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None",
+        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2303,7 +2312,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):\n    matches: Optional[bool] = None",
+        "peekOfCode": "processing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2312,7 +2321,25 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "count_y_mess_empty = 0\nclass DispatchError(Exception):\n    pass\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None",
+        "peekOfCode": "count_y_mess_empty = 0\ncopied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "copied_message_counter",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "copied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\n# ---- Клиентские модели под ответ сервера ----",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "last_message_copy_monotonic",
+        "kind": 5,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "last_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
