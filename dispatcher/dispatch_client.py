@@ -804,7 +804,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
         
         if not gd.click_image(
             "select.png",
-            scope=(680, 400, 780, 520),
+            scope=(580, 400, 740, 520),
             confidence=0.88,
             count_click=1,
             multiscale=True,
