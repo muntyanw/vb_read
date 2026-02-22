@@ -800,17 +800,27 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
         gd.pause(1)
         log_and_print("Click ctrl v")
         gd.pause(1)
-
-        if not gd.click_text(
-            [first_name],
-            count_attempt_find=2,
-            pause_attempt=4,
-            lang="ukr",
-            scope=(pos[0], pos[0] + 40, pos[0] + 300, pos[0] + 200),
+        
+        
+        if not gd.click_image(
+            "select.png",
+            scope=(680, 400, 780, 520),
+            confidence=0.88,
+            count_click=1,
+            multiscale=True,
             is_debug=False,
-            threshold=0.5,
-            occurrence=1,
-        ):
+        ): 
+
+        #if not gd.click_text(
+        #    [first_name],
+        #    count_attempt_find=2,
+        #    pause_attempt=4,
+        #    lang="ukr",
+        #    scope=(pos[0], pos[0] + 40, pos[0] + 300, pos[0] + 200),
+        #    is_debug=False,
+        #    threshold=0.5,
+        #    occurrence=1,
+        #):
             log_and_print(f"Not find NameViberCarrier  {viber_name}")
             return "repeat"
 
