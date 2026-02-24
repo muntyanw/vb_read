@@ -5,6 +5,7 @@ __pycache__/
 venv/
 build/
 dist/
+.codex/
 previous_text.txt
 settings.json
 .vscode/
@@ -17,3 +18,9 @@ build/pwa/PKG-00.toc
 build/pwa/PYZ-00.pyz
 build/pwa/xref-pwa.html
 dist/pwa.exe
+.vscode/PythonImportHelper-v2-Completion.json
+.codex/AGENTS.md
+.codex/config.toml
+.vscode/PythonImportHelper-v2-Completion.json
+.vscode/PythonImportHelper-v2-Completion.json
+.vscode/PythonImportHelper-v2-Completion.json
