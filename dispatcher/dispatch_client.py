@@ -67,6 +67,13 @@ def mark_message_copied() -> None:
     log_and_print(f"[copy_watchdog] copied_message_counter={copied_message_counter}", "info")
 
 
+def reset_copy_watchdog() -> None:
+    global copied_message_counter, last_message_copy_monotonic
+    copied_message_counter = 0
+    last_message_copy_monotonic = time.monotonic()
+    log_and_print("[copy_watchdog] reset on worker start", "info")
+
+
 # ---- Клиентские модели под ответ сервера ----
 class Action(BaseModel):
     type: str

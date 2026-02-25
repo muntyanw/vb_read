@@ -6,10 +6,13 @@ from core import gui_driver as gd
 from dispatcher.dispatch_client import (
     processViberMess,
     window_left,
-    window_top_focus
+    window_top_focus,
+    reset_copy_watchdog
 )
 from dispatcher.periodic_broadcast_config import load_periodic_broadcast_config
 from dispatcher.periodic_broadcast_sender import PeriodicBroadcastSender
+from dispatcher.personal_broadcast_config import load_personal_broadcast_config
+from dispatcher.personal_broadcast_sender import PersonalBroadcastSender
 import asyncio
 from pywinauto import Application
 from pathlib import Path
@@ -124,6 +127,7 @@ async def main():
             "cycle_timeout_s": _to_int(read_setting("cycle_timeout_s"), 120),
             "restart_delay_s": _to_int(read_setting("restart_delay_s"), 5),
             "settings_reload_interval_s": _to_int(read_setting("settings_reload_interval_s"), 30),
+            "work_mode": str(read_setting("work_mode") or "reader").strip().lower(),
         }
 
     def refresh_context_from_settings(ctx):
@@ -153,6 +157,7 @@ async def main():
 
     gd.ensure_layout()
     periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
+    personal_sender = PersonalBroadcastSender(load_personal_broadcast_config())
 
     def stop_requested():
         if STOP_FILE.exists():
@@ -166,8 +171,9 @@ async def main():
 
 
     async def run_worker():
-        nonlocal runtime_settings, last_settings_reload_at, periodic_sender
+        nonlocal runtime_settings, last_settings_reload_at, periodic_sender, personal_sender
         s = await init()
+        reset_copy_watchdog()
 
         _, window = await ensure_viber_ready()
         window_top_focus(window)
@@ -184,17 +190,21 @@ async def main():
                 runtime_settings = load_runtime_settings()
                 refresh_context_from_settings(s)
                 periodic_sender.update_config(load_periodic_broadcast_config())
+                personal_sender.update_config(load_personal_broadcast_config())
                 last_settings_reload_at = now
 
-            periodic_sender.send_if_due(window, s)
-
-            await processViberMess(
-                window,
-                s,
-                runtime_settings["count_scroll_up"],
-                runtime_settings["count_scroll_down"],
-                runtime_settings["pause_cycle_read"],
-            )
+            if runtime_settings["work_mode"] == "personal_broadcast":
+                personal_sender.run_once(window, s)
+                await asyncio.sleep(0.2)
+            else:
+                periodic_sender.send_if_due(window, s)
+                await processViberMess(
+                    window,
+                    s,
+                    runtime_settings["count_scroll_up"],
+                    runtime_settings["count_scroll_down"],
+                    runtime_settings["pause_cycle_read"],
+                )
 
     while True:
         try:

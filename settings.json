@@ -1,6 +1,7 @@
 ﻿{
     "capture_and_recognize": {
         "lang": "ukr",
+        "lang_comment": "Варианты: ukr | rus | eng | ukr+rus | ukr+eng | rus+eng",
         "custom_config": "--oem 3 --psm 6"
     },
     "search_board_mess_x_start": 310,
@@ -11,13 +12,6 @@
     "count_scroll_up": 10,
     "count_scroll_down": 10,
     "count_repeat": 4,
-    "cycle_timeout_s": 120,
-    "restart_delay_s": 5,
-    "settings_reload_interval_s": 30,
-    "copy_stall_restart_seconds": 3600,
-    "periodic_broadcast_text": "Автоматичний пошук поїздок https://web.tailda4cd0.ts.net:8443/",
-    "periodic_broadcast_interval_minutes": 0,
-    "periodic_broadcast_send_on_startup": false,
     "word_comment": [
         "Скопировать",
         "Комментарии",
@@ -34,6 +28,7 @@
     },
     "dispatch_timeout_s": 15,
     "dispatch_retries": 2,
+    "name_viber_contact_lang_comment": "Варианты для каждого канала: ukr | rus | eng",
     "IPS": [
         "100.92.97.90",
         "46.63.40.211",
@@ -60,5 +55,60 @@
             "name_viber_contact": "ПЕРЕВІЗНИЧОК",
             "name_viber_contact_lang": "ukr"
         }
-    ]
+    ],
+    "cycle_timeout_s": 120,
+    "restart_delay_s": 5,
+    "settings_reload_interval_s": 30,
+    "copy_stall_restart_seconds": 3600,
+    "work_mode": "reader",
+    "work_mode_comment": "Варианты: reader | personal_broadcast",
+    "periodic_broadcast_text": "Автоматичний пошук поїздок https://web.tailda4cd0.ts.net:8443/",
+    "periodic_broadcast_interval_minutes": 0,
+    "periodic_broadcast_send_on_startup": false,
+    "periodic_broadcast_send_on_startup_comment": "Варианты: true | false",
+    "personal_broadcast_text": "",
+    "personal_broadcast_max_pause_seconds": 8,
+    "personal_broadcast_gender_filter": "all",
+    "personal_broadcast_gender_filter_comment": "Варианты: all | male | female",
+    "personal_broadcast_channel_comment": "Один канал для personal_broadcast: name_viber_channel, name_viber_contact, name_viber_contact_lang",
+    "personal_broadcast_channel": {
+        "name_viber_channel": "pereviz",
+        "name_viber_contact": "DECPEAT",
+        "name_viber_contact_lang": "eng"
+    },
+    "personal_broadcast_sent_names_file": "personal_broadcast_sent_names.txt",
+    "personal_broadcast_participants_texts": [
+        "Учасники",
+        "Участники"
+    ],
+    "personal_broadcast_role_keywords": [
+        "адмін",
+        "admin",
+        "moderator",
+        "модератор",
+        "creator",
+        "создатель"
+    ],
+    "personal_broadcast_members_scope": [
+        330,
+        230,
+        450,
+        620
+    ],
+    "personal_broadcast_participants_click_scope": [
+        790,
+        120,
+        1120,
+        780
+    ],
+    "personal_broadcast_message_input_xy": [
+        560,
+        770
+    ],
+    "personal_broadcast_open_info_image": "info.png",
+    "personal_broadcast_row_send_image": "send_to_member.png",
+    "personal_broadcast_dialog_send_image": "send_message.png",
+    "personal_broadcast_back_to_group_image": "group.png",
+    "personal_broadcast_max_scroll_steps": 120,
+    "personal_broadcast_line_top_tolerance": 14
 }
