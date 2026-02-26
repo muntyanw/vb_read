@@ -643,7 +643,7 @@
         "documentation": {}
     },
     {
-        "label": "write_setting",
+        "label": "take_screenshot",
         "importPath": "utils",
         "description": "utils",
         "isExtraImport": true,
@@ -651,7 +651,15 @@
         "documentation": {}
     },
     {
-        "label": "take_screenshot",
+        "label": "read_setting",
+        "importPath": "utils",
+        "description": "utils",
+        "isExtraImport": true,
+        "detail": "utils",
+        "documentation": {}
+    },
+    {
+        "label": "showImage",
         "importPath": "utils",
         "description": "utils",
         "isExtraImport": true,
@@ -838,6 +846,22 @@
     },
     {
         "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "log_and_print",
+        "importPath": "log",
+        "description": "log",
+        "isExtraImport": true,
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "set_debug_mode",
         "importPath": "log",
         "description": "log",
         "isExtraImport": true,
@@ -1121,6 +1145,14 @@
     },
     {
         "label": "window_top_focus",
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "isExtraImport": true,
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "reset_copy_watchdog",
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
         "isExtraImport": true,
@@ -1709,7 +1741,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def arrays_fuzzy_equal(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:\n    \"\"\"\n    Считает два массива «равными», если они одинаковой длины, и для каждой позиции i:\n      отношение похожести (SequenceMatcher) на строках w[i] и q[i] ≥ threshold.\n    Пустые строки считаются непохожими на непустые (только обе пустые → похожесть = 1.0).\n    :param window:      первый список строк\n    :param query_words: второй список строк\n    :param threshold:   минимальный порог похожести (по умолчанию 0.7)\n    :return: True, если все парные строковые элементы похожи ≥ threshold\n    \"\"\"",
+        "peekOfCode": "def arrays_fuzzy_equal(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:\n    \"\"\"\n    РЎС‡РёС‚Р°РµС‚ РґРІР° РјР°СЃСЃРёРІР° В«СЂР°РІРЅС‹РјРёВ», РµСЃР»Рё РѕРЅРё РѕРґРёРЅР°РєРѕРІРѕР№ РґР»РёРЅС‹, Рё РґР»СЏ РєР°Р¶РґРѕР№ РїРѕР·РёС†РёРё i:\n      РѕС‚РЅРѕС€РµРЅРёРµ РїРѕС…РѕР¶РµСЃС‚Рё (SequenceMatcher) РЅР° СЃС‚СЂРѕРєР°С… w[i] Рё q[i] в‰Ґ threshold.\n    РџСѓСЃС‚С‹Рµ СЃС‚СЂРѕРєРё СЃС‡РёС‚Р°СЋС‚СЃСЏ РЅРµРїРѕС…РѕР¶РёРјРё РЅР° РЅРµРїСѓСЃС‚С‹Рµ (С‚РѕР»СЊРєРѕ РѕР±Рµ РїСѓСЃС‚С‹Рµ в†’ РїРѕС…РѕР¶РµСЃС‚СЊ = 1.0).\n    :param window:      РїРµСЂРІС‹Р№ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє\n    :param query_words: РІС‚РѕСЂРѕР№ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє\n    :param threshold:   РјРёРЅРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂРѕРі РїРѕС…РѕР¶РµСЃС‚Рё (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ 0.7)\n    :return: True, РµСЃР»Рё РІСЃРµ РїР°СЂРЅС‹Рµ СЃС‚СЂРѕРєРѕРІС‹Рµ СЌР»РµРјРµРЅС‚С‹ РїРѕС…РѕР¶Рё в‰Ґ threshold\n    \"\"\"",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1718,7 +1750,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def arrays_fuzzy_equal_as_one_str(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:\n    \"\"\"\n    Преобразует два массива в строки и сравнивает их\n    :param window:      первый список строк\n    :param query_words: второй список строк\n    :param threshold:   минимальный порог похожести (по умолчанию 0.7)\n    :return: True, если все парные строковые элементы похожи ≥ threshold\n    \"\"\"\n    if len(window) != len(query_words):\n        return False",
+        "peekOfCode": "def arrays_fuzzy_equal_as_one_str(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:\n    \"\"\"\n    РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РґРІР° РјР°СЃСЃРёРІР° РІ СЃС‚СЂРѕРєРё Рё СЃСЂР°РІРЅРёРІР°РµС‚ РёС…\n    :param window:      РїРµСЂРІС‹Р№ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє\n    :param query_words: РІС‚РѕСЂРѕР№ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє\n    :param threshold:   РјРёРЅРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂРѕРі РїРѕС…РѕР¶РµСЃС‚Рё (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ 0.7)\n    :return: True, РµСЃР»Рё РІСЃРµ РїР°СЂРЅС‹Рµ СЃС‚СЂРѕРєРѕРІС‹Рµ СЌР»РµРјРµРЅС‚С‹ РїРѕС…РѕР¶Рё в‰Ґ threshold\n    \"\"\"\n    if len(window) != len(query_words):\n        return False",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1727,7 +1759,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def detect_checkbox_type_from_frame(scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False) -> str:\n    \"\"\"\n        frame_bgr: кадр экрана (numpy.ndarray в формате BGR)\n        empty_template_path: путь до шаблона пустого квадратика\n        checked_template_path: путь до шаблона квадратика с галочкой\n        threshold: минимальное значение совпадения (0.0–1.0)\n        Вернёт:\n        - \"empty\", если на экране найден пустой квадратик\n        - \"checked\", если найден квадратик с галочкой",
+        "peekOfCode": "def detect_checkbox_type_from_frame(scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False) -> str:\n    \"\"\"\n        frame_bgr: РєР°РґСЂ СЌРєСЂР°РЅР° (numpy.ndarray РІ С„РѕСЂРјР°С‚Рµ BGR)\n        empty_template_path: РїСѓС‚СЊ РґРѕ С€Р°Р±Р»РѕРЅР° РїСѓСЃС‚РѕРіРѕ РєРІР°РґСЂР°С‚РёРєР°\n        checked_template_path: РїСѓС‚СЊ РґРѕ С€Р°Р±Р»РѕРЅР° РєРІР°РґСЂР°С‚РёРєР° СЃ РіР°Р»РѕС‡РєРѕР№\n        threshold: РјРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ СЃРѕРІРїР°РґРµРЅРёСЏ (0.0вЂ“1.0)\n        Р’РµСЂРЅС‘С‚:\n        - \"empty\", РµСЃР»Рё РЅР° СЌРєСЂР°РЅРµ РЅР°Р№РґРµРЅ РїСѓСЃС‚РѕР№ РєРІР°РґСЂР°С‚РёРє\n        - \"checked\", РµСЃР»Рё РЅР°Р№РґРµРЅ РєРІР°РґСЂР°С‚РёРє СЃ РіР°Р»РѕС‡РєРѕР№",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1736,7 +1768,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def detect_image_from_frame(image_names: list[str], scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False,\n                threshold: float = 0.8) -> str:\n    frame_bgr = screen(scope)\n    # Конвертируем скрин в оттенки серого\n    gray_frame = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)\n    max_weight = -10000\n    check_image = \"\"\n    for image_name in image_names:\n        templ = cv2.imread(TEMPLATE_DIR / image_name, cv2.IMREAD_GRAYSCALE)",
+        "peekOfCode": "def detect_image_from_frame(image_names: list[str], scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False,\n                threshold: float = 0.8) -> str:\n    frame_bgr = screen(scope)\n    # РљРѕРЅРІРµСЂС‚РёСЂСѓРµРј СЃРєСЂРёРЅ РІ РѕС‚С‚РµРЅРєРё СЃРµСЂРѕРіРѕ\n    gray_frame = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)\n    max_weight = -10000\n    check_image = \"\"\n    for image_name in image_names:\n        templ = cv2.imread(TEMPLATE_DIR / image_name, cv2.IMREAD_GRAYSCALE)",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1745,7 +1777,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def find_image(name: str, timeout: float = 8.0, \n                confidence: float = 0.7,\n                scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False, \n                multiscale: bool = False) -> (tuple[int, int] | None):\n    \"\"\"\n    Найти PNG-шаблон на экране.\n    \"\"\"\n    path = TEMPLATE_DIR / name\n    if not path.exists():",
+        "peekOfCode": "def find_image(name: str, timeout: float = 8.0, \n                confidence: float = 0.7,\n                scope: tuple[int, int, int, int] = None,\n                is_debug: bool = False, \n                multiscale: bool = False) -> (tuple[int, int] | None):\n    \"\"\"\n    РќР°Р№С‚Рё PNG-С€Р°Р±Р»РѕРЅ РЅР° СЌРєСЂР°РЅРµ.\n    \"\"\"\n    path = TEMPLATE_DIR / name\n    if not path.exists():",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1754,7 +1786,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,\n                scope: tuple[int, int, int, int] = None,\n                plus_y: int = 0,\n                plus_x: int = 0,\n                is_debug: bool = False,\n                multiscale: bool = False,\n                count_click: int = 1) -> bool:\n    \"\"\"\n    Найти PNG-шаблон на экране (в пределах целевого монитора) и кликнуть его центр.\n    Возвращает True, если кликнули, False если не найдено за timeout секунд.",
+        "peekOfCode": "def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,\n                scope: tuple[int, int, int, int] = None,\n                plus_y: int = 0,\n                plus_x: int = 0,\n                is_debug: bool = False,\n                multiscale: bool = False,\n                count_click: int = 1) -> bool:\n    \"\"\"\n    РќР°Р№С‚Рё PNG-С€Р°Р±Р»РѕРЅ РЅР° СЌРєСЂР°РЅРµ (РІ РїСЂРµРґРµР»Р°С… С†РµР»РµРІРѕРіРѕ РјРѕРЅРёС‚РѕСЂР°) Рё РєР»РёРєРЅСѓС‚СЊ РµРіРѕ С†РµРЅС‚СЂ.\n    Р’РѕР·РІСЂР°С‰Р°РµС‚ True, РµСЃР»Рё РєР»РёРєРЅСѓР»Рё, False РµСЃР»Рё РЅРµ РЅР°Р№РґРµРЅРѕ Р·Р° timeout СЃРµРєСѓРЅРґ.",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1763,7 +1795,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def type_text(text: str, interval: Tuple[float, float] = (0.05, 0.12)) -> None:\n    \"\"\"\n    Печатать строку с небольшим случайным интервалом между символами.\n    \"\"\"\n    for ch in text:\n        pag.typewrite(ch)\n        time.sleep(random.uniform(*interval))\ndef show_image(img) -> None:\n    # Показать изображение через matplotlib\n    plt.figure(figsize=(8, 5))",
+        "peekOfCode": "def type_text(text: str, interval: Tuple[float, float] = (0.05, 0.12)) -> None:\n    \"\"\"\n    РџРµС‡Р°С‚Р°С‚СЊ СЃС‚СЂРѕРєСѓ СЃ РЅРµР±РѕР»СЊС€РёРј СЃР»СѓС‡Р°Р№РЅС‹Рј РёРЅС‚РµСЂРІР°Р»РѕРј РјРµР¶РґСѓ СЃРёРјРІРѕР»Р°РјРё.\n    \"\"\"\n    for ch in text:\n        pag.typewrite(ch)\n        time.sleep(random.uniform(*interval))\ndef show_image(img) -> None:\n    # Show debug image on the right side of the screen when backend allows.\n    plt.figure(figsize=(8, 5))",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1772,7 +1804,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def show_image(img) -> None:\n    # Показать изображение через matplotlib\n    plt.figure(figsize=(8, 5))\n    plt.imshow(img)\n    plt.axis('off')\n    plt.title(\"Tesseract Input: Full-Screen Screenshot\")\n    plt.show()\n# ---------------------------------------------------------------------------\n# Internal helpers\n# ---------------------------------------------------------------------------",
+        "peekOfCode": "def show_image(img) -> None:\n    # Show debug image on the right side of the screen when backend allows.\n    plt.figure(figsize=(8, 5))\n    plt.imshow(img)\n    plt.axis(\"off\")\n    plt.title(\"Tesseract Input: Full-Screen Screenshot\")\n    try:\n        screen_w, screen_h = pag.size()\n        win_w = int(screen_w * 0.45)\n        win_h = int(screen_h * 0.55)",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1808,7 +1840,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def human_move_and_click(x: int, y: int, \n                         duration: Tuple[float, float] = (0.2, 0.3),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение\n    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.\n    \"\"\"\n    _human_move(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")",
+        "peekOfCode": "def human_move_and_click(x: int, y: int, \n                         duration: Tuple[float, float] = (0.2, 0.3),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    РџРµСЂРµРґР°С‚СЊ Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ (x, y) Рё РІС‹РїРѕР»РЅРёС‚СЊ РїР»Р°РІРЅРѕРµ РґРІРёР¶РµРЅРёРµ\n    вЂњРїРѕ-С‡РµР»РѕРІРµС‡РµСЃРєРёвЂќ + РєР»РёРє. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Bezier-РєСЂРёРІР°СЏ + РЅРµР±РѕР»СЊС€РёРµ СЃР»СѓС‡Р°Р№РЅС‹Рµ РїР°СѓР·С‹.\n    \"\"\"\n    _human_move(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1817,7 +1849,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def human_move_and_right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение\n    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.\n    \"\"\"\n    _human_move(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")\n        draw_click_circle(x,y,duration=0.4)",
+        "peekOfCode": "def human_move_and_right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    РџРµСЂРµРґР°С‚СЊ Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ (x, y) Рё РІС‹РїРѕР»РЅРёС‚СЊ РїР»Р°РІРЅРѕРµ РґРІРёР¶РµРЅРёРµ\n    вЂњРїРѕ-С‡РµР»РѕРІРµС‡РµСЃРєРёвЂќ + РєР»РёРє. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Bezier-РєСЂРёРІР°СЏ + РЅРµР±РѕР»СЊС€РёРµ СЃР»СѓС‡Р°Р№РЅС‹Рµ РїР°СѓР·С‹.\n    \"\"\"\n    _human_move(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")\n        draw_click_circle(x,y,duration=0.4)",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1826,7 +1858,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def human_move_and_click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение\n    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.\n    \"\"\"\n    x, y = human_move_diff(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")\n        draw_click_circle(x,y)",
+        "peekOfCode": "def human_move_and_click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),\n                         count_click: int = 1) -> None:\n    \"\"\"\n    РџРµСЂРµРґР°С‚СЊ Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ (x, y) Рё РІС‹РїРѕР»РЅРёС‚СЊ РїР»Р°РІРЅРѕРµ РґРІРёР¶РµРЅРёРµ\n    вЂњРїРѕ-С‡РµР»РѕРІРµС‡РµСЃРєРёвЂќ + РєР»РёРє. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Bezier-РєСЂРёРІР°СЏ + РЅРµР±РѕР»СЊС€РёРµ СЃР»СѓС‡Р°Р№РЅС‹Рµ РїР°СѓР·С‹.\n    \"\"\"\n    x, y = human_move_diff(x, y, duration)\n    for i in range(0, count_click, 1):\n        LOGGER.debug(f\"click x: {x} y: {y}\")\n        draw_click_circle(x,y)",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1862,7 +1894,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.\n    Вход: pts — список точек (x, y), t от 0.0 до 1.0.\n    Выход: координаты точки на кривой Безье.\n    \"\"\"",
+        "peekOfCode": "def right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_right_click(x, y) \ndef click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) вЂ“ generic n-degree.\n    Р’С…РѕРґ: pts вЂ” СЃРїРёСЃРѕРє С‚РѕС‡РµРє (x, y), t РѕС‚ 0.0 РґРѕ 1.0.\n    Р’С‹С…РѕРґ: РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РѕС‡РєРё РЅР° РєСЂРёРІРѕР№ Р‘РµР·СЊРµ.\n    \"\"\"",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1871,7 +1903,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.\n    Вход: pts — список точек (x, y), t от 0.0 до 1.0.\n    Выход: координаты точки на кривой Безье.\n    \"\"\"\n    pts_arr = np.array(pts, dtype=float)\n    while len(pts_arr) > 1:",
+        "peekOfCode": "def click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):\n    human_move_and_click_diff(x, y)\ndef _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:\n    \"\"\"\n    Quadratic/ cubic bezier evaluation (De Casteljau) вЂ“ generic n-degree.\n    Р’С…РѕРґ: pts вЂ” СЃРїРёСЃРѕРє С‚РѕС‡РµРє (x, y), t РѕС‚ 0.0 РґРѕ 1.0.\n    Р’С‹С…РѕРґ: РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РѕС‡РєРё РЅР° РєСЂРёРІРѕР№ Р‘РµР·СЊРµ.\n    \"\"\"\n    pts_arr = np.array(pts, dtype=float)\n    while len(pts_arr) > 1:",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1880,7 +1912,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def draw_monitor_region_on_screen(color: tuple[int,int,int] = (0, 0, 255), thickness: int = 4) -> None:\n    \"\"\"\n    Нарисовать на рабочем столе (на самой поверхности экрана) полупрозрачный (через XOR)\n    или сплошной (через GDI Rectangle) контур области MON_X, MON_Y, MON_W, MON_H.\n    Параметры:\n    ---------\n    color : BGR-цвет рамки, например (0, 0, 255) для красного (как OpenCV).\n    thickness : толщина линии рамки в пикселях.\n    При запуске этой функции вы увидите чёткую рамку на экране. Она отрисуется поверх всего,\n    но исчезнет при следующем обновлении окна или при следующем вызове (в зависимости от режима).",
+        "peekOfCode": "def draw_monitor_region_on_screen(color: tuple[int,int,int] = (0, 0, 255), thickness: int = 4) -> None:\n    \"\"\"\n    РќР°СЂРёСЃРѕРІР°С‚СЊ РЅР° СЂР°Р±РѕС‡РµРј СЃС‚РѕР»Рµ (РЅР° СЃР°РјРѕР№ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё СЌРєСЂР°РЅР°) РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅС‹Р№ (С‡РµСЂРµР· XOR)\n    РёР»Рё СЃРїР»РѕС€РЅРѕР№ (С‡РµСЂРµР· GDI Rectangle) РєРѕРЅС‚СѓСЂ РѕР±Р»Р°СЃС‚Рё MON_X, MON_Y, MON_W, MON_H.\n    РџР°СЂР°РјРµС‚СЂС‹:\n    ---------\n    color : BGR-С†РІРµС‚ СЂР°РјРєРё, РЅР°РїСЂРёРјРµСЂ (0, 0, 255) РґР»СЏ РєСЂР°СЃРЅРѕРіРѕ (РєР°Рє OpenCV).\n    thickness : С‚РѕР»С‰РёРЅР° Р»РёРЅРёРё СЂР°РјРєРё РІ РїРёРєСЃРµР»СЏС….\n    РџСЂРё Р·Р°РїСѓСЃРєРµ СЌС‚РѕР№ С„СѓРЅРєС†РёРё РІС‹ СѓРІРёРґРёС‚Рµ С‡С‘С‚РєСѓСЋ СЂР°РјРєСѓ РЅР° СЌРєСЂР°РЅРµ. РћРЅР° РѕС‚СЂРёСЃСѓРµС‚СЃСЏ РїРѕРІРµСЂС… РІСЃРµРіРѕ,\n    РЅРѕ РёСЃС‡РµР·РЅРµС‚ РїСЂРё СЃР»РµРґСѓСЋС‰РµРј РѕР±РЅРѕРІР»РµРЅРёРё РѕРєРЅР° РёР»Рё РїСЂРё СЃР»РµРґСѓСЋС‰РµРј РІС‹Р·РѕРІРµ (РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂРµР¶РёРјР°).",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1889,7 +1921,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def replace_similar_chars(word: str) -> str:\n    char_map = {\n        'e': 'е',  # англ e → укр е\n        'E': 'Е',  # англ E → укр Е\n        'i': 'і',  # англ i → укр і (по необходимости)\n        'I': 'І',  # англ I → укр І\n        'a': 'а',  # англ a → укр а\n        'A': 'А',  # англ A → укр А\n        'o': 'о',  # англ o → укр о\n        'O': 'О',  # англ O → укр О",
+        "peekOfCode": "def replace_similar_chars(word: str) -> str:\n    char_map = {\n        'e': 'Рµ',  # Р°РЅРіР» e в†’ СѓРєСЂ Рµ\n        'E': 'Р•',  # Р°РЅРіР» E в†’ СѓРєСЂ Р•\n        'i': 'С–',  # Р°РЅРіР» i в†’ СѓРєСЂ С– (РїРѕ РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё)\n        'I': 'Р†',  # Р°РЅРіР» I в†’ СѓРєСЂ Р†\n        'a': 'Р°',  # Р°РЅРіР» a в†’ СѓРєСЂ Р°\n        'A': 'Рђ',  # Р°РЅРіР» A в†’ СѓРєСЂ Рђ\n        'o': 'Рѕ',  # Р°РЅРіР» o в†’ СѓРєСЂ Рѕ\n        'O': 'Рћ',  # Р°РЅРіР» O в†’ СѓРєСЂ Рћ",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1934,7 +1966,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def find_text(\n    query: str,\n    lang: str,\n    count: int = 1,\n    pause_attempt: int = 2,\n    scope: tuple[int, int, int, int] | None = None,\n    plus_y: int = 0,\n    is_debug: bool = False,\n    occurrence: int = 1,  # номер совпадения\n) -> tuple[int, int] | None:",
+        "peekOfCode": "def find_text(\n    query: str,\n    lang: str,\n    count: int = 1,\n    pause_attempt: int = 2,\n    scope: tuple[int, int, int, int] | None = None,\n    plus_y: int = 0,\n    is_debug: bool = False,\n    occurrence: int = 1,  # РЅРѕРјРµСЂ СЃРѕРІРїР°РґРµРЅРёСЏ\n) -> tuple[int, int] | None:",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1943,7 +1975,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def init_tesseract(tess_root=r\"C:\\Program Files\\Tesseract-OCR\", lang_check=(\"eng\",\"rus\")):\n    tess_root = os.path.normpath(tess_root)\n    tess_exe  = os.path.join(tess_root, \"tesseract.exe\")\n    tessdata  = os.path.join(tess_root, \"tessdata\")\n    # 1) базовые проверки\n    if not os.path.isfile(tess_exe):\n        raise FileNotFoundError(f\"tesseract.exe not found: {tess_exe}\")\n    if not os.path.isdir(tessdata):\n        raise FileNotFoundError(f\"tessdata folder not found: {tessdata}\")\n    # 2) сбросить кривую настройку, если была",
+        "peekOfCode": "def init_tesseract(tess_root=r\"C:\\Program Files\\Tesseract-OCR\", lang_check=(\"eng\",\"rus\")):\n    tess_root = os.path.normpath(tess_root)\n    tess_exe  = os.path.join(tess_root, \"tesseract.exe\")\n    tessdata  = os.path.join(tess_root, \"tessdata\")\n    # 1) Р±Р°Р·РѕРІС‹Рµ РїСЂРѕРІРµСЂРєРё\n    if not os.path.isfile(tess_exe):\n        raise FileNotFoundError(f\"tesseract.exe not found: {tess_exe}\")\n    if not os.path.isdir(tessdata):\n        raise FileNotFoundError(f\"tessdata folder not found: {tessdata}\")\n    # 2) СЃР±СЂРѕСЃРёС‚СЊ РєСЂРёРІСѓСЋ РЅР°СЃС‚СЂРѕР№РєСѓ, РµСЃР»Рё Р±С‹Р»Р°",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1970,7 +2002,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def contrlScroll(amount:int):\n    time.sleep(1)\n    pag.keyDown('ctrl')\n    time.sleep(0.1)\n    pag.scroll(amount)\n    time.sleep(1)\n    # Отпускаем Ctrl\n    pag.keyUp('ctrl')\n    time.sleep(1) \ndef remove_green_background(src_bgr: np.ndarray) -> np.ndarray:",
+        "peekOfCode": "def contrlScroll(amount:int):\n    time.sleep(1)\n    pag.keyDown('ctrl')\n    time.sleep(0.1)\n    pag.scroll(amount)\n    time.sleep(1)\n    # РћС‚РїСѓСЃРєР°РµРј Ctrl\n    pag.keyUp('ctrl')\n    time.sleep(1) \ndef remove_green_background(src_bgr: np.ndarray) -> np.ndarray:",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1979,7 +2011,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def remove_green_background(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    Превращает зелёные блоки в чисто-белый фон, оставляя текст (и всё остальное) нетронутым.\n    Возвращает BGR-изображение, где «зелёное» стало (255,255,255).\n    \"\"\"\n    # 1. Переводим в пространство HSV, чтобы легко отфильтровать зелёный\n    hsv = cv2.cvtColor(src_bgr, cv2.COLOR_BGR2HSV)\n    # 2. Задаём диапазон «зелёного»\n    #    Нижний и верхний порог границ H, S, V — можно подкорректировать под ваш оттенок\n    lower_green = np.array([40,  40,  40])   # например: H≈60°, но OpenCV: H от 0 до 179",
+        "peekOfCode": "def remove_green_background(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    РџСЂРµРІСЂР°С‰Р°РµС‚ Р·РµР»С‘РЅС‹Рµ Р±Р»РѕРєРё РІ С‡РёСЃС‚Рѕ-Р±РµР»С‹Р№ С„РѕРЅ, РѕСЃС‚Р°РІР»СЏСЏ С‚РµРєСЃС‚ (Рё РІСЃС‘ РѕСЃС‚Р°Р»СЊРЅРѕРµ) РЅРµС‚СЂРѕРЅСѓС‚С‹Рј.\n    Р’РѕР·РІСЂР°С‰Р°РµС‚ BGR-РёР·РѕР±СЂР°Р¶РµРЅРёРµ, РіРґРµ В«Р·РµР»С‘РЅРѕРµВ» СЃС‚Р°Р»Рѕ (255,255,255).\n    \"\"\"\n    # 1. РџРµСЂРµРІРѕРґРёРј РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ HSV, С‡С‚РѕР±С‹ Р»РµРіРєРѕ РѕС‚С„РёР»СЊС‚СЂРѕРІР°С‚СЊ Р·РµР»С‘РЅС‹Р№\n    hsv = cv2.cvtColor(src_bgr, cv2.COLOR_BGR2HSV)\n    # 2. Р—Р°РґР°С‘Рј РґРёР°РїР°Р·РѕРЅ В«Р·РµР»С‘РЅРѕРіРѕВ»\n    #    РќРёР¶РЅРёР№ Рё РІРµСЂС…РЅРёР№ РїРѕСЂРѕРі РіСЂР°РЅРёС† H, S, V вЂ” РјРѕР¶РЅРѕ РїРѕРґРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°С‚СЊ РїРѕРґ РІР°С€ РѕС‚С‚РµРЅРѕРє\n    lower_green = np.array([40,  40,  40])   # РЅР°РїСЂРёРјРµСЂ: Hв‰€60В°, РЅРѕ OpenCV: H РѕС‚ 0 РґРѕ 179",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1988,7 +2020,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def sharpen_filter(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    Применяет к BGR-изображению простой фильтр резкости.\n    Возвращает «резче» BGR-изображение.\n    \"\"\"\n    # Определяем kernel\n    kernel = np.array([\n        [ 0, -1,  0],\n        [-1,  5, -1],\n        [ 0, -1,  0]",
+        "peekOfCode": "def sharpen_filter(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    РџСЂРёРјРµРЅСЏРµС‚ Рє BGR-РёР·РѕР±СЂР°Р¶РµРЅРёСЋ РїСЂРѕСЃС‚РѕР№ С„РёР»СЊС‚СЂ СЂРµР·РєРѕСЃС‚Рё.\n    Р’РѕР·РІСЂР°С‰Р°РµС‚ В«СЂРµР·С‡РµВ» BGR-РёР·РѕР±СЂР°Р¶РµРЅРёРµ.\n    \"\"\"\n    # РћРїСЂРµРґРµР»СЏРµРј kernel\n    kernel = np.array([\n        [ 0, -1,  0],\n        [-1,  5, -1],\n        [ 0, -1,  0]",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -1997,7 +2029,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def unsharp_mask(src_bgr: np.ndarray, \n                 blur_ksize: tuple[int, int] = (9, 9), \n                 sigma: float = 10.0, \n                 amount: float = 1.5, \n                 threshold: int = 0) -> np.ndarray:\n    \"\"\"\n    Параметры:\n    - blur_ksize: размер ядра для GaussianBlur (должен быть нечётным, напр. (9,9)).\n    - sigma: отклонение по Гауссу (чем больше, тем сильнее сглаживание).\n    - amount: во сколько раз усиливается «маска резкости».",
+        "peekOfCode": "def unsharp_mask(src_bgr: np.ndarray, \n                 blur_ksize: tuple[int, int] = (9, 9), \n                 sigma: float = 10.0, \n                 amount: float = 1.5, \n                 threshold: int = 0) -> np.ndarray:\n    \"\"\"\n    РџР°СЂР°РјРµС‚СЂС‹:\n    - blur_ksize: СЂР°Р·РјРµСЂ СЏРґСЂР° РґР»СЏ GaussianBlur (РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РЅРµС‡С‘С‚РЅС‹Рј, РЅР°РїСЂ. (9,9)).\n    - sigma: РѕС‚РєР»РѕРЅРµРЅРёРµ РїРѕ Р“Р°СѓСЃСЃСѓ (С‡РµРј Р±РѕР»СЊС€Рµ, С‚РµРј СЃРёР»СЊРЅРµРµ СЃРіР»Р°Р¶РёРІР°РЅРёРµ).\n    - amount: РІРѕ СЃРєРѕР»СЊРєРѕ СЂР°Р· СѓСЃРёР»РёРІР°РµС‚СЃСЏ В«РјР°СЃРєР° СЂРµР·РєРѕСЃС‚РёВ».",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2006,7 +2038,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def preprocess_for_ocr(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    1) Удаляет зелёный фон (вызывая remove_green_background)\n    2) Конвертирует в серый + CLAHE (локальное выравнивание гистограммы)\n    3) Адаптивную бинаризацию (чёрно-белое)\n    \"\"\"\n    # 1) Убираем зелёный фон\n    no_green = unsharp_mask(remove_green_background(src_bgr))\n    # 2) В оттенки серого\n    gray = cv2.cvtColor(no_green, cv2.COLOR_BGR2GRAY)",
+        "peekOfCode": "def preprocess_for_ocr(src_bgr: np.ndarray) -> np.ndarray:\n    \"\"\"\n    1) РЈРґР°Р»СЏРµС‚ Р·РµР»С‘РЅС‹Р№ С„РѕРЅ (РІС‹Р·С‹РІР°СЏ remove_green_background)\n    2) РљРѕРЅРІРµСЂС‚РёСЂСѓРµС‚ РІ СЃРµСЂС‹Р№ + CLAHE (Р»РѕРєР°Р»СЊРЅРѕРµ РІС‹СЂР°РІРЅРёРІР°РЅРёРµ РіРёСЃС‚РѕРіСЂР°РјРјС‹)\n    3) РђРґР°РїС‚РёРІРЅСѓСЋ Р±РёРЅР°СЂРёР·Р°С†РёСЋ (С‡С‘СЂРЅРѕ-Р±РµР»РѕРµ)\n    \"\"\"\n    # 1) РЈР±РёСЂР°РµРј Р·РµР»С‘РЅС‹Р№ С„РѕРЅ\n    no_green = unsharp_mask(remove_green_background(src_bgr))\n    # 2) Р’ РѕС‚С‚РµРЅРєРё СЃРµСЂРѕРіРѕ\n    gray = cv2.cvtColor(no_green, cv2.COLOR_BGR2GRAY)",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2015,7 +2047,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def find_first_free_slot_in_day_week(scope: tuple[int,int,int,int],\n                                     is_debug: bool = False\n                                    ) -> tuple[int,int] | None:\n    # 1) Захват экрана + конверсия BGRA→BGR→HSV\n    with mss.mss() as sct:\n        mon = _get_monitor_region(scope)\n        img = sct.grab(mon)\n        bgr = np.array(img)[..., :3]\n        hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)\n    if is_debug:",
+        "peekOfCode": "def find_first_free_slot_in_day_week(scope: tuple[int,int,int,int],\n                                     is_debug: bool = False\n                                    ) -> tuple[int,int] | None:\n    # 1) Р—Р°С…РІР°С‚ СЌРєСЂР°РЅР° + РєРѕРЅРІРµСЂСЃРёСЏ BGRAв†’BGRв†’HSV\n    with mss.mss() as sct:\n        mon = _get_monitor_region(scope)\n        img = sct.grab(mon)\n        bgr = np.array(img)[..., :3]\n        hsv = cv2.cvtColor(bgr, cv2.COLOR_BGR2HSV)\n    if is_debug:",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2024,7 +2056,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def reload_page():\n    LOGGER.debug(\"reload page\")\n    click(92,50)\n    pause(2)\n    human_move_diff(0, 70)\ndef get_current_layout() -> int:\n    \"\"\"\n    Получает текущий язык ввода активного окна.\n    Возвращает low word layout code (например, 0x409 для EN-US).\n    \"\"\"",
+        "peekOfCode": "def reload_page():\n    LOGGER.debug(\"reload page\")\n    click(92,50)\n    pause(2)\n    human_move_diff(0, 70)\ndef get_current_layout() -> int:\n    \"\"\"\n    РџРѕР»СѓС‡Р°РµС‚ С‚РµРєСѓС‰РёР№ СЏР·С‹Рє РІРІРѕРґР° Р°РєС‚РёРІРЅРѕРіРѕ РѕРєРЅР°.\n    Р’РѕР·РІСЂР°С‰Р°РµС‚ low word layout code (РЅР°РїСЂРёРјРµСЂ, 0x409 РґР»СЏ EN-US).\n    \"\"\"",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2033,7 +2065,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def get_current_layout() -> int:\n    \"\"\"\n    Получает текущий язык ввода активного окна.\n    Возвращает low word layout code (например, 0x409 для EN-US).\n    \"\"\"\n    hwnd = win32gui.GetForegroundWindow()\n    thread_id, _ = win32process.GetWindowThreadProcessId(hwnd)\n    layout = win32api.GetKeyboardLayout(thread_id)\n    return layout & 0xFFFF\ndef ensure_layout(target: str = \"en\", max_attempts: int = 5) -> bool:",
+        "peekOfCode": "def get_current_layout() -> int:\n    \"\"\"\n    РџРѕР»СѓС‡Р°РµС‚ С‚РµРєСѓС‰РёР№ СЏР·С‹Рє РІРІРѕРґР° Р°РєС‚РёРІРЅРѕРіРѕ РѕРєРЅР°.\n    Р’РѕР·РІСЂР°С‰Р°РµС‚ low word layout code (РЅР°РїСЂРёРјРµСЂ, 0x409 РґР»СЏ EN-US).\n    \"\"\"\n    hwnd = win32gui.GetForegroundWindow()\n    thread_id, _ = win32process.GetWindowThreadProcessId(hwnd)\n    layout = win32api.GetKeyboardLayout(thread_id)\n    return layout & 0xFFFF\ndef ensure_layout(target: str = \"en\", max_attempts: int = 5) -> bool:",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2042,7 +2074,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def ensure_layout(target: str = \"en\", max_attempts: int = 5) -> bool:\n    \"\"\"\n    Гарантирует, что раскладка клавиатуры установлена в нужный язык.\n    Поддерживает 'en' (английский) и 'ru' (русский).\n    Возвращает True, если удалось установить раскладку, иначе False.\n    \"\"\"\n    lang_codes = {\n        \"en\": 0x0409,  # English (US)\n        \"ru\": 0x0419,  # Russian\n        # можно добавить другие",
+        "peekOfCode": "def ensure_layout(target: str = \"en\", max_attempts: int = 5) -> bool:\n    \"\"\"\n    Р“Р°СЂР°РЅС‚РёСЂСѓРµС‚, С‡С‚Рѕ СЂР°СЃРєР»Р°РґРєР° РєР»Р°РІРёР°С‚СѓСЂС‹ СѓСЃС‚Р°РЅРѕРІР»РµРЅР° РІ РЅСѓР¶РЅС‹Р№ СЏР·С‹Рє.\n    РџРѕРґРґРµСЂР¶РёРІР°РµС‚ 'en' (Р°РЅРіР»РёР№СЃРєРёР№) Рё 'ru' (СЂСѓСЃСЃРєРёР№).\n    Р’РѕР·РІСЂР°С‰Р°РµС‚ True, РµСЃР»Рё СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°СЃРєР»Р°РґРєСѓ, РёРЅР°С‡Рµ False.\n    \"\"\"\n    lang_codes = {\n        \"en\": 0x0409,  # English (US)\n        \"ru\": 0x0419,  # Russian\n        # РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РґСЂСѓРіРёРµ",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2051,7 +2083,7 @@
         "kind": 2,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "def grab_monitor(region=None, as_rgb=False):\n    \"\"\"\n    region:\n      - tuple/list: (x, y, w, h) абсолютные координаты виртуального рабочего стола\n      - dict: {\"left\":x, \"top\":y, \"width\":w, \"height\":h}\n      - None: весь виртуальный экран (sct.monitors[1])\n    as_rgb: True -> RGB (как у pyautogui), False -> BGR (для OpenCV)\n    returns: np.ndarray (H, W, 3), uint8\n    \"\"\"\n    with mss.mss() as sct:",
+        "peekOfCode": "def grab_monitor(region=None, as_rgb=False):\n    \"\"\"\n    region:\n      - tuple/list: (x, y, w, h) Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РІРёСЂС‚СѓР°Р»СЊРЅРѕРіРѕ СЂР°Р±РѕС‡РµРіРѕ СЃС‚РѕР»Р°\n      - dict: {\"left\":x, \"top\":y, \"width\":w, \"height\":h}\n      - None: РІРµСЃСЊ РІРёСЂС‚СѓР°Р»СЊРЅС‹Р№ СЌРєСЂР°РЅ (sct.monitors[1])\n    as_rgb: True -> RGB (РєР°Рє Сѓ pyautogui), False -> BGR (РґР»СЏ OpenCV)\n    returns: np.ndarray (H, W, 3), uint8\n    \"\"\"\n    with mss.mss() as sct:",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2114,7 +2146,7 @@
         "kind": 5,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "LOGGER = logging.getLogger(__name__)\npag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»\n# ---------------------------------------------------------------------------\n# Constants: ищем монитор с разрешением необходимым для работы\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\n# with mss.mss() as sct:\n#     monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран\n#     # monitors[1] — первый физический экран; monitors[2] — второй и т.д.\n#     # Мы ожидаем MONITOR_INDEX 1-based",
+        "peekOfCode": "LOGGER = logging.getLogger(__name__)\npag.FAILSAFE = True  # РѕСЃС‚Р°РІРёС‚СЊ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ В«РґРІРёР¶РµРЅРёСЏ РјС‹С€Рё РІ СѓРіРѕР» РґР»СЏ СЌРєСЃС‚СЂРµРЅРЅРѕР№ РѕСЃС‚Р°РЅРѕРІРєРёВ»\n# ---------------------------------------------------------------------------\n# Constants: РёС‰РµРј РјРѕРЅРёС‚РѕСЂ СЃ СЂР°Р·СЂРµС€РµРЅРёРµРј РЅРµРѕР±С…РѕРґРёРјС‹Рј РґР»СЏ СЂР°Р±РѕС‚С‹\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\n# with mss.mss() as sct:\n#     monitors = sct.monitors  # СЃРїРёСЃРѕРє СЃР»РѕРІР°СЂРµР№; monitors[0] вЂ” РІРµСЃСЊ РІРёСЂС‚СѓР°Р»СЊРЅС‹Р№ СЌРєСЂР°РЅ\n#     # monitors[1] вЂ” РїРµСЂРІС‹Р№ С„РёР·РёС‡РµСЃРєРёР№ СЌРєСЂР°РЅ; monitors[2] вЂ” РІС‚РѕСЂРѕР№ Рё С‚.Рґ.\n#     # РњС‹ РѕР¶РёРґР°РµРј MONITOR_INDEX 1-based",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2123,7 +2155,7 @@
         "kind": 5,
         "importPath": "core.gui_driver",
         "description": "core.gui_driver",
-        "peekOfCode": "pag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»\n# ---------------------------------------------------------------------------\n# Constants: ищем монитор с разрешением необходимым для работы\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\n# with mss.mss() as sct:\n#     monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран\n#     # monitors[1] — первый физический экран; monitors[2] — второй и т.д.\n#     # Мы ожидаем MONITOR_INDEX 1-based\n#     print(f\"MONITOR_INDEX = {MONITOR_INDEX}\")",
+        "peekOfCode": "pag.FAILSAFE = True  # РѕСЃС‚Р°РІРёС‚СЊ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ В«РґРІРёР¶РµРЅРёСЏ РјС‹С€Рё РІ СѓРіРѕР» РґР»СЏ СЌРєСЃС‚СЂРµРЅРЅРѕР№ РѕСЃС‚Р°РЅРѕРІРєРёВ»\n# ---------------------------------------------------------------------------\n# Constants: РёС‰РµРј РјРѕРЅРёС‚РѕСЂ СЃ СЂР°Р·СЂРµС€РµРЅРёРµРј РЅРµРѕР±С…РѕРґРёРјС‹Рј РґР»СЏ СЂР°Р±РѕС‚С‹\n# ---------------------------------------------------------------------------\nTARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)\n# with mss.mss() as sct:\n#     monitors = sct.monitors  # СЃРїРёСЃРѕРє СЃР»РѕРІР°СЂРµР№; monitors[0] вЂ” РІРµСЃСЊ РІРёСЂС‚СѓР°Р»СЊРЅС‹Р№ СЌРєСЂР°РЅ\n#     # monitors[1] вЂ” РїРµСЂРІС‹Р№ С„РёР·РёС‡РµСЃРєРёР№ СЌРєСЂР°РЅ; monitors[2] вЂ” РІС‚РѕСЂРѕР№ Рё С‚.Рґ.\n#     # РњС‹ РѕР¶РёРґР°РµРј MONITOR_INDEX 1-based\n#     print(f\"MONITOR_INDEX = {MONITOR_INDEX}\")",
         "detail": "core.gui_driver",
         "documentation": {}
     },
@@ -2150,7 +2182,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str",
+        "peekOfCode": "class DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\ndef reset_copy_watchdog() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter = 0",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2168,7 +2200,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None\n    reason: Optional[str] = None\nclass MatchedContact(BaseModel):\n    order_id: int\n    carrier_id: int\n    viber_contact_name: Optional[str] = None\nclass DispatchResult(BaseModel):\n    # Игнорируем неожиданные поля от бэкенда",
+        "peekOfCode": "class Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None\n    reason: Optional[str] = None\nclass MatchedContact(BaseModel):\n    order_id: int\n    carrier_id: int\n    viber_contact_name: Optional[str] = None\nclass DispatchResult(BaseModel):\n    # РРіРЅРѕСЂРёСЂСѓРµРј РЅРµРѕР¶РёРґР°РЅРЅС‹Рµ РїРѕР»СЏ РѕС‚ Р±СЌРєРµРЅРґР°",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2177,7 +2209,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class MatchedContact(BaseModel):\n    order_id: int\n    carrier_id: int\n    viber_contact_name: Optional[str] = None\nclass DispatchResult(BaseModel):\n    # Игнорируем неожиданные поля от бэкенда\n    model_config = ConfigDict(extra='ignore')\n    message_id: str\n    # Превращаем null -> {}, и задаём безопасный дефолт через default_factory\n    extracted: Dict[str, Any] = Field(default_factory=dict)",
+        "peekOfCode": "class MatchedContact(BaseModel):\n    order_id: int\n    carrier_id: int\n    viber_contact_name: Optional[str] = None\nclass DispatchResult(BaseModel):\n    # РРіРЅРѕСЂРёСЂСѓРµРј РЅРµРѕР¶РёРґР°РЅРЅС‹Рµ РїРѕР»СЏ РѕС‚ Р±СЌРєРµРЅРґР°\n    model_config = ConfigDict(extra='ignore')\n    message_id: str\n    # РџСЂРµРІСЂР°С‰Р°РµРј null -> {}, Рё Р·Р°РґР°С‘Рј Р±РµР·РѕРїР°СЃРЅС‹Р№ РґРµС„РѕР»С‚ С‡РµСЂРµР· default_factory\n    extracted: Dict[str, Any] = Field(default_factory=dict)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2186,7 +2218,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchResult(BaseModel):\n    # Игнорируем неожиданные поля от бэкенда\n    model_config = ConfigDict(extra='ignore')\n    message_id: str\n    # Превращаем null -> {}, и задаём безопасный дефолт через default_factory\n    extracted: Dict[str, Any] = Field(default_factory=dict)\n    # Заодно приводим null -> [] для списков\n    actions: List[Action] = Field(default_factory=list)\n    decision: Optional[Decision] = None\n    matched_contacts: List[MatchedContact] = Field(default_factory=list)",
+        "peekOfCode": "class DispatchResult(BaseModel):\n    # РРіРЅРѕСЂРёСЂСѓРµРј РЅРµРѕР¶РёРґР°РЅРЅС‹Рµ РїРѕР»СЏ РѕС‚ Р±СЌРєРµРЅРґР°\n    model_config = ConfigDict(extra='ignore')\n    message_id: str\n    # РџСЂРµРІСЂР°С‰Р°РµРј null -> {}, Рё Р·Р°РґР°С‘Рј Р±РµР·РѕРїР°СЃРЅС‹Р№ РґРµС„РѕР»С‚ С‡РµСЂРµР· default_factory\n    extracted: Dict[str, Any] = Field(default_factory=dict)\n    # Р—Р°РѕРґРЅРѕ РїСЂРёРІРѕРґРёРј null -> [] РґР»СЏ СЃРїРёСЃРєРѕРІ\n    actions: List[Action] = Field(default_factory=list)\n    decision: Optional[Decision] = None\n    matched_contacts: List[MatchedContact] = Field(default_factory=list)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2204,7 +2236,16 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):",
+        "peekOfCode": "def mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\ndef reset_copy_watchdog() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter = 0\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(\"[copy_watchdog] reset on worker start\", \"info\")",
+        "detail": "dispatcher.dispatch_client",
+        "documentation": {}
+    },
+    {
+        "label": "reset_copy_watchdog",
+        "kind": 2,
+        "importPath": "dispatcher.dispatch_client",
+        "description": "dispatcher.dispatch_client",
+        "peekOfCode": "def reset_copy_watchdog() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter = 0\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(\"[copy_watchdog] reset on worker start\", \"info\")\n# ---- РљР»РёРµРЅС‚СЃРєРёРµ РјРѕРґРµР»Рё РїРѕРґ РѕС‚РІРµС‚ СЃРµСЂРІРµСЂР° ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2213,7 +2254,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_foto_message(scope):\n    pos = gd.find_text_any(queries=[\"Копировать фото\",],\n                            lang=\"rus\", \n                            count=2, \n                            pause_attempt_sec =1, \n                            scope=scope, \n                            threshold = 0.8,\n                            is_debug=False, \n                            occurrence = 1)\n    if pos:",
+        "peekOfCode": "def is_foto_message(scope):\n    pos = gd.find_text_any(queries=[\"РљРѕРїРёСЂРѕРІР°С‚СЊ С„РѕС‚Рѕ\",],\n                            lang=\"rus\", \n                            count=2, \n                            pause_attempt_sec =1, \n                            scope=scope, \n                            threshold = 0.8,\n                            is_debug=_ui_debug(), \n                            occurrence = 1)\n    if pos:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2222,7 +2263,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_link(scope):\n    pos = gd.find_text_any(queries=[\"Копировать ссылку\",],\n                            lang=\"rus\", \n                            count=2, \n                            pause_attempt_sec =1, \n                            scope=scope, \n                            threshold = 0.8,\n                            is_debug=False, \n                            occurrence = 1)\n    if pos:",
+        "peekOfCode": "def is_link(scope):\n    pos = gd.find_text_any(queries=[\"РљРѕРїРёСЂРѕРІР°С‚СЊ СЃСЃС‹Р»РєСѓ\",],\n                            lang=\"rus\", \n                            count=2, \n                            pause_attempt_sec =1, \n                            scope=scope, \n                            threshold = 0.8,\n                            is_debug=_ui_debug(), \n                            occurrence = 1)\n    if pos:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2231,7 +2272,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_center_ok():\n    if not gd.click_image(\n        \"center_ok.png\",\n        scope=(350, 450, 800, 800),\n        confidence=0.88,\n        count_click=2,\n        multiscale=True,\n        is_debug=False,\n        ):\n        log_and_print(\"[is_center_ok] Not find center OK\")",
+        "peekOfCode": "def is_center_ok():\n    if not gd.click_image(\n        \"center_ok.png\",\n        scope=(350, 450, 800, 800),\n        confidence=0.88,\n        count_click=2,\n        multiscale=True,\n        is_debug=_ui_debug(),\n        ):\n        log_and_print(\"[is_center_ok] Not find center OK\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2240,7 +2281,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_center_continue():\n    if not gd.click_image(\n        \"continue.png\",\n        scope=(300, 550, 600, 700),\n        confidence=0.88,\n        count_click=2,\n        multiscale=True,\n        is_debug=False,\n        ):\n        log_and_print(\"[is_center_continue] Not find center Continue\")",
+        "peekOfCode": "def is_center_continue():\n    if not gd.click_image(\n        \"continue.png\",\n        scope=(300, 550, 600, 700),\n        confidence=0.88,\n        count_click=2,\n        multiscale=True,\n        is_debug=_ui_debug(),\n        ):\n        log_and_print(\"[is_center_continue] Not find center Continue\")",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2258,7 +2299,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_copy_text(tp, window, s, x, y, is_debug = False):\n    #global count_y_mess_empty\n    scope=(\n            int(x - s.width_menu),\n            y - int(s.height_menu),\n            x + int(s.width_menu),\n            y + int(s.height_menu),\n    )\n    gd.pause(1)\n    pos = False",
+        "peekOfCode": "def click_copy_text(tp, window, s, x, y, is_debug=None):\n    #global count_y_mess_empty\n    if is_debug is None:\n        is_debug = _ui_debug()\n    scope=(\n            int(x - s.width_menu),\n            y - int(s.height_menu),\n            x + int(s.width_menu),\n            y + int(s.height_menu),\n    )",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2267,7 +2308,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess(window, name_viber_channel):\n    window.set_focus()\n    if not gd.click_image(\n        f\"{name_viber_channel}\\\\last_mess.png\",\n        scope=(880, 910, 1100, 990),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
+        "peekOfCode": "def clickLastMess(window, name_viber_channel):\n    window.set_focus()\n    if not gd.click_image(\n        f\"{name_viber_channel}\\\\last_mess.png\",\n        scope=(880, 910, 1100, 990),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=_ui_debug(),\n    ):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2285,7 +2326,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_viber_channel_image(name_viber_channel ):\n    return gd.click_image(\n            name_viber_channel + \".png\",\n            scope=(0, 200, 120, 700),\n            confidence=0.88,\n            count_click=1,\n            multiscale=True,\n            is_debug=False,\n    )\ndef click_viber_channel_text(viber_channel):",
+        "peekOfCode": "def click_viber_channel_image(name_viber_channel ):\n    return gd.click_image(\n            name_viber_channel + \".png\",\n            scope=(0, 200, 120, 700),\n            confidence=0.88,\n            count_click=1,\n            multiscale=True,\n            is_debug=_ui_debug(),\n    )\ndef click_viber_channel_text(viber_channel):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2294,7 +2335,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_viber_channel_text(viber_channel):\n    return gd.click_text(\n            [viber_channel[\"name_viber_contact\"],],\n            count_attempt_find=2,\n            pause_attempt=4,\n            lang=viber_channel[\"name_viber_contact_lang\"],\n            scope=(0, 200, 320, 700),\n            threshold=0.5,\n            plus_x = -16,\n            is_debug=False,",
+        "peekOfCode": "def click_viber_channel_text(viber_channel):\n    return gd.click_text(\n            [viber_channel[\"name_viber_contact\"],],\n            count_attempt_find=2,\n            pause_attempt=4,\n            lang=viber_channel[\"name_viber_contact_lang\"],\n            scope=(0, 200, 320, 700),\n            threshold=0.5,\n            plus_x = -16,\n            is_debug=_ui_debug(),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2312,16 +2353,16 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def findMessage(window, x, y, viber_channel, text, s):\n    log_and_print(f\"[findMessage] text = {text}\")\n    gd.right_click(x, y)\n    gd.pause(0.5)\n    current_text = click_copy_text(\"text\", window, s, x+60, y, is_debug=False)\n    log_and_print(f\"[findMessage] current_text = {current_text}\")\n    if current_text and text_includes_fast(text, current_text, 0.7):\n        log_and_print(\"[findMessage] succ message find\")\n        return x, y\n    else:",
+        "peekOfCode": "def findMessage(window, x, y, viber_channel, text, s):\n    log_and_print(f\"[findMessage] text = {text}\")\n    gd.right_click(x, y)\n    gd.pause(0.5)\n    current_text = click_copy_text(\"text\", window, s, x+60, y, is_debug=_ui_debug())\n    log_and_print(f\"[findMessage] current_text = {current_text}\")\n    if current_text and text_includes_fast(text, current_text, 0.7):\n        log_and_print(\"[findMessage] succ message find\")\n        return x, y\n    else:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
     {
-        "label": "sendViberMessDispatherToСarrier",
+        "label": "sendViberMessDispatherToРЎarrier",
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, text, s):\n    is_debug = False\n    resultFind = findMessage(window, x, y, viber_channel, text, s)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 70\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
+        "peekOfCode": "def sendViberMessDispatherToРЎarrier(viber_names, window, x, y, viber_channel, text, s):\n    is_debug = _ui_debug()\n    resultFind = findMessage(window, x, y, viber_channel, text, s)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 70\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2330,7 +2371,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def fill_y_mess(window, viber_channel, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = gd.capture_and_find_image_boundary_coordinates(\n        (x, y, 800, height),",
+        "peekOfCode": "def fill_y_mess(window, viber_channel, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"РЎС‚Р°СЂС‚ fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = gd.capture_and_find_image_boundary_coordinates(\n        (x, y, 800, height),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2348,7 +2389,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_folder():\n    log_and_print(\"Find button folder\", \"INFO\")\n    if not gd.click_image(\n        \"folder.png\",\n        scope=(66, 154, 175, 207),\n        confidence=0.8,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
+        "peekOfCode": "def click_folder():\n    log_and_print(\"Find button folder\", \"INFO\")\n    if not gd.click_image(\n        \"folder.png\",\n        scope=(66, 154, 175, 207),\n        confidence=0.8,\n        count_click=1,\n        multiscale=True,\n        is_debug=_ui_debug(),\n    ):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2384,7 +2425,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_open_info():\n    log_and_print(\"Find info\", \"INFO\")\n    if not gd.click_image(\n        \"info.png\",\n        scope=(1050, 70, 1100, 120),\n        confidence=0.8,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
+        "peekOfCode": "def click_open_info():\n    log_and_print(\"Find info\", \"INFO\")\n    if not gd.click_image(\n        \"info.png\",\n        scope=(1050, 70, 1100, 120),\n        confidence=0.8,\n        count_click=1,\n        multiscale=True,\n        is_debug=_ui_debug(),\n    ):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2393,7 +2434,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def click_cancel_window_save_as():\n    log_and_print(\"Find window_save_as\", \"INFO\")\n    if not gd.click_image(\n        \"cancel.png\",\n        scope=(800, 500, 1060, 580),\n        confidence=0.9,\n        count_click=1,\n        multiscale=True,\n        is_debug=False,\n    ):",
+        "peekOfCode": "def click_cancel_window_save_as():\n    log_and_print(\"Find window_save_as\", \"INFO\")\n    if not gd.click_image(\n        \"cancel.png\",\n        scope=(800, 500, 1060, 580),\n        confidence=0.9,\n        count_click=1,\n        multiscale=True,\n        is_debug=_ui_debug(),\n    ):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2402,7 +2443,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def window_top_focus(window):\n    hwnd = window.handle\n    # Устанавливаем флаг \"всегда поверх остальных\"\n    win32gui.SetWindowPos(\n        hwnd,\n        win32con.HWND_TOPMOST,  # верх всех окон\n        0, 0, 0, 0,\n        win32con.SWP_NOMOVE | win32con.SWP_NOSIZE\n    )\n    window.set_focus()",
+        "peekOfCode": "def window_top_focus(window):\n    hwnd = window.handle\n    # РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі \"РІСЃРµРіРґР° РїРѕРІРµСЂС… РѕСЃС‚Р°Р»СЊРЅС‹С…\"\n    win32gui.SetWindowPos(\n        hwnd,\n        win32con.HWND_TOPMOST,  # РІРµСЂС… РІСЃРµС… РѕРєРѕРЅ\n        0, 0, 0, 0,\n        win32con.SWP_NOMOVE | win32con.SWP_NOSIZE\n    )\n    window.set_focus()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2420,7 +2461,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "pag.FAILSAFE = False\nip_numbber = 0\ndef _get_ips() -> list[str]:\n    ips = read_setting(\"IPS\") or []\n    if not isinstance(ips, list):\n        return []\n    return [str(ip).strip() for ip in ips if str(ip).strip()]\ndef get_dispatch_url():\n    ips = _get_ips()\n    if not ips:",
+        "peekOfCode": "pag.FAILSAFE = False\nip_numbber = 0\ndef _ui_debug() -> bool:\n    return bool(read_setting(\"debug_methods_mode\"))\ndef _get_ips() -> list[str]:\n    ips = read_setting(\"IPS\") or []\n    if not isinstance(ips, list):\n        return []\n    return [str(ip).strip() for ip in ips if str(ip).strip()]\ndef get_dispatch_url():",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2429,7 +2470,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "ip_numbber = 0\ndef _get_ips() -> list[str]:\n    ips = read_setting(\"IPS\") or []\n    if not isinstance(ips, list):\n        return []\n    return [str(ip).strip() for ip in ips if str(ip).strip()]\ndef get_dispatch_url():\n    ips = _get_ips()\n    if not ips:\n        return \"http://127.0.0.1:8888/api/v1/dispatch/analyze\"",
+        "peekOfCode": "ip_numbber = 0\ndef _ui_debug() -> bool:\n    return bool(read_setting(\"debug_methods_mode\"))\ndef _get_ips() -> list[str]:\n    ips = read_setting(\"IPS\") or []\n    if not isinstance(ips, list):\n        return []\n    return [str(ip).strip() for ip in ips if str(ip).strip()]\ndef get_dispatch_url():\n    ips = _get_ips()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2438,7 +2479,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Глобальный флаг для предотвращения двойной реакции\nprocessed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0",
+        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ С„Р»Р°Рі РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ РґРІРѕР№РЅРѕР№ СЂРµР°РєС†РёРё\nprocessed_messages = set()\n# РЎРµРјР°С„РѕСЂ РґР»СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2447,7 +2488,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "processed_messages = set()\n# Семафор для последовательной обработки сообщений\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic",
+        "peekOfCode": "processed_messages = set()\n# РЎРµРјР°С„РѕСЂ РґР»СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2474,7 +2515,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "copied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\n# ---- Клиентские модели под ответ сервера ----",
+        "peekOfCode": "copied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\ndef reset_copy_watchdog() -> None:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2483,7 +2524,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "last_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\n# ---- Клиентские модели под ответ сервера ----\nclass Action(BaseModel):",
+        "peekOfCode": "last_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter += 1\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(f\"[copy_watchdog] copied_message_counter={copied_message_counter}\", \"info\")\ndef reset_copy_watchdog() -> None:\n    global copied_message_counter, last_message_copy_monotonic",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2492,7 +2533,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "count_old_mess = 0\nasync def send_messages_from_y_mess(window, viber_channel, s):\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:\n            log_and_print(f\"[send_messages_from_y_mess] Меседж y = {y}\")\n            window.set_focus()",
+        "peekOfCode": "count_old_mess = 0\nasync def send_messages_from_y_mess(window, viber_channel, s):\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:\n            log_and_print(f\"[send_messages_from_y_mess] РњРµСЃРµРґР¶ y = {y}\")\n            window.set_focus()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2555,7 +2596,7 @@
         "kind": 2,
         "importPath": "dispatcher.personal_broadcast_config",
         "description": "dispatcher.personal_broadcast_config",
-        "peekOfCode": "def load_personal_broadcast_config() -> PersonalBroadcastConfig:\n    defaults = {\n        \"work_mode\": \"reader\",\n        \"personal_broadcast_text\": \"\",\n        \"personal_broadcast_max_pause_seconds\": 8,\n        \"personal_broadcast_gender_filter\": \"all\",\n        \"personal_broadcast_sent_names_file\": \"personal_broadcast_sent_names.txt\",\n        \"personal_broadcast_participants_texts\": [\"Учасники\", \"Участники\"],\n        \"personal_broadcast_role_keywords\": [\"адмін\", \"admin\", \"moderator\", \"модератор\", \"creator\", \"создатель\"],\n        \"personal_broadcast_members_scope\": [330, 230, 450, 620],",
+        "peekOfCode": "def load_personal_broadcast_config() -> PersonalBroadcastConfig:\n    mode = str(read_setting(\"work_mode\") or \"reader\").strip().lower()\n    message_text = str(read_setting(\"personal_broadcast_text\") or \"\")\n    try:\n        max_pause_seconds = float(read_setting(\"personal_broadcast_max_pause_seconds\") or 8.0)\n    except Exception:\n        max_pause_seconds = 8.0\n    gender_filter = str(read_setting(\"personal_broadcast_gender_filter\") or \"all\").strip().lower()\n    sent_names_file = str(read_setting(\"personal_broadcast_sent_names_file\") or \"personal_broadcast_sent_names.txt\")\n    participants_texts = read_setting(\"personal_broadcast_participants_texts\") or [\"Учасники\", \"Участники\"]",
         "detail": "dispatcher.personal_broadcast_config",
         "documentation": {}
     },
@@ -2573,7 +2614,7 @@
         "kind": 6,
         "importPath": "dispatcher.personal_broadcast_sender",
         "description": "dispatcher.personal_broadcast_sender",
-        "peekOfCode": "class PersonalBroadcastSender:\n    def __init__(self, config: PersonalBroadcastConfig):\n        self._config = config\n        self._registry = PersonalBroadcastRegistry(config.sent_names_file)\n        log_and_print(\"[personal_broadcast] initialized\", \"info\")\n    def update_config(self, config: PersonalBroadcastConfig) -> None:\n        sent_file_changed = self._config.sent_names_file != config.sent_names_file\n        self._config = config\n        if sent_file_changed:\n            self._registry = PersonalBroadcastRegistry(config.sent_names_file)",
+        "peekOfCode": "class PersonalBroadcastSender:\n    _NON_MEMBER_WORDS = {\n        \"участники\",\n        \"учасники\",\n        \"participants\",\n        \"вы\",\n        \"you\",\n        \"неизвестно\",\n        \"--\",\n    }",
         "detail": "dispatcher.personal_broadcast_sender",
         "documentation": {}
     },
@@ -2650,11 +2691,20 @@
         "documentation": {}
     },
     {
+        "label": "set_debug_mode",
+        "kind": 2,
+        "importPath": "log",
+        "description": "log",
+        "peekOfCode": "def set_debug_mode(enabled: bool) -> None:\n    global DEBUG_MODE\n    DEBUG_MODE = bool(enabled)\n    logging.getLogger().setLevel(logging.DEBUG if DEBUG_MODE else logging.INFO)\n    logging.info(f\"[log] debug_logs_mode={'on' if DEBUG_MODE else 'off'}\")\ndef log_and_print(message: str, level: str = \"debug\"):\n    level = level.lower()\n    now = datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")\n    if level in (\"info\", \"warning\", \"error\", \"critical\") or (level == \"debug\" and DEBUG_MODE):\n        print(f\"[{now}] {message}\")",
+        "detail": "log",
+        "documentation": {}
+    },
+    {
         "label": "log_and_print",
         "kind": 2,
         "importPath": "log",
         "description": "log",
-        "peekOfCode": "def log_and_print(message: str, level: str = 'debug'):\n    level = level.lower()\n    now = datetime.now().strftime('%Y-%m-%d %H:%M:%S')\n    if level in ('info', 'warning', 'error', 'critical'): #, 'debug'\n        print(f\"[{now}] {message}\")\n    if level == 'info':\n        logging.info(message)\n    elif level == 'warning':\n        logging.warning(message)\n    elif level == 'error':",
+        "peekOfCode": "def log_and_print(message: str, level: str = \"debug\"):\n    level = level.lower()\n    now = datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")\n    if level in (\"info\", \"warning\", \"error\", \"critical\") or (level == \"debug\" and DEBUG_MODE):\n        print(f\"[{now}] {message}\")\n    if level == \"info\":\n        logging.info(message)\n    elif level == \"warning\":\n        logging.warning(message)\n    elif level == \"error\":",
         "detail": "log",
         "documentation": {}
     },
@@ -2663,7 +2713,16 @@
         "kind": 5,
         "importPath": "log",
         "description": "log",
-        "peekOfCode": "FMT = '%(asctime)s - %(levelname)s - %(message)s'\nlogging.basicConfig(\n    level=logging.INFO,           # корневой логгер: только INFO и выше\n    format=FMT,\n    handlers=[\n        logging.FileHandler(\"log.log\", mode='w', encoding='utf-8'),  # файл\n        logging.StreamHandler(),                                      # консоль\n    ],\n    force=True  # ВАЖНО: сбрасывает ВСЕ ранее добавленные хендлеры/настройки\n)",
+        "peekOfCode": "FMT = \"%(asctime)s - %(levelname)s - %(message)s\"\nDEBUG_MODE = False\nlogging.basicConfig(\n    level=logging.INFO,\n    format=FMT,\n    handlers=[\n        logging.FileHandler(\"log.log\", mode=\"w\", encoding=\"utf-8\"),\n        logging.StreamHandler(),\n    ],\n    force=True,",
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "DEBUG_MODE",
+        "kind": 5,
+        "importPath": "log",
+        "description": "log",
+        "peekOfCode": "DEBUG_MODE = False\nlogging.basicConfig(\n    level=logging.INFO,\n    format=FMT,\n    handlers=[\n        logging.FileHandler(\"log.log\", mode=\"w\", encoding=\"utf-8\"),\n        logging.StreamHandler(),\n    ],\n    force=True,\n)",
         "detail": "log",
         "documentation": {}
     },
@@ -3032,7 +3091,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого\n    \"\"\"\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")\n    # Конвертируем из RGB в BGR",
+        "peekOfCode": "def preprocess_image(image_np):\n    \"\"\"\n    РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° OCR.\n    :param image_np: РР·РѕР±СЂР°Р¶РµРЅРёРµ РІ С„РѕСЂРјР°С‚Рµ NumPy РјР°СЃСЃРёРІР° (RGB)\n    :return: РћР±СЂР°Р±РѕС‚Р°РЅРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ РѕС‚С‚РµРЅРєР°С… СЃРµСЂРѕРіРѕ\n    \"\"\"\n    # РџСЂРѕРІРµСЂСЏРµРј СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°СЃСЃРёРІР°\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"РР·РѕР±СЂР°Р¶РµРЅРёРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ С†РІРµС‚РЅС‹Рј (3 РєР°РЅР°Р»Р°).\")\n    # РљРѕРЅРІРµСЂС‚РёСЂСѓРµРј РёР· RGB РІ BGR",
         "detail": "utils",
         "documentation": {}
     },
@@ -3059,7 +3118,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8-sig') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')\n        return None",
+        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… РёР· JSON С„Р°Р№Р»Р° {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8-sig') as file:\n            data = json.load(file)\n        log_and_print(f\"Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹ РёР· {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Р¤Р°Р№Р» {file_path} РЅРµ РЅР°Р№РґРµРЅ.\", 'error')\n        return None",
         "detail": "utils",
         "documentation": {}
     },
@@ -3068,7 +3127,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def get_latest_file(download_folder):\n    try:\n        files = os.listdir(download_folder)\n        paths = [os.path.join(download_folder, fname) for fname in files]\n        latest_file = max(paths, key=os.path.getctime)\n        return latest_file\n    except Exception as e:\n        print(f\"Ошибка при получении последнего файла: {e}\")\n        return None\ndef is_video_file(file_path):",
+        "peekOfCode": "def get_latest_file(download_folder):\n    try:\n        files = os.listdir(download_folder)\n        paths = [os.path.join(download_folder, fname) for fname in files]\n        latest_file = max(paths, key=os.path.getctime)\n        return latest_file\n    except Exception as e:\n        print(f\"РћС€РёР±РєР° РїСЂРё РїРѕР»СѓС‡РµРЅРёРё РїРѕСЃР»РµРґРЅРµРіРѕ С„Р°Р№Р»Р°: {e}\")\n        return None\ndef is_video_file(file_path):",
         "detail": "utils",
         "documentation": {}
     },
@@ -3077,7 +3136,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def is_video_file(file_path):\n    \"\"\"\n    Определяет, является ли файл видео по его расширению.\n    :param file_path: Путь к файлу.\n    :return: True, если файл является видео, иначе False.\n    \"\"\"\n    # Список расширений видеофайлов\n    video_extensions = {\".mp4\", \".mkv\", \".avi\", \".mov\", \".wmv\", \".flv\", \".webm\", \".m4v\"}\n    # Получаем расширение файла\n    file_extension = file_path.lower().split('.')[-1]",
+        "peekOfCode": "def is_video_file(file_path):\n    \"\"\"\n    РћРїСЂРµРґРµР»СЏРµС‚, СЏРІР»СЏРµС‚СЃСЏ Р»Рё С„Р°Р№Р» РІРёРґРµРѕ РїРѕ РµРіРѕ СЂР°СЃС€РёСЂРµРЅРёСЋ.\n    :param file_path: РџСѓС‚СЊ Рє С„Р°Р№Р»Сѓ.\n    :return: True, РµСЃР»Рё С„Р°Р№Р» СЏРІР»СЏРµС‚СЃСЏ РІРёРґРµРѕ, РёРЅР°С‡Рµ False.\n    \"\"\"\n    # РЎРїРёСЃРѕРє СЂР°СЃС€РёСЂРµРЅРёР№ РІРёРґРµРѕС„Р°Р№Р»РѕРІ\n    video_extensions = {\".mp4\", \".mkv\", \".avi\", \".mov\", \".wmv\", \".flv\", \".webm\", \".m4v\"}\n    # РџРѕР»СѓС‡Р°РµРј СЂР°СЃС€РёСЂРµРЅРёРµ С„Р°Р№Р»Р°\n    file_extension = file_path.lower().split('.')[-1]",
         "detail": "utils",
         "documentation": {}
     },
@@ -3095,7 +3154,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def showImage(processed_image, ms):\n    # Отображение обработанного изображения\n    processed_array = np.array(processed_image)\n    window_name = \"Processed Image\"\n    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)\n    cv2.moveWindow(window_name, 10, 10)\n    cv2.imshow(window_name, processed_array)\n    cv2.waitKey(1)\n    cv2.waitKey(ms)\n    cv2.destroyAllWindows()",
+        "peekOfCode": "def showImage(processed_image, ms, title=None):\n    # РћС‚РѕР±СЂР°Р¶РµРЅРёРµ РѕР±СЂР°Р±РѕС‚Р°РЅРЅРѕРіРѕ РёР·РѕР±СЂР°Р¶РµРЅРёСЏ\n    processed_array = np.array(processed_image)\n    window_name = str(title) if title else \"Processed Image\"\n    cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)\n    screen_w = win32api.GetSystemMetrics(0)\n    screen_h = win32api.GetSystemMetrics(1)\n    window_w = max(420, min(900, int(screen_w * 0.35)))\n    window_h = max(320, min(900, int(screen_h * 0.45)))\n    cv2.resizeWindow(window_name, window_w, window_h)",
         "detail": "utils",
         "documentation": {}
     },
@@ -3113,7 +3172,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def take_screenshot(region):\n    screenshot = pyautogui.screenshot(region=region)\n    image_np = np.array(screenshot)\n    return image_np\ndef show_overlay_win32_hole(\n    region,                  # (x, y, w, h) - экранные координаты\n    delay_ms=1500,\n    *,\n    alpha=120,               # 0..255 — затемнение фона\n    border_color=(0, 255, 0),# BGR",
+        "peekOfCode": "def take_screenshot(region):\n    screenshot = pyautogui.screenshot(region=region)\n    image_np = np.array(screenshot)\n    return image_np\ndef show_overlay_win32_hole(\n    region,                  # (x, y, w, h) - СЌРєСЂР°РЅРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹\n    delay_ms=1500,\n    *,\n    alpha=120,               # 0..255 вЂ” Р·Р°С‚РµРјРЅРµРЅРёРµ С„РѕРЅР°\n    border_color=(0, 255, 0),# BGR",
         "detail": "utils",
         "documentation": {}
     },
@@ -3122,7 +3181,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def show_overlay_win32_hole(\n    region,                  # (x, y, w, h) - экранные координаты\n    delay_ms=1500,\n    *,\n    alpha=120,               # 0..255 — затемнение фона\n    border_color=(0, 255, 0),# BGR\n    border_width=3,\n    click_through=False,     # True -> клики проходят сквозь оверлей\n    caption=None,            # подпись (опционально)\n):",
+        "peekOfCode": "def show_overlay_win32_hole(\n    region,                  # (x, y, w, h) - СЌРєСЂР°РЅРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹\n    delay_ms=1500,\n    *,\n    alpha=120,               # 0..255 вЂ” Р·Р°С‚РµРјРЅРµРЅРёРµ С„РѕРЅР°\n    border_color=(0, 255, 0),# BGR\n    border_width=3,\n    click_through=False,     # True -> РєР»РёРєРё РїСЂРѕС…РѕРґСЏС‚ СЃРєРІРѕР·СЊ РѕРІРµСЂР»РµР№\n    caption=None,            # РїРѕРґРїРёСЃСЊ (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)\n):",
         "detail": "utils",
         "documentation": {}
     },
@@ -3131,7 +3190,7 @@
         "kind": 5,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "os.environ[\"QT_LOGGING_RULES\"] = \"qt.qpa.windows.debug=false\"\nfrom typing import Tuple, Optional\nimport time\nimport win32api, win32con, win32gui\nImageLike = Union[str, np.ndarray]\ndef preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого",
+        "peekOfCode": "os.environ[\"QT_LOGGING_RULES\"] = \"qt.qpa.windows.debug=false\"\nfrom typing import Tuple, Optional\nimport time\nimport win32api, win32con, win32gui\nImageLike = Union[str, np.ndarray]\ndef preprocess_image(image_np):\n    \"\"\"\n    РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° OCR.\n    :param image_np: РР·РѕР±СЂР°Р¶РµРЅРёРµ РІ С„РѕСЂРјР°С‚Рµ NumPy РјР°СЃСЃРёРІР° (RGB)\n    :return: РћР±СЂР°Р±РѕС‚Р°РЅРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ РѕС‚С‚РµРЅРєР°С… СЃРµСЂРѕРіРѕ",
         "detail": "utils",
         "documentation": {}
     },
@@ -3140,7 +3199,7 @@
         "kind": 5,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "ImageLike = Union[str, np.ndarray]\ndef preprocess_image(image_np):\n    \"\"\"\n    Преобразует изображение для улучшения качества OCR.\n    :param image_np: Изображение в формате NumPy массива (RGB)\n    :return: Обработанное изображение в оттенках серого\n    \"\"\"\n    # Проверяем размерность массива\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"Изображение должно быть цветным (3 канала).\")",
+        "peekOfCode": "ImageLike = Union[str, np.ndarray]\ndef preprocess_image(image_np):\n    \"\"\"\n    РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° OCR.\n    :param image_np: РР·РѕР±СЂР°Р¶РµРЅРёРµ РІ С„РѕСЂРјР°С‚Рµ NumPy РјР°СЃСЃРёРІР° (RGB)\n    :return: РћР±СЂР°Р±РѕС‚Р°РЅРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ РѕС‚С‚РµРЅРєР°С… СЃРµСЂРѕРіРѕ\n    \"\"\"\n    # РџСЂРѕРІРµСЂСЏРµРј СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°СЃСЃРёРІР°\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"РР·РѕР±СЂР°Р¶РµРЅРёРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ С†РІРµС‚РЅС‹Рј (3 РєР°РЅР°Р»Р°).\")",
         "detail": "utils",
         "documentation": {}
     },

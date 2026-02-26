@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from utils import read_setting, write_setting
+from utils import read_setting
 
 
 @dataclass
@@ -16,9 +16,12 @@ class PersonalBroadcastConfig:
     participants_click_scope: tuple[int, int, int, int]
     message_input_xy: tuple[int, int]
     open_info_image: str
+    open_info_scope: tuple[int, int, int, int] | None
     row_send_image: str
     dialog_send_image: str
-    back_to_group_image: str
+    dialog_send_scope: tuple[int, int, int, int]
+    return_image: str
+    return_scope: tuple[int, int, int, int] | None
     max_scroll_steps: int
     line_top_tolerance: int
     target_channel: dict
@@ -36,6 +39,16 @@ def _as_tuple4(value, default):
             return default
     return default
 
+def _as_optional_tuple4(value):
+    if value is None:
+        return None
+    if isinstance(value, (list, tuple)) and len(value) == 4:
+        try:
+            return (int(value[0]), int(value[1]), int(value[2]), int(value[3]))
+        except Exception:
+            return None
+    return None
+
 
 def _as_tuple2(value, default):
     if isinstance(value, (list, tuple)) and len(value) == 2:
@@ -46,38 +59,7 @@ def _as_tuple2(value, default):
     return default
 
 
-def _ensure_setting(key: str, default_value) -> None:
-    if read_setting(key) is None:
-        write_setting(key, default_value)
-
-
 def load_personal_broadcast_config() -> PersonalBroadcastConfig:
-    defaults = {
-        "work_mode": "reader",
-        "personal_broadcast_text": "",
-        "personal_broadcast_max_pause_seconds": 8,
-        "personal_broadcast_gender_filter": "all",
-        "personal_broadcast_sent_names_file": "personal_broadcast_sent_names.txt",
-        "personal_broadcast_participants_texts": ["Учасники", "Участники"],
-        "personal_broadcast_role_keywords": ["адмін", "admin", "moderator", "модератор", "creator", "создатель"],
-        "personal_broadcast_members_scope": [330, 230, 450, 620],
-        "personal_broadcast_participants_click_scope": [790, 120, 1120, 780],
-        "personal_broadcast_message_input_xy": [560, 770],
-        "personal_broadcast_open_info_image": "info.png",
-        "personal_broadcast_row_send_image": "send_to_member.png",
-        "personal_broadcast_dialog_send_image": "send_message.png",
-        "personal_broadcast_back_to_group_image": "group.png",
-        "personal_broadcast_max_scroll_steps": 120,
-        "personal_broadcast_line_top_tolerance": 14,
-        "personal_broadcast_channel": {
-            "name_viber_channel": "pereviz",
-            "name_viber_contact": "DECPEAT",
-            "name_viber_contact_lang": "eng",
-        },
-    }
-    for key, value in defaults.items():
-        _ensure_setting(key, value)
-
     mode = str(read_setting("work_mode") or "reader").strip().lower()
     message_text = str(read_setting("personal_broadcast_text") or "")
 
@@ -112,10 +94,16 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         (560, 770),
     )
 
-    open_info_image = str(read_setting("personal_broadcast_open_info_image") or "info.png")
-    row_send_image = str(read_setting("personal_broadcast_row_send_image") or "send_to_member.png")
-    dialog_send_image = str(read_setting("personal_broadcast_dialog_send_image") or "send_message.png")
-    back_to_group_image = str(read_setting("personal_broadcast_back_to_group_image") or "group.png")
+    open_info_image = str(read_setting("personal_broadcast_open_info_image"))
+    open_info_scope = _as_optional_tuple4(read_setting("personal_broadcast_open_info_scope"))
+    row_send_image = str(read_setting("personal_broadcast_row_send_image"))
+    dialog_send_image = str(read_setting("personal_broadcast_dialog_send_image"))
+    dialog_send_scope = _as_tuple4(
+        read_setting("personal_broadcast_dialog_send_scope"),
+        (710, 980, 800, 1040),
+    )
+    return_image = str(read_setting("personal_broadcast_return_image"))
+    return_scope = _as_optional_tuple4(read_setting("personal_broadcast_return_scope"))
 
     try:
         max_scroll_steps = int(read_setting("personal_broadcast_max_scroll_steps") or 120)
@@ -128,11 +116,19 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
 
     target_channel = read_setting("personal_broadcast_channel")
     if not isinstance(target_channel, dict):
-        target_channel = defaults["personal_broadcast_channel"]
+        target_channel = {
+            "name_viber_channel": "pereviz",
+            "name_viber_contact": "DECPEAT",
+            "name_viber_contact_lang": "eng",
+        }
 
     required_keys = {"name_viber_channel", "name_viber_contact", "name_viber_contact_lang"}
     if not required_keys.issubset(set(target_channel.keys())):
-        target_channel = defaults["personal_broadcast_channel"]
+        target_channel = {
+            "name_viber_channel": "pereviz",
+            "name_viber_contact": "DECPEAT",
+            "name_viber_contact_lang": "eng",
+        }
 
     return PersonalBroadcastConfig(
         mode=mode,
@@ -146,9 +142,12 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         participants_click_scope=participants_click_scope,
         message_input_xy=message_input_xy,
         open_info_image=open_info_image,
+        open_info_scope=open_info_scope,
         row_send_image=row_send_image,
         dialog_send_image=dialog_send_image,
-        back_to_group_image=back_to_group_image,
+        dialog_send_scope=dialog_send_scope,
+        return_image=return_image,
+        return_scope=return_scope,
         max_scroll_steps=max_scroll_steps,
         line_top_tolerance=line_top_tolerance,
         target_channel=target_channel,

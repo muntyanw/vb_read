@@ -13,6 +13,7 @@ from dispatcher.periodic_broadcast_config import load_periodic_broadcast_config
 from dispatcher.periodic_broadcast_sender import PeriodicBroadcastSender
 from dispatcher.personal_broadcast_config import load_personal_broadcast_config
 from dispatcher.personal_broadcast_sender import PersonalBroadcastSender
+from log import set_debug_mode, log_and_print
 import asyncio
 from pywinauto import Application
 from pathlib import Path
@@ -37,6 +38,17 @@ def _to_float(val, default):
         return float(val)
     except Exception:
         return default
+
+def _to_bool(val, default=False):
+    if isinstance(val, bool):
+        return val
+    if isinstance(val, str):
+        v = val.strip().lower()
+        if v in {"1", "true", "yes", "on"}:
+            return True
+        if v in {"0", "false", "no", "off"}:
+            return False
+    return default
 
 class Context:
     def __init__(
@@ -128,6 +140,7 @@ async def main():
             "restart_delay_s": _to_int(read_setting("restart_delay_s"), 5),
             "settings_reload_interval_s": _to_int(read_setting("settings_reload_interval_s"), 30),
             "work_mode": str(read_setting("work_mode") or "reader").strip().lower(),
+            "debug_logs_mode": _to_bool(read_setting("debug_logs_mode"), False),
         }
 
     def refresh_context_from_settings(ctx):
@@ -153,6 +166,8 @@ async def main():
         )
 
     runtime_settings = load_runtime_settings()
+    set_debug_mode(runtime_settings["debug_logs_mode"])
+    log_and_print(f"[pwa] startup mode={runtime_settings['work_mode']}", "debug")
     last_settings_reload_at = time.monotonic()
 
     gd.ensure_layout()
@@ -188,9 +203,14 @@ async def main():
             now = time.monotonic()
             if now - last_settings_reload_at >= runtime_settings["settings_reload_interval_s"]:
                 runtime_settings = load_runtime_settings()
+                set_debug_mode(runtime_settings["debug_logs_mode"])
                 refresh_context_from_settings(s)
                 periodic_sender.update_config(load_periodic_broadcast_config())
                 personal_sender.update_config(load_personal_broadcast_config())
+                log_and_print(
+                    f"[pwa] settings reloaded; mode={runtime_settings['work_mode']}",
+                    "debug",
+                )
                 last_settings_reload_at = now
 
             if runtime_settings["work_mode"] == "personal_broadcast":

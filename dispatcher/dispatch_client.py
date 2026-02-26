@@ -1,4 +1,4 @@
-# viber_worker/dispatch_client.py
+﻿# viber_worker/dispatch_client.py
 import os
 from typing import Optional, Dict, Any, List, Union
 import asyncio
@@ -25,6 +25,10 @@ pag.FAILSAFE = False
 
 ip_numbber = 0
 
+def _ui_debug() -> bool:
+    return bool(read_setting("debug_methods_mode"))
+
+
 def _get_ips() -> list[str]:
     ips = read_setting("IPS") or []
     if not isinstance(ips, list):
@@ -47,9 +51,9 @@ DISPATCH_API_KEY = os.getenv(
     "3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87",
 )
 
-# Глобальный флаг для предотвращения двойной реакции
+# Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ С„Р»Р°Рі РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ РґРІРѕР№РЅРѕР№ СЂРµР°РєС†РёРё
 processed_messages = set()
-# Семафор для последовательной обработки сообщений
+# РЎРµРјР°С„РѕСЂ РґР»СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№
 processing_semaphore = asyncio.Semaphore(1)
 count_y_mess_empty = 0
 copied_message_counter = 0
@@ -74,7 +78,7 @@ def reset_copy_watchdog() -> None:
     log_and_print("[copy_watchdog] reset on worker start", "info")
 
 
-# ---- Клиентские модели под ответ сервера ----
+# ---- РљР»РёРµРЅС‚СЃРєРёРµ РјРѕРґРµР»Рё РїРѕРґ РѕС‚РІРµС‚ СЃРµСЂРІРµСЂР° ----
 class Action(BaseModel):
     type: str
     payload: Optional[Dict[str, Any]] = None
@@ -90,13 +94,13 @@ class MatchedContact(BaseModel):
     viber_contact_name: Optional[str] = None
 
 class DispatchResult(BaseModel):
-    # Игнорируем неожиданные поля от бэкенда
+    # РРіРЅРѕСЂРёСЂСѓРµРј РЅРµРѕР¶РёРґР°РЅРЅС‹Рµ РїРѕР»СЏ РѕС‚ Р±СЌРєРµРЅРґР°
     model_config = ConfigDict(extra='ignore')
 
     message_id: str
-    # Превращаем null -> {}, и задаём безопасный дефолт через default_factory
+    # РџСЂРµРІСЂР°С‰Р°РµРј null -> {}, Рё Р·Р°РґР°С‘Рј Р±РµР·РѕРїР°СЃРЅС‹Р№ РґРµС„РѕР»С‚ С‡РµСЂРµР· default_factory
     extracted: Dict[str, Any] = Field(default_factory=dict)
-    # Заодно приводим null -> [] для списков
+    # Р—Р°РѕРґРЅРѕ РїСЂРёРІРѕРґРёРј null -> [] РґР»СЏ СЃРїРёСЃРєРѕРІ
     actions: List[Action] = Field(default_factory=list)
     decision: Optional[Decision] = None
     matched_contacts: List[MatchedContact] = Field(default_factory=list)
@@ -117,7 +121,7 @@ class DispatchResult(BaseModel):
         return v or []
 
 def _dispatch_base_url() -> str:
-    # из "http://host/api/v1/dispatch/analyze" → "http://host/api/v1/dispatch"
+    # РёР· "http://host/api/v1/dispatch/analyze" в†’ "http://host/api/v1/dispatch"
     base = get_dispatch_url().rstrip("/")
     return base.rsplit("/", 1)[0]
 
@@ -129,9 +133,9 @@ async def has_active_orders(
     retries: int = 1,
 ) -> tuple[bool, Optional[int]]:
     """
-    Возвращает (has_active, count|None).
-    - has_active: True/False — есть ли активные заказы в окне [сегодня..сегодня+window_days]
-    - count: если include_count=True — количество (ограничено лимитом на сервере), иначе None
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ (has_active, count|None).
+    - has_active: True/False вЂ” РµСЃС‚СЊ Р»Рё Р°РєС‚РёРІРЅС‹Рµ Р·Р°РєР°Р·С‹ РІ РѕРєРЅРµ [СЃРµРіРѕРґРЅСЏ..СЃРµРіРѕРґРЅСЏ+window_days]
+    - count: РµСЃР»Рё include_count=True вЂ” РєРѕР»РёС‡РµСЃС‚РІРѕ (РѕРіСЂР°РЅРёС‡РµРЅРѕ Р»РёРјРёС‚РѕРј РЅР° СЃРµСЂРІРµСЂРµ), РёРЅР°С‡Рµ None
     """
     url = _dispatch_base_url() + "/has-active-orders"
     params = {
@@ -170,7 +174,7 @@ async def has_active_orders(
 
 
 def _fallback_result(message_id: str) -> DispatchResult:
-    """Резервный ответ, чтобы наверх не улетал None."""
+    """Р РµР·РµСЂРІРЅС‹Р№ РѕС‚РІРµС‚, С‡С‚РѕР±С‹ РЅР°РІРµСЂС… РЅРµ СѓР»РµС‚Р°Р» None."""
     return DispatchResult(
         message_id=message_id,
         extracted={},
@@ -185,7 +189,7 @@ def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
     if isinstance(a, dict):
         return a.get("type")
     try:
-        return a.type  # pydantic-модель
+        return a.type  # pydantic-РјРѕРґРµР»СЊ
     except Exception:
         return None
 
@@ -202,26 +206,26 @@ async def process_one_message_dispatcher(
     if uid_source:
         processed_messages.add(uid_source)
 
-    # Обрабатываем сообщение последовательно с использованием семафора
+    # РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј СЃРµРјР°С„РѕСЂР°
     async with processing_semaphore:
         try:
-            log_and_print(f"Обработка сообщения: {message_text}", "info")
+            log_and_print(f"РћР±СЂР°Р±РѕС‚РєР° СЃРѕРѕР±С‰РµРЅРёСЏ: {message_text}", "info")
             md5_hash = hashlib.md5(uid_source.encode()).hexdigest()
 
             return await send_for_analysis(
                 message_id=md5_hash,
                 text=message_text or "",
                 chat_id=name_viber_channel,
-                sender="",  # <— отправляем имя отправителя
+                sender="",  # <вЂ” РѕС‚РїСЂР°РІР»СЏРµРј РёРјСЏ РѕС‚РїСЂР°РІРёС‚РµР»СЏ
                 attachments=None,
                 locale="uk",
                 timeout_s=float(read_setting("dispatch_timeout_s") or 15.0),
                 retries=int(read_setting("dispatch_retries") or 2),
             )
         except Exception as e:
-            log_and_print(f"Oшибка при обработке одного сообщения: {e}", "error")
-            await asyncio.sleep(2)  # небольшая пауза
-            # ВАЖНО: всегда возвращаем не-None, чтобы наверху логика не падала
+            log_and_print(f"OС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РѕРґРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ: {e}", "error")
+            await asyncio.sleep(2)  # РЅРµР±РѕР»СЊС€Р°СЏ РїР°СѓР·Р°
+            # Р’РђР–РќРћ: РІСЃРµРіРґР° РІРѕР·РІСЂР°С‰Р°РµРј РЅРµ-None, С‡С‚РѕР±С‹ РЅР°РІРµСЂС…Сѓ Р»РѕРіРёРєР° РЅРµ РїР°РґР°Р»Р°
             return _fallback_result(message_id=md5_hash)
 
 
@@ -270,7 +274,7 @@ async def send_for_analysis(
                 log_and_print(f"[dispatch] post to {get_dispatch_url()}", "debug")
                 resp = await client.post(get_dispatch_url(), json=payload, headers=headers)
                 log_and_print(f"[dispatch] status={resp.status_code}", "debug")
-                # логируем тело всегда — помогает при несовпадении контрактов
+                # Р»РѕРіРёСЂСѓРµРј С‚РµР»Рѕ РІСЃРµРіРґР° вЂ” РїРѕРјРѕРіР°РµС‚ РїСЂРё РЅРµСЃРѕРІРїР°РґРµРЅРёРё РєРѕРЅС‚СЂР°РєС‚РѕРІ
                 body_preview = (
                     resp.text
                     if len(resp.text) < 2000
@@ -287,9 +291,9 @@ async def send_for_analysis(
                 try:
                     result = DispatchResult(**data)
                 except ValidationError as ve:
-                    # Логируем и пробуем мягко привести actions, если это список dict'ов
+                    # Р›РѕРіРёСЂСѓРµРј Рё РїСЂРѕР±СѓРµРј РјСЏРіРєРѕ РїСЂРёРІРµСЃС‚Рё actions, РµСЃР»Рё СЌС‚Рѕ СЃРїРёСЃРѕРє dict'РѕРІ
                     log_and_print(f"[dispatch] ValidationError: {ve}", "error")
-                    # Попытка «ручной» сборки результата
+                    # РџРѕРїС‹С‚РєР° В«СЂСѓС‡РЅРѕР№В» СЃР±РѕСЂРєРё СЂРµР·СѓР»СЊС‚Р°С‚Р°
                     actions_raw = data.get("actions") or []
                     actions: List[Action] = []
                     for a in actions_raw:
@@ -322,24 +326,24 @@ async def send_for_analysis(
                 log_and_print("[dispatch] IPS is empty in settings.json", "ERROR")
             
             if attempt < retries:
-                await asyncio.sleep(0.7 * (attempt + 1))  # легкий backoff
+                await asyncio.sleep(0.7 * (attempt + 1))  # Р»РµРіРєРёР№ backoff
             else:
-                # На последней попытке возвращаем fallback, а не выбрасываем исключение
+                # РќР° РїРѕСЃР»РµРґРЅРµР№ РїРѕРїС‹С‚РєРµ РІРѕР·РІСЂР°С‰Р°РµРј fallback, Р° РЅРµ РІС‹Р±СЂР°СЃС‹РІР°РµРј РёСЃРєР»СЋС‡РµРЅРёРµ
                 log_and_print("[dispatch] returning fallback result", "error")
                 return _fallback_result(message_id=message_id)
 
-    # теоретически недостижимо
+    # С‚РµРѕСЂРµС‚РёС‡РµСЃРєРё РЅРµРґРѕСЃС‚РёР¶РёРјРѕ
     raise DispatchError(f"Dispatch failed: {last_exc}")
  
 def is_foto_message(scope):
 
-    pos = gd.find_text_any(queries=["Копировать фото",],
+    pos = gd.find_text_any(queries=["РљРѕРїРёСЂРѕРІР°С‚СЊ С„РѕС‚Рѕ",],
                             lang="rus", 
                             count=2, 
                             pause_attempt_sec =1, 
                             scope=scope, 
                             threshold = 0.8,
-                            is_debug=False, 
+                            is_debug=_ui_debug(), 
                             occurrence = 1)
     if pos:
         return True
@@ -348,13 +352,13 @@ def is_foto_message(scope):
 
 def is_link(scope):
 
-    pos = gd.find_text_any(queries=["Копировать ссылку",],
+    pos = gd.find_text_any(queries=["РљРѕРїРёСЂРѕРІР°С‚СЊ СЃСЃС‹Р»РєСѓ",],
                             lang="rus", 
                             count=2, 
                             pause_attempt_sec =1, 
                             scope=scope, 
                             threshold = 0.8,
-                            is_debug=False, 
+                            is_debug=_ui_debug(), 
                             occurrence = 1)
     if pos:
         return True
@@ -369,7 +373,7 @@ def is_center_ok():
         confidence=0.88,
         count_click=2,
         multiscale=True,
-        is_debug=False,
+        is_debug=_ui_debug(),
         ):
         log_and_print("[is_center_ok] Not find center OK")
         return False
@@ -386,7 +390,7 @@ def is_center_continue():
         confidence=0.88,
         count_click=2,
         multiscale=True,
-        is_debug=False,
+        is_debug=_ui_debug(),
         ):
         log_and_print("[is_center_continue] Not find center Continue")
         return False
@@ -408,8 +412,10 @@ def press_esq(window):
     #     s.search_board_mess_y_start + 10,
     # )
 
-def click_copy_text(tp, window, s, x, y, is_debug = False):
+def click_copy_text(tp, window, s, x, y, is_debug=None):
     #global count_y_mess_empty
+    if is_debug is None:
+        is_debug = _ui_debug()
     
     scope=(
             int(x - s.width_menu),
@@ -431,7 +437,7 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
         )
     else:
         pos = gd.click_text(
-            ["Копировать текст", "Скопировать сообщение", ],
+            ["РљРѕРїРёСЂРѕРІР°С‚СЊ С‚РµРєСЃС‚", "РЎРєРѕРїРёСЂРѕРІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ", ],
             count_attempt_find=2,
             pause_attempt=2,
             lang="rus",
@@ -447,7 +453,7 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
         if tp == "image":
         
             pos = gd.click_text(
-                ["Копировать текст", "Скопировать сообщение", ],
+                ["РљРѕРїРёСЂРѕРІР°С‚СЊ С‚РµРєСЃС‚", "РЎРєРѕРїРёСЂРѕРІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ", ],
                 count_attempt_find=2,
                 pause_attempt=2,
                 lang="rus",
@@ -468,7 +474,7 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
             
     if not pos:
         
-        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
+        log_and_print("[send_messages_from_y_mess] Not find РЎРєРѕРїРёСЂРѕРІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ", "INFO")
         
         press_esq(window)    
         #if is_foto_message(scope) or is_link(scope) or is_center_continue():
@@ -482,7 +488,7 @@ def click_copy_text(tp, window, s, x, y, is_debug = False):
         #    press_esq(window)
         #    return None
 
-    log_and_print("[send_messages_from_y_mess] Повідомлення скопіювано в буфер обміну", "INFO")
+    log_and_print("[send_messages_from_y_mess] РџРѕРІС–РґРѕРјР»РµРЅРЅСЏ СЃРєРѕРїС–СЋРІР°РЅРѕ РІ Р±СѓС„РµСЂ РѕР±РјС–РЅСѓ", "INFO")
     mark_message_copied()
     return pyperclip.paste()
 
@@ -496,7 +502,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 
     for x, y in s.y_mess:
         if y:
-            log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
+            log_and_print(f"[send_messages_from_y_mess] РњРµСЃРµРґР¶ y = {y}")
             window.set_focus()
 
             x = x + s.search_board_mess_x_start + 180
@@ -509,19 +515,19 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
 
-            text = click_copy_text("text", window, s, x, y, is_debug=False)
+            text = click_copy_text("text", window, s, x, y, is_debug=_ui_debug())
             
 
             if len(text) == 1:
                 continue
     
             if text == "is_foto":
-                log_and_print("[send_messages_from_y_mess] Фото повідомлення", "INFO")
+                log_and_print("[send_messages_from_y_mess] Р¤РѕС‚Рѕ РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ", "INFO")
                 continue
             
             if text is None:
                 log_and_print(
-                    "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий", "INFO"
+                    "[send_messages_from_y_mess] РќРµ РІРґР°Р»РѕСЃСЏ СЃРєРѕРїС–СЋРІР°С‚Рё РјРµСЃРµРґР¶, Р±СѓС„РµСЂ РѕР±РјС–РЅСѓ РїСѓСЃС‚РёР№", "INFO"
                 )
                 
                 if is_center_ok():
@@ -534,7 +540,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                 was_new_mess = True
                 count_old_mess = 0
                 log_and_print(
-                    "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу", "INFO"
+                    "[send_messages_from_y_mess] Р’С–РґРїСЂР°РІРєР° С‚Р° Р·Р±РµСЂРµР¶РµРЅРЅСЏ РЅРѕРІРѕРіРѕ СЃРїРѕРІС–С‰РµРЅРЅСЏ РґР»СЏ Р°РЅР°Р»С–Р·Сѓ", "INFO"
                 )
                 resp = await process_one_message_dispatcher(
                     text, None,
@@ -545,7 +551,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                     f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
                 )
 
-                # Извлекаем тип первой команды (если есть)
+                # РР·РІР»РµРєР°РµРј С‚РёРї РїРµСЂРІРѕР№ РєРѕРјР°РЅРґС‹ (РµСЃР»Рё РµСЃС‚СЊ)
                 action_type = None
                 viber_names = []
                 
@@ -553,15 +559,15 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                     first_action = resp.actions[0]
                     action_type = _safe_action_type(first_action)
                     
-                    # 2) достаём имена перевозчиков, если backend вернул matched_contacts
+                    # 2) РґРѕСЃС‚Р°С‘Рј РёРјРµРЅР° РїРµСЂРµРІРѕР·С‡РёРєРѕРІ, РµСЃР»Рё backend РІРµСЂРЅСѓР» matched_contacts
                     if hasattr(resp, "matched_contacts") and getattr(resp, "matched_contacts", None):
-                        # resp.matched_contacts — это список объектов или словарей
+                        # resp.matched_contacts вЂ” СЌС‚Рѕ СЃРїРёСЃРѕРє РѕР±СЉРµРєС‚РѕРІ РёР»Рё СЃР»РѕРІР°СЂРµР№
                         for mc in resp.matched_contacts or []:
-                            # если это словарь
+                            # РµСЃР»Рё СЌС‚Рѕ СЃР»РѕРІР°СЂСЊ
                             if isinstance(mc, dict):
                                 name = mc.get("viber_contact_name")
                             else:
-                                # Pydantic-модель MatchedContact
+                                # Pydantic-РјРѕРґРµР»СЊ MatchedContact
                                 name = getattr(mc, "viber_contact_name", None)
 
                             if name and name not in viber_names:
@@ -571,7 +577,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                 if action_type != "ignore":
                     log_and_print("++++++++++++++++++++++++++++++++++++++++++++++", "INFO")
 
-                    result = sendViberMessDispatherToСarrier(
+                    result = sendViberMessDispatherToРЎarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s
                     )
 
@@ -585,7 +591,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                             s.search_board_mess_y_start + 10,
                         )
 
-                        result = sendViberMessDispatherToСarrier(
+                        result = sendViberMessDispatherToРЎarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s
                     )
 
@@ -603,7 +609,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                     return was_new_mess
                 sending += 1
                 log_and_print(
-                    "[send_messages_from_y_mess] ------------------------------------- Сповіщення вже було відправлено", "INFO"
+                    "[send_messages_from_y_mess] ------------------------------------- РЎРїРѕРІС–С‰РµРЅРЅСЏ РІР¶Рµ Р±СѓР»Рѕ РІС–РґРїСЂР°РІР»РµРЅРѕ", "INFO"
                 )
                 if sending >= 2:
                     # break
@@ -619,7 +625,7 @@ def clickLastMess(window, name_viber_channel):
         confidence=0.7,
         count_click=1,
         multiscale=True,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
         log_and_print("Not find icon LastMessage", "INFO")
         return False
@@ -643,7 +649,7 @@ def click_viber_channel_image(name_viber_channel ):
             confidence=0.88,
             count_click=1,
             multiscale=True,
-            is_debug=False,
+            is_debug=_ui_debug(),
     )
     
 def click_viber_channel_text(viber_channel):
@@ -656,7 +662,7 @@ def click_viber_channel_text(viber_channel):
             scope=(0, 200, 320, 700),
             threshold=0.5,
             plus_x = -16,
-            is_debug=False,
+            is_debug=_ui_debug(),
             count_click=2
     )
 
@@ -702,7 +708,7 @@ def findMessage(window, x, y, viber_channel, text, s):
     log_and_print(f"[findMessage] text = {text}")
     gd.right_click(x, y)
     gd.pause(0.5)
-    current_text = click_copy_text("text", window, s, x+60, y, is_debug=False)
+    current_text = click_copy_text("text", window, s, x+60, y, is_debug=_ui_debug())
     
     log_and_print(f"[findMessage] current_text = {current_text}")
 
@@ -720,7 +726,7 @@ def findMessage(window, x, y, viber_channel, text, s):
 
                 for x, y in s.y_mess:
                     if y:
-                        log_and_print(f"[findMessage] Меседж y = {y}")
+                        log_and_print(f"[findMessage] РњРµСЃРµРґР¶ y = {y}")
                         window.set_focus()
 
                         x = x + s.search_board_mess_x_start + 180
@@ -762,8 +768,8 @@ def findMessage(window, x, y, viber_channel, text, s):
                     s.search_board_mess_y_start + 10,
                 )
 
-def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, text, s):
-    is_debug = False
+def sendViberMessDispatherToРЎarrier(viber_names, window, x, y, viber_channel, text, s):
+    is_debug = _ui_debug()
 
     resultFind = findMessage(window, x, y, viber_channel, text, s)
     if resultFind:
@@ -777,19 +783,19 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
     gd.right_click(xRight, yRight)
 
     if not gd.click_text(
-        ["Переслать"],
+        ["РџРµСЂРµСЃР»Р°С‚СЊ"],
         count_attempt_find=2,
         pause_attempt=4,
         lang="rus",
         scope=(x - 200, y - 50, x + 200, y + 400),
         threshold=0.86,
         plus_x = -16,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
-        log_and_print("Not find menu item Переслать")
+        log_and_print("Not find menu item РџРµСЂРµСЃР»Р°С‚СЊ")
         return False
 
-    log_and_print("Click Переслать")
+    log_and_print("Click РџРµСЂРµСЃР»Р°С‚СЊ")
 
     for viber_name in viber_names:
         log_and_print(f"viber_name = {viber_name}")
@@ -825,7 +831,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
             confidence=0.88,
             count_click=1,
             multiscale=True,
-            is_debug=False,
+            is_debug=_ui_debug(),
         ): 
 
         #if not gd.click_text(
@@ -834,7 +840,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
         #    pause_attempt=4,
         #    lang="ukr",
         #    scope=(pos[0], pos[0] + 40, pos[0] + 300, pos[0] + 200),
-        #    is_debug=False,
+        #    is_debug=_ui_debug(),
         #    threshold=0.5,
         #    occurrence=1,
         #):
@@ -849,7 +855,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
         scope=(460, 730, 640, 810),
         confidence=0.5,
         count_click=1,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
         log_and_print("Not find button resend")
         return "repeat"
@@ -865,7 +871,7 @@ def sendViberMessDispatherToСarrier(viber_names, window, x, y, viber_channel, t
 def fill_y_mess(window, viber_channel, s):
     s.y_mess = []
     window.set_focus()
-    log_and_print("Старт fill_y_mess")
+    log_and_print("РЎС‚Р°СЂС‚ fill_y_mess")
 
     height = s.search_board_mess_y_end - s.search_board_mess_y_start
     width = s.search_board_mess_x_end - s.search_board_mess_x_start
@@ -902,7 +908,7 @@ def click_close_hitlite():
         multiscale=True,
         plus_x=10,
         plus_y=6,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
         log_and_print("Not find icon close", "INFO")
         return False
@@ -918,7 +924,7 @@ def click_folder():
         confidence=0.8,
         count_click=1,
         multiscale=True,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
         log_and_print("Not find button folder", "INFO")
         return False
@@ -936,7 +942,7 @@ def click_close_image():
         multiscale=True,
         plus_x=10,
         plus_y=6,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
         log_and_print("Not find icon close image", "INFO")
         return False
@@ -956,7 +962,7 @@ def click_exist_mess(window, viber_channel):
             multiscale=True,
             plus_x=0,
             plus_y=0,
-            is_debug=False,
+            is_debug=_ui_debug(),
         ):
             log_and_print(f"Not find exist mrssages{number}", "INFO")
             
@@ -979,7 +985,7 @@ def click_close_info():
         plus_x=0,
         count_click=1,
         multiscale=True,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
         log_and_print("Not find icon close info, attempt 2", "INFO")
         
@@ -994,7 +1000,7 @@ def click_open_info():
         confidence=0.8,
         count_click=1,
         multiscale=True,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
         log_and_print("Not find icon open info, attempt 2", "INFO")
         if not gd.click_image(
@@ -1003,7 +1009,7 @@ def click_open_info():
         confidence=0.8,
         count_click=1,
         multiscale=True,
-        is_debug=False,
+        is_debug=_ui_debug(),
         ):
             
             log_and_print("Not find icon open info atte,pt2", "INFO")
@@ -1020,7 +1026,7 @@ def click_cancel_window_save_as():
         confidence=0.9,
         count_click=1,
         multiscale=True,
-        is_debug=False,
+        is_debug=_ui_debug(),
     ):
         log_and_print("Not find window_save_as - attempt 2", "INFO")
         if not gd.click_image(
@@ -1029,7 +1035,7 @@ def click_cancel_window_save_as():
             confidence=0.9,
             count_click=1,
             multiscale=True,
-            is_debug=False,
+            is_debug=_ui_debug(),
         ):
             log_and_print("Not find window_save_as - attempt 3", "INFO")
             if not gd.click_image(
@@ -1038,7 +1044,7 @@ def click_cancel_window_save_as():
                 confidence=0.8,
                 count_click=1,
                 multiscale=True,
-                is_debug=False,
+                is_debug=_ui_debug(),
                 ):
                     
                     log_and_print("Not find window_save_as attempt2", "INFO")
@@ -1177,10 +1183,10 @@ def window_top_focus(window):
     
     hwnd = window.handle
 
-    # Устанавливаем флаг "всегда поверх остальных"
+    # РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі "РІСЃРµРіРґР° РїРѕРІРµСЂС… РѕСЃС‚Р°Р»СЊРЅС‹С…"
     win32gui.SetWindowPos(
         hwnd,
-        win32con.HWND_TOPMOST,  # верх всех окон
+        win32con.HWND_TOPMOST,  # РІРµСЂС… РІСЃРµС… РѕРєРѕРЅ
         0, 0, 0, 0,
         win32con.SWP_NOMOVE | win32con.SWP_NOSIZE
     )
@@ -1195,3 +1201,4 @@ def window_left(window):
 
     
     
+

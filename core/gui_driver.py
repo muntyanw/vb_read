@@ -1,13 +1,13 @@
-"""
+﻿"""
 core/gui_driver.py
 ~~~~~~~~~~~~~~~~~~
 
-Low-level wrapper around PyAutoGUI + OpenCV (и опционально OCR), 
-адаптирован для работы на одном мониторе 1920×1080 в мульти-мониторной конфигурации.
+Low-level wrapper around PyAutoGUI + OpenCV (Рё РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ OCR), 
+Р°РґР°РїС‚РёСЂРѕРІР°РЅ РґР»СЏ СЂР°Р±РѕС‚С‹ РЅР° РѕРґРЅРѕРј РјРѕРЅРёС‚РѕСЂРµ 1920Г—1080 РІ РјСѓР»СЊС‚Рё-РјРѕРЅРёС‚РѕСЂРЅРѕР№ РєРѕРЅС„РёРіСѓСЂР°С†РёРё.
 
-* Определяет целевой монитор по разрешению TARGET_RES.
-* Все скриншоты берутся только из этого монитора (с region).
-* Координаты кликов и поиска смещаются обратно в глобальные (с учётом x, y целевого монитора).
+* РћРїСЂРµРґРµР»СЏРµС‚ С†РµР»РµРІРѕР№ РјРѕРЅРёС‚РѕСЂ РїРѕ СЂР°Р·СЂРµС€РµРЅРёСЋ TARGET_RES.
+* Р’СЃРµ СЃРєСЂРёРЅС€РѕС‚С‹ Р±РµСЂСѓС‚СЃСЏ С‚РѕР»СЊРєРѕ РёР· СЌС‚РѕРіРѕ РјРѕРЅРёС‚РѕСЂР° (СЃ region).
+* РљРѕРѕСЂРґРёРЅР°С‚С‹ РєР»РёРєРѕРІ Рё РїРѕРёСЃРєР° СЃРјРµС‰Р°СЋС‚СЃСЏ РѕР±СЂР°С‚РЅРѕ РІ РіР»РѕР±Р°Р»СЊРЅС‹Рµ (СЃ СѓС‡С‘С‚РѕРј x, y С†РµР»РµРІРѕРіРѕ РјРѕРЅРёС‚РѕСЂР°).
 """
 
 from __future__ import annotations
@@ -63,19 +63,19 @@ logging.basicConfig(
 )
 LOGGER = logging.getLogger(__name__)
 
-pag.FAILSAFE = True  # оставить возможность «движения мыши в угол для экстренной остановки»
+pag.FAILSAFE = True  # РѕСЃС‚Р°РІРёС‚СЊ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊ В«РґРІРёР¶РµРЅРёСЏ РјС‹С€Рё РІ СѓРіРѕР» РґР»СЏ СЌРєСЃС‚СЂРµРЅРЅРѕР№ РѕСЃС‚Р°РЅРѕРІРєРёВ»
 
 # ---------------------------------------------------------------------------
-# Constants: ищем монитор с разрешением необходимым для работы
+# Constants: РёС‰РµРј РјРѕРЅРёС‚РѕСЂ СЃ СЂР°Р·СЂРµС€РµРЅРёРµРј РЅРµРѕР±С…РѕРґРёРјС‹Рј РґР»СЏ СЂР°Р±РѕС‚С‹
 # ---------------------------------------------------------------------------
 TARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)
 
 
 
 # with mss.mss() as sct:
-#     monitors = sct.monitors  # список словарей; monitors[0] — весь виртуальный экран
-#     # monitors[1] — первый физический экран; monitors[2] — второй и т.д.
-#     # Мы ожидаем MONITOR_INDEX 1-based
+#     monitors = sct.monitors  # СЃРїРёСЃРѕРє СЃР»РѕРІР°СЂРµР№; monitors[0] вЂ” РІРµСЃСЊ РІРёСЂС‚СѓР°Р»СЊРЅС‹Р№ СЌРєСЂР°РЅ
+#     # monitors[1] вЂ” РїРµСЂРІС‹Р№ С„РёР·РёС‡РµСЃРєРёР№ СЌРєСЂР°РЅ; monitors[2] вЂ” РІС‚РѕСЂРѕР№ Рё С‚.Рґ.
+#     # РњС‹ РѕР¶РёРґР°РµРј MONITOR_INDEX 1-based
 #     print(f"MONITOR_INDEX = {MONITOR_INDEX}")
 #     if 1 <= MONITOR_INDEX < len(monitors):
 #         mon = monitors[MONITOR_INDEX]
@@ -85,7 +85,7 @@ TARGET_RES: Final[Tuple[int, int]] = (MONITOR_WIDTH, MONITOR_HEIGHT)
 #         LOGGER.debug("Using MSS monitor #%d: offset (%d,%d), size %dx%d",
 #                     MONITOR_INDEX, MON_X, MON_Y, MON_W, MON_H)
 #     else:
-#         # fallback: если указанный индекс вне диапазона — берем первый монитор
+#         # fallback: РµСЃР»Рё СѓРєР°Р·Р°РЅРЅС‹Р№ РёРЅРґРµРєСЃ РІРЅРµ РґРёР°РїР°Р·РѕРЅР° вЂ” Р±РµСЂРµРј РїРµСЂРІС‹Р№ РјРѕРЅРёС‚РѕСЂ
 #         mon = monitors[1]
 #         MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
 #         LOGGER.warning("monitor_index=%d is invalid, using primary monitor #%d", MONITOR_INDEX, 1)
@@ -94,7 +94,7 @@ def _safe_norm_text(x) -> str:
     """Convert OCR cell to normalized lowercase string; None -> ''."""
     if x is None:
         return ""
-    # у pytesseract может проскочить нестроковый тип
+    # Сѓ pytesseract РјРѕР¶РµС‚ РїСЂРѕСЃРєРѕС‡РёС‚СЊ РЅРµСЃС‚СЂРѕРєРѕРІС‹Р№ С‚РёРї
     try:
         s = str(x)
     except Exception:
@@ -123,14 +123,14 @@ def _get_monitor_region(scope) -> dict:
 
 def arrays_fuzzy_equal(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:
     """
-    Считает два массива «равными», если они одинаковой длины, и для каждой позиции i:
-      отношение похожести (SequenceMatcher) на строках w[i] и q[i] ≥ threshold.
-    Пустые строки считаются непохожими на непустые (только обе пустые → похожесть = 1.0).
+    РЎС‡РёС‚Р°РµС‚ РґРІР° РјР°СЃСЃРёРІР° В«СЂР°РІРЅС‹РјРёВ», РµСЃР»Рё РѕРЅРё РѕРґРёРЅР°РєРѕРІРѕР№ РґР»РёРЅС‹, Рё РґР»СЏ РєР°Р¶РґРѕР№ РїРѕР·РёС†РёРё i:
+      РѕС‚РЅРѕС€РµРЅРёРµ РїРѕС…РѕР¶РµСЃС‚Рё (SequenceMatcher) РЅР° СЃС‚СЂРѕРєР°С… w[i] Рё q[i] в‰Ґ threshold.
+    РџСѓСЃС‚С‹Рµ СЃС‚СЂРѕРєРё СЃС‡РёС‚Р°СЋС‚СЃСЏ РЅРµРїРѕС…РѕР¶РёРјРё РЅР° РЅРµРїСѓСЃС‚С‹Рµ (С‚РѕР»СЊРєРѕ РѕР±Рµ РїСѓСЃС‚С‹Рµ в†’ РїРѕС…РѕР¶РµСЃС‚СЊ = 1.0).
 
-    :param window:      первый список строк
-    :param query_words: второй список строк
-    :param threshold:   минимальный порог похожести (по умолчанию 0.7)
-    :return: True, если все парные строковые элементы похожи ≥ threshold
+    :param window:      РїРµСЂРІС‹Р№ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє
+    :param query_words: РІС‚РѕСЂРѕР№ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє
+    :param threshold:   РјРёРЅРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂРѕРі РїРѕС…РѕР¶РµСЃС‚Рё (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ 0.7)
+    :return: True, РµСЃР»Рё РІСЃРµ РїР°СЂРЅС‹Рµ СЃС‚СЂРѕРєРѕРІС‹Рµ СЌР»РµРјРµРЅС‚С‹ РїРѕС…РѕР¶Рё в‰Ґ threshold
     """
     if len(window) != len(query_words):
         return False
@@ -138,12 +138,12 @@ def arrays_fuzzy_equal(window: List[str], query_words: List[str], threshold: flo
     count_equal = 0
     
     for w, q in zip(window, query_words):
-        # Если обе строки пустые, считаем их идентичными
+        # Р•СЃР»Рё РѕР±Рµ СЃС‚СЂРѕРєРё РїСѓСЃС‚С‹Рµ, СЃС‡РёС‚Р°РµРј РёС… РёРґРµРЅС‚РёС‡РЅС‹РјРё
         if not w and not q:
             count_equal += 1
             continue
 
-        # Если одна пустая, а вторая нет → похожесть 0
+        # Р•СЃР»Рё РѕРґРЅР° РїСѓСЃС‚Р°СЏ, Р° РІС‚РѕСЂР°СЏ РЅРµС‚ в†’ РїРѕС…РѕР¶РµСЃС‚СЊ 0
         if not w or not q:
             continue
 
@@ -155,12 +155,12 @@ def arrays_fuzzy_equal(window: List[str], query_words: List[str], threshold: flo
 
 def arrays_fuzzy_equal_as_one_str(window: List[str], query_words: List[str], threshold: float = 0.7) -> bool:
     """
-    Преобразует два массива в строки и сравнивает их
+    РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РґРІР° РјР°СЃСЃРёРІР° РІ СЃС‚СЂРѕРєРё Рё СЃСЂР°РІРЅРёРІР°РµС‚ РёС…
     
-    :param window:      первый список строк
-    :param query_words: второй список строк
-    :param threshold:   минимальный порог похожести (по умолчанию 0.7)
-    :return: True, если все парные строковые элементы похожи ≥ threshold
+    :param window:      РїРµСЂРІС‹Р№ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє
+    :param query_words: РІС‚РѕСЂРѕР№ СЃРїРёСЃРѕРє СЃС‚СЂРѕРє
+    :param threshold:   РјРёРЅРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂРѕРі РїРѕС…РѕР¶РµСЃС‚Рё (РїРѕ СѓРјРѕР»С‡Р°РЅРёСЋ 0.7)
+    :return: True, РµСЃР»Рё РІСЃРµ РїР°СЂРЅС‹Рµ СЃС‚СЂРѕРєРѕРІС‹Рµ СЌР»РµРјРµРЅС‚С‹ РїРѕС…РѕР¶Рё в‰Ґ threshold
     """
     if len(window) != len(query_words):
         return False
@@ -176,15 +176,15 @@ def arrays_fuzzy_equal_as_one_str(window: List[str], query_words: List[str], thr
 def detect_checkbox_type_from_frame(scope: tuple[int, int, int, int] = None,
                 is_debug: bool = False) -> str:
     """
-        frame_bgr: кадр экрана (numpy.ndarray в формате BGR)
-        empty_template_path: путь до шаблона пустого квадратика
-        checked_template_path: путь до шаблона квадратика с галочкой
-        threshold: минимальное значение совпадения (0.0–1.0)
+        frame_bgr: РєР°РґСЂ СЌРєСЂР°РЅР° (numpy.ndarray РІ С„РѕСЂРјР°С‚Рµ BGR)
+        empty_template_path: РїСѓС‚СЊ РґРѕ С€Р°Р±Р»РѕРЅР° РїСѓСЃС‚РѕРіРѕ РєРІР°РґСЂР°С‚РёРєР°
+        checked_template_path: РїСѓС‚СЊ РґРѕ С€Р°Р±Р»РѕРЅР° РєРІР°РґСЂР°С‚РёРєР° СЃ РіР°Р»РѕС‡РєРѕР№
+        threshold: РјРёРЅРёРјР°Р»СЊРЅРѕРµ Р·РЅР°С‡РµРЅРёРµ СЃРѕРІРїР°РґРµРЅРёСЏ (0.0вЂ“1.0)
         
-        Вернёт:
-        - "empty", если на экране найден пустой квадратик
-        - "checked", если найден квадратик с галочкой
-        - "none", если ни один из шаблонов не нашёлся (маximальный коэффициент < threshold)
+        Р’РµСЂРЅС‘С‚:
+        - "empty", РµСЃР»Рё РЅР° СЌРєСЂР°РЅРµ РЅР°Р№РґРµРЅ РїСѓСЃС‚РѕР№ РєРІР°РґСЂР°С‚РёРє
+        - "checked", РµСЃР»Рё РЅР°Р№РґРµРЅ РєРІР°РґСЂР°С‚РёРє СЃ РіР°Р»РѕС‡РєРѕР№
+        - "none", РµСЃР»Рё РЅРё РѕРґРёРЅ РёР· С€Р°Р±Р»РѕРЅРѕРІ РЅРµ РЅР°С€С‘Р»СЃСЏ (РјР°ximР°Р»СЊРЅС‹Р№ РєРѕСЌС„С„РёС†РёРµРЅС‚ < threshold)
     """
     frame_bgr = screen(scope)
     
@@ -193,15 +193,15 @@ def detect_checkbox_type_from_frame(scope: tuple[int, int, int, int] = None,
         time.sleep(0.5)
     
 
-    # Загружаем оба шаблона сразу в градациях серого
+    # Р—Р°РіСЂСѓР¶Р°РµРј РѕР±Р° С€Р°Р±Р»РѕРЅР° СЃСЂР°Р·Сѓ РІ РіСЂР°РґР°С†РёСЏС… СЃРµСЂРѕРіРѕ
     templ_empty = cv2.imread(str(TEMPLATE_DIR / CHECK_EMPTY_TEMPLATE_PATH))
     
     templ_checked = cv2.imread(str(TEMPLATE_DIR / CHECK_CHECKED_TEMPLATE_PATH))
     
     if templ_empty is None:
-        raise FileNotFoundError(f"Не найден шаблон «пустой» по пути {TEMPLATE_DIR / CHECK_EMPTY_TEMPLATE_PATH}")
+        raise FileNotFoundError(f"РќРµ РЅР°Р№РґРµРЅ С€Р°Р±Р»РѕРЅ В«РїСѓСЃС‚РѕР№В» РїРѕ РїСѓС‚Рё {TEMPLATE_DIR / CHECK_EMPTY_TEMPLATE_PATH}")
     if templ_checked is None:
-        raise FileNotFoundError(f"Не найден шаблон «с галочкой» по пути {TEMPLATE_DIR / CHECK_CHECKED_TEMPLATE_PATH}")
+        raise FileNotFoundError(f"РќРµ РЅР°Р№РґРµРЅ С€Р°Р±Р»РѕРЅ В«СЃ РіР°Р»РѕС‡РєРѕР№В» РїРѕ РїСѓС‚Рё {TEMPLATE_DIR / CHECK_CHECKED_TEMPLATE_PATH}")
 
     if is_debug:
         show_image(templ_empty)
@@ -209,18 +209,18 @@ def detect_checkbox_type_from_frame(scope: tuple[int, int, int, int] = None,
         show_image(templ_checked)
         time.sleep(0.5)
     
-    # 1) Поиск пустого квадратика
+    # 1) РџРѕРёСЃРє РїСѓСЃС‚РѕРіРѕ РєРІР°РґСЂР°С‚РёРєР°
     res_empty = cv2.matchTemplate(frame_bgr, templ_empty, cv2.TM_CCOEFF_NORMED)
     _, max_val_empty, _, _ = cv2.minMaxLoc(res_empty)
 
-    # 2) Поиск квадратика с галочкой
+    # 2) РџРѕРёСЃРє РєРІР°РґСЂР°С‚РёРєР° СЃ РіР°Р»РѕС‡РєРѕР№
     res_checked = cv2.matchTemplate(frame_bgr, templ_checked, cv2.TM_CCOEFF_NORMED)
     _, max_val_checked, _, _ = cv2.minMaxLoc(res_checked)
 
-    # Если ни один из шаблонов не превысил threshold → «ничего не найдено»
+    # Р•СЃР»Рё РЅРё РѕРґРёРЅ РёР· С€Р°Р±Р»РѕРЅРѕРІ РЅРµ РїСЂРµРІС‹СЃРёР» threshold в†’ В«РЅРёС‡РµРіРѕ РЅРµ РЅР°Р№РґРµРЅРѕВ»
     LOGGER.debug(f"max_val_empty: {max_val_empty}, max_val_checked: {max_val_checked}")
 
-    # Если оба выше порога, смотрим, у кого коэффициент больший
+    # Р•СЃР»Рё РѕР±Р° РІС‹С€Рµ РїРѕСЂРѕРіР°, СЃРјРѕС‚СЂРёРј, Сѓ РєРѕРіРѕ РєРѕСЌС„С„РёС†РёРµРЅС‚ Р±РѕР»СЊС€РёР№
     if max_val_checked >= max_val_empty:
         return "checked"
     else:
@@ -232,7 +232,7 @@ def detect_image_from_frame(image_names: list[str], scope: tuple[int, int, int, 
    
     frame_bgr = screen(scope)
     
-    # Конвертируем скрин в оттенки серого
+    # РљРѕРЅРІРµСЂС‚РёСЂСѓРµРј СЃРєСЂРёРЅ РІ РѕС‚С‚РµРЅРєРё СЃРµСЂРѕРіРѕ
     gray_frame = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2GRAY)
 
     max_weight = -10000
@@ -241,7 +241,7 @@ def detect_image_from_frame(image_names: list[str], scope: tuple[int, int, int, 
     for image_name in image_names:
         templ = cv2.imread(TEMPLATE_DIR / image_name, cv2.IMREAD_GRAYSCALE)
         if templ is None:
-            raise FileNotFoundError(f"Не найден шаблон «пустой» по пути {TEMPLATE_DIR / image_name}")
+            raise FileNotFoundError(f"РќРµ РЅР°Р№РґРµРЅ С€Р°Р±Р»РѕРЅ В«РїСѓСЃС‚РѕР№В» РїРѕ РїСѓС‚Рё {TEMPLATE_DIR / image_name}")
         res = cv2.matchTemplate(gray_frame, templ, cv2.TM_CCOEFF_NORMED)
         _, weight, _, _ = cv2.minMaxLoc(res)
         
@@ -256,7 +256,7 @@ def find_image(name: str, timeout: float = 8.0,
                 is_debug: bool = False, 
                 multiscale: bool = False) -> (tuple[int, int] | None):
     """
-    Найти PNG-шаблон на экране.
+    РќР°Р№С‚Рё PNG-С€Р°Р±Р»РѕРЅ РЅР° СЌРєСЂР°РЅРµ.
     """
     path = TEMPLATE_DIR / name
     if not path.exists():
@@ -290,8 +290,8 @@ def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,
                 multiscale: bool = False,
                 count_click: int = 1) -> bool:
     """
-    Найти PNG-шаблон на экране (в пределах целевого монитора) и кликнуть его центр.
-    Возвращает True, если кликнули, False если не найдено за timeout секунд.
+    РќР°Р№С‚Рё PNG-С€Р°Р±Р»РѕРЅ РЅР° СЌРєСЂР°РЅРµ (РІ РїСЂРµРґРµР»Р°С… С†РµР»РµРІРѕРіРѕ РјРѕРЅРёС‚РѕСЂР°) Рё РєР»РёРєРЅСѓС‚СЊ РµРіРѕ С†РµРЅС‚СЂ.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ True, РµСЃР»Рё РєР»РёРєРЅСѓР»Рё, False РµСЃР»Рё РЅРµ РЅР°Р№РґРµРЅРѕ Р·Р° timeout СЃРµРєСѓРЅРґ.
     """
     LOGGER.debug(f"Start find image {name}")
     start = time.perf_counter()
@@ -316,25 +316,44 @@ def click_image(name: str, timeout: float = 8.0, confidence: float = 0.7,
 
 def type_text(text: str, interval: Tuple[float, float] = (0.05, 0.12)) -> None:
     """
-    Печатать строку с небольшим случайным интервалом между символами.
+    РџРµС‡Р°С‚Р°С‚СЊ СЃС‚СЂРѕРєСѓ СЃ РЅРµР±РѕР»СЊС€РёРј СЃР»СѓС‡Р°Р№РЅС‹Рј РёРЅС‚РµСЂРІР°Р»РѕРј РјРµР¶РґСѓ СЃРёРјРІРѕР»Р°РјРё.
     """
     for ch in text:
         pag.typewrite(ch)
         time.sleep(random.uniform(*interval))
 
 def show_image(img) -> None:
-    # Показать изображение через matplotlib
+    # Show debug image on the right side of the screen when backend allows.
     plt.figure(figsize=(8, 5))
     plt.imshow(img)
-    plt.axis('off')
+    plt.axis("off")
     plt.title("Tesseract Input: Full-Screen Screenshot")
+
+    try:
+        screen_w, screen_h = pag.size()
+        win_w = int(screen_w * 0.45)
+        win_h = int(screen_h * 0.55)
+        pos_x = max(0, screen_w - win_w - 20)
+        pos_y = 20
+
+        manager = plt.get_current_fig_manager()
+        if hasattr(manager, "resize"):
+            manager.resize(win_w, win_h)
+
+        if hasattr(manager, "window") and hasattr(manager.window, "wm_geometry"):
+            manager.window.wm_geometry(f"{win_w}x{win_h}+{pos_x}+{pos_y}")
+        elif hasattr(manager, "window") and hasattr(manager.window, "setGeometry"):
+            manager.window.setGeometry(pos_x, pos_y, win_w, win_h)
+    except Exception:
+        pass
+
     plt.show()
 # ---------------------------------------------------------------------------
 # Internal helpers
 # ---------------------------------------------------------------------------
 def _detect_chrome() -> Path:
     """
-    Best-effort поиск chrome.exe / google-chrome в common locations.
+    Best-effort РїРѕРёСЃРє chrome.exe / google-chrome РІ common locations.
     """
     candidates = [
         Path(r"C:/Program Files/Google/Chrome/Application/chrome.exe"),
@@ -464,6 +483,29 @@ def _read_template_with_optional_mask(template_path: Path):
         tpl_bgr = bgr
     elif tpl.ndim == 3:
         tpl_bgr = tpl
+        # Auto-mask for templates without alpha:
+        # if corner background is almost uniform, ignore it in matching.
+        h, w = tpl_bgr.shape[:2]
+        if h >= 3 and w >= 3:
+            corners = np.array(
+                [
+                    tpl_bgr[0, 0],
+                    tpl_bgr[0, w - 1],
+                    tpl_bgr[h - 1, 0],
+                    tpl_bgr[h - 1, w - 1],
+                ],
+                dtype=np.int16,
+            )
+            bg = np.median(corners, axis=0).astype(np.int16)
+            corner_spread = int(np.max(np.abs(corners - bg)))
+            if corner_spread <= 12:
+                diff = np.max(np.abs(tpl_bgr.astype(np.int16) - bg), axis=2)
+                auto_mask = (diff > 20).astype(np.uint8) * 255
+                nz = int(np.count_nonzero(auto_mask))
+                total = int(auto_mask.size)
+                # Keep only meaningful masks (avoid all-0 or all-1 masks).
+                if int(0.03 * total) <= nz <= int(0.97 * total):
+                    mask = auto_mask
     else:
         # Single channel template -> convert to BGR for uniformity
         tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_GRAY2BGR)
@@ -532,22 +574,22 @@ def _locate_multiscale(
     confidence: float,
     scope: Tuple[int, int, int, int] = None,
     is_debug: bool = False,
-    w_l: float = 0.55,          # вес яркости (L*)
-    w_c: float = 0.45,          # совокупный вес цвета (a*+b*)
+    w_l: float = 0.55,          # РІРµСЃ СЏСЂРєРѕСЃС‚Рё (L*)
+    w_c: float = 0.45,          # СЃРѕРІРѕРєСѓРїРЅС‹Р№ РІРµСЃ С†РІРµС‚Р° (a*+b*)
     hist_bins_h: int = 30,
     hist_bins_s: int = 32,
-    color_reweight: float = 0.25,  # сила донастройки по цвету (0..1)
+    color_reweight: float = 0.25,  # СЃРёР»Р° РґРѕРЅР°СЃС‚СЂРѕР№РєРё РїРѕ С†РІРµС‚Сѓ (0..1)
 ) -> Optional[Tuple[int, int]]:
     """
     Multi-scale template matching with color-aware scoring.
-    Возвращает абсолютные (cx, cy) или None.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ (cx, cy) РёР»Рё None.
     """
 
     def _deltaEab_mean(bgrA, bgrB) -> float:
         A = cv2.cvtColor(bgrA, cv2.COLOR_BGR2LAB).astype("float32")
         B = cv2.cvtColor(bgrB, cv2.COLOR_BGR2LAB).astype("float32")
         diff = A - B
-        # Простой ΔE*ab (CIE76) — норм для ранжирования
+        # РџСЂРѕСЃС‚РѕР№ О”E*ab (CIE76) вЂ” РЅРѕСЂРј РґР»СЏ СЂР°РЅР¶РёСЂРѕРІР°РЅРёСЏ
         de = np.sqrt(np.sum(diff ** 2, axis=2))
         return float(de.mean())
 
@@ -558,24 +600,24 @@ def _locate_multiscale(
         histB = cv2.calcHist([hsvB], [0, 1], None, [hist_bins_h, hist_bins_s], [0, 180, 0, 256])
         cv2.normalize(histA, histA)
         cv2.normalize(histB, histB)
-        # CORREL ∈ [-1..1] -> приведём к [0..1]
+        # CORREL в€€ [-1..1] -> РїСЂРёРІРµРґС‘Рј Рє [0..1]
         corr = cv2.compareHist(histA, histB, cv2.HISTCMP_CORREL)
         return float(max(0.0, min(1.0, 0.5 * (corr + 1.0))))
 
-    # 1) Снимок экрана
+    # 1) РЎРЅРёРјРѕРє СЌРєСЂР°РЅР°
     scr_bgr = screen(scope, process_for_read=False, is_debug=is_debug)
     img_h, img_w = scr_bgr.shape[:2]
 
-    # 2) Шаблон (+маска при наличии)
+    # 2) РЁР°Р±Р»РѕРЅ (+РјР°СЃРєР° РїСЂРё РЅР°Р»РёС‡РёРё)
     tpl_bgr, mask = _read_template_with_optional_mask(template_path)
     tw0, th0 = tpl_bgr.shape[1], tpl_bgr.shape[0]
 
-    # 3) Диапазон масштабов
+    # 3) Р”РёР°РїР°Р·РѕРЅ РјР°СЃС€С‚Р°Р±РѕРІ
     scales = np.linspace(0.75, 1.25, 21)
 
-    best = None  # будет хранить (final_score, raw_tm, x, y, w, h, scale)
+    best = None  # Р±СѓРґРµС‚ С…СЂР°РЅРёС‚СЊ (final_score, raw_tm, x, y, w, h, scale)
 
-    # Предрасчёт яркостного и цветовых каналов для экрана
+    # РџСЂРµРґСЂР°СЃС‡С‘С‚ СЏСЂРєРѕСЃС‚РЅРѕРіРѕ Рё С†РІРµС‚РѕРІС‹С… РєР°РЅР°Р»РѕРІ РґР»СЏ СЌРєСЂР°РЅР°
     scr_lab = cv2.cvtColor(scr_bgr, cv2.COLOR_BGR2LAB)
     scr_L, scr_a, scr_b = cv2.split(scr_lab)
 
@@ -592,44 +634,44 @@ def _locate_multiscale(
             mask_s = cv2.resize(mask, (new_w, new_h), interpolation=cv2.INTER_NEAREST)
 
         if mask_s is not None:
-            # Маскированное сопоставление по цвету (нормированная корреляция)
+            # РњР°СЃРєРёСЂРѕРІР°РЅРЅРѕРµ СЃРѕРїРѕСЃС‚Р°РІР»РµРЅРёРµ РїРѕ С†РІРµС‚Сѓ (РЅРѕСЂРјРёСЂРѕРІР°РЅРЅР°СЏ РєРѕСЂСЂРµР»СЏС†РёСЏ)
             res = cv2.matchTemplate(scr_bgr, tpl_s, cv2.TM_CCORR_NORMED, mask=mask_s)
             _, raw_tm, _, max_loc = cv2.minMaxLoc(res)
             x, y = max_loc
         else:
-            # Цвето-чувствительный скоринг: L*, a*, b* отдельно — затем смешиваем
+            # Р¦РІРµС‚Рѕ-С‡СѓРІСЃС‚РІРёС‚РµР»СЊРЅС‹Р№ СЃРєРѕСЂРёРЅРі: L*, a*, b* РѕС‚РґРµР»СЊРЅРѕ вЂ” Р·Р°С‚РµРј СЃРјРµС€РёРІР°РµРј
             tpl_lab = cv2.cvtColor(tpl_s, cv2.COLOR_BGR2LAB)
             tpl_L, tpl_a, tpl_b = cv2.split(tpl_lab)
 
-            # Небольшое сглаживание только на L* (текстурный шум)
+            # РќРµР±РѕР»СЊС€РѕРµ СЃРіР»Р°Р¶РёРІР°РЅРёРµ С‚РѕР»СЊРєРѕ РЅР° L* (С‚РµРєСЃС‚СѓСЂРЅС‹Р№ С€СѓРј)
             scr_L_blur = cv2.GaussianBlur(scr_L, (3, 3), 0)
             tpl_L_blur = cv2.GaussianBlur(tpl_L, (3, 3), 0)
 
-            # Карты совпадения ([-1..1] для CCOEFF_NORMED)
+            # РљР°СЂС‚С‹ СЃРѕРІРїР°РґРµРЅРёСЏ ([-1..1] РґР»СЏ CCOEFF_NORMED)
             res_L = cv2.matchTemplate(scr_L_blur, tpl_L_blur, cv2.TM_CCOEFF_NORMED)
             res_a = cv2.matchTemplate(scr_a, tpl_a, cv2.TM_CCOEFF_NORMED)
             res_b = cv2.matchTemplate(scr_b, tpl_b, cv2.TM_CCOEFF_NORMED)
 
-            # Смешивание с весами
+            # РЎРјРµС€РёРІР°РЅРёРµ СЃ РІРµСЃР°РјРё
             res = w_l * res_L + (w_c * 0.5) * (res_a + res_b)
 
             _, raw_tm, _, max_loc = cv2.minMaxLoc(res)
             x, y = max_loc
 
-        # 4) Re-rank по цвету на найденном пике: ΔE*ab и HSV-гист корреляция
+        # 4) Re-rank РїРѕ С†РІРµС‚Сѓ РЅР° РЅР°Р№РґРµРЅРЅРѕРј РїРёРєРµ: О”E*ab Рё HSV-РіРёСЃС‚ РєРѕСЂСЂРµР»СЏС†РёСЏ
         roi = scr_bgr[y:y+new_h, x:x+new_w]
         if roi.shape[0] == new_h and roi.shape[1] == new_w:
-            # ΔE ~ [0..~100] -> преобразуем в [0..1] через экспоненту
-            dE = _deltaEab_mean(roi, tpl_s)  # меньше — лучше
-            dE_term = np.exp(-dE / 12.0)     # ≈0.44 при dE=10; ≈0.19 при dE=20
+            # О”E ~ [0..~100] -> РїСЂРµРѕР±СЂР°Р·СѓРµРј РІ [0..1] С‡РµСЂРµР· СЌРєСЃРїРѕРЅРµРЅС‚Сѓ
+            dE = _deltaEab_mean(roi, tpl_s)  # РјРµРЅСЊС€Рµ вЂ” Р»СѓС‡С€Рµ
+            dE_term = np.exp(-dE / 12.0)     # в‰€0.44 РїСЂРё dE=10; в‰€0.19 РїСЂРё dE=20
 
-            # Коррел. гистограмм HSV ∈ [0..1]
+            # РљРѕСЂСЂРµР». РіРёСЃС‚РѕРіСЂР°РјРј HSV в€€ [0..1]
             hcorr = _hsv_hist_corr(roi, tpl_s)
 
-            # Цветовой бонус [0..1]
+            # Р¦РІРµС‚РѕРІРѕР№ Р±РѕРЅСѓСЃ [0..1]
             color_bonus = 0.6 * dE_term + 0.4 * hcorr
 
-            # Итоговый скор (подправляем сырой TM в сторону цветового совпадения)
+            # РС‚РѕРіРѕРІС‹Р№ СЃРєРѕСЂ (РїРѕРґРїСЂР°РІР»СЏРµРј СЃС‹СЂРѕР№ TM РІ СЃС‚РѕСЂРѕРЅСѓ С†РІРµС‚РѕРІРѕРіРѕ СЃРѕРІРїР°РґРµРЅРёСЏ)
             final_score = (1.0 - color_reweight) * float(raw_tm) + color_reweight * float(color_bonus)
         else:
             final_score = float(raw_tm)
@@ -666,16 +708,16 @@ def _locate_multiscale(
 def _human_move(x: int, y: int, 
                 duration: Tuple[float, float] = (0.1, 0.2)) -> None:
     """
-    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение
-    “по-человечески”. Используется Bezier-кривая + небольшие случайные паузы.
+    РџРµСЂРµРґР°С‚СЊ Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ (x, y) Рё РІС‹РїРѕР»РЅРёС‚СЊ РїР»Р°РІРЅРѕРµ РґРІРёР¶РµРЅРёРµ
+    вЂњРїРѕ-С‡РµР»РѕРІРµС‡РµСЃРєРёвЂќ. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Bezier-РєСЂРёРІР°СЏ + РЅРµР±РѕР»СЊС€РёРµ СЃР»СѓС‡Р°Р№РЅС‹Рµ РїР°СѓР·С‹.
     """
     LOGGER.debug(f"Start human move to x: {x}, y: {y}")
     
     x = x + MON_X
     
-    #cx, cy = pag.position()  # текущая абсолютная позиция мыши
+    #cx, cy = pag.position()  # С‚РµРєСѓС‰Р°СЏ Р°Р±СЃРѕР»СЋС‚РЅР°СЏ РїРѕР·РёС†РёСЏ РјС‹С€Рё
 
-    # Точки для кривой Безье: старт → 2 случайные опоры → цель
+    # РўРѕС‡РєРё РґР»СЏ РєСЂРёРІРѕР№ Р‘РµР·СЊРµ: СЃС‚Р°СЂС‚ в†’ 2 СЃР»СѓС‡Р°Р№РЅС‹Рµ РѕРїРѕСЂС‹ в†’ С†РµР»СЊ
     # anchors = [
     #     (cx, cy),
     #     _rand_near(cx, cy, 100),
@@ -717,7 +759,7 @@ def draw_click_circle(x, y, radius=20, duration=0.2):
     try:
         win32gui.RegisterClass(wnd_class)
     except win32gui.error:
-        pass  # Класс уже зарегистрирован
+        pass  # РљР»Р°СЃСЃ СѓР¶Рµ Р·Р°СЂРµРіРёСЃС‚СЂРёСЂРѕРІР°РЅ
 
     hwnd = win32gui.CreateWindowEx(
         win32con.WS_EX_LAYERED | win32con.WS_EX_TOPMOST | win32con.WS_EX_TOOLWINDOW,
@@ -733,7 +775,7 @@ def draw_click_circle(x, y, radius=20, duration=0.2):
     win32gui.ShowWindow(hwnd, win32con.SW_SHOW)
     win32gui.UpdateWindow(hwnd)
 
-    # Ждём duration секунд, потом закрываем окно
+    # Р–РґС‘Рј duration СЃРµРєСѓРЅРґ, РїРѕС‚РѕРј Р·Р°РєСЂС‹РІР°РµРј РѕРєРЅРѕ
     time.sleep(duration)
     win32gui.DestroyWindow(hwnd)
     
@@ -741,8 +783,8 @@ def human_move_and_click(x: int, y: int,
                          duration: Tuple[float, float] = (0.2, 0.3),
                          count_click: int = 1) -> None:
     """
-    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение
-    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.
+    РџРµСЂРµРґР°С‚СЊ Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ (x, y) Рё РІС‹РїРѕР»РЅРёС‚СЊ РїР»Р°РІРЅРѕРµ РґРІРёР¶РµРЅРёРµ
+    вЂњРїРѕ-С‡РµР»РѕРІРµС‡РµСЃРєРёвЂќ + РєР»РёРє. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Bezier-РєСЂРёРІР°СЏ + РЅРµР±РѕР»СЊС€РёРµ СЃР»СѓС‡Р°Р№РЅС‹Рµ РїР°СѓР·С‹.
     """
     _human_move(x, y, duration)
     
@@ -754,8 +796,8 @@ def human_move_and_click(x: int, y: int,
 def human_move_and_right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),
                          count_click: int = 1) -> None:
     """
-    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение
-    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.
+    РџРµСЂРµРґР°С‚СЊ Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ (x, y) Рё РІС‹РїРѕР»РЅРёС‚СЊ РїР»Р°РІРЅРѕРµ РґРІРёР¶РµРЅРёРµ
+    вЂњРїРѕ-С‡РµР»РѕРІРµС‡РµСЃРєРёвЂќ + РєР»РёРє. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Bezier-РєСЂРёРІР°СЏ + РЅРµР±РѕР»СЊС€РёРµ СЃР»СѓС‡Р°Р№РЅС‹Рµ РїР°СѓР·С‹.
     """
     _human_move(x, y, duration)
     
@@ -767,8 +809,8 @@ def human_move_and_right_click(x: int, y: int, duration: Tuple[float, float] = (
 def human_move_and_click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9),
                          count_click: int = 1) -> None:
     """
-    Передать абсолютные глобальные координаты (x, y) и выполнить плавное движение
-    “по-человечески” + клик. Используется Bezier-кривая + небольшие случайные паузы.
+    РџРµСЂРµРґР°С‚СЊ Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РіР»РѕР±Р°Р»СЊРЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ (x, y) Рё РІС‹РїРѕР»РЅРёС‚СЊ РїР»Р°РІРЅРѕРµ РґРІРёР¶РµРЅРёРµ
+    вЂњРїРѕ-С‡РµР»РѕРІРµС‡РµСЃРєРёвЂќ + РєР»РёРє. РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ Bezier-РєСЂРёРІР°СЏ + РЅРµР±РѕР»СЊС€РёРµ СЃР»СѓС‡Р°Р№РЅС‹Рµ РїР°СѓР·С‹.
     """
     x, y = human_move_diff(x, y, duration)
     
@@ -802,9 +844,9 @@ def click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):
     
 def _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:
     """
-    Quadratic/ cubic bezier evaluation (De Casteljau) – generic n-degree.
-    Вход: pts — список точек (x, y), t от 0.0 до 1.0.
-    Выход: координаты точки на кривой Безье.
+    Quadratic/ cubic bezier evaluation (De Casteljau) вЂ“ generic n-degree.
+    Р’С…РѕРґ: pts вЂ” СЃРїРёСЃРѕРє С‚РѕС‡РµРє (x, y), t РѕС‚ 0.0 РґРѕ 1.0.
+    Р’С‹С…РѕРґ: РєРѕРѕСЂРґРёРЅР°С‚С‹ С‚РѕС‡РєРё РЅР° РєСЂРёРІРѕР№ Р‘РµР·СЊРµ.
     """
     pts_arr = np.array(pts, dtype=float)
     while len(pts_arr) > 1:
@@ -813,8 +855,8 @@ def _bezier_point(pts: list[Tuple[int, int]], t: float) -> Tuple[int, int]:
 
 def _rand_near(x: int, y: int, radius: int = 80) -> Tuple[int, int]:
     """
-    Вернёт точку в случайном направлении на расстоянии [radius*0.3 .. radius]
-    от (x, y). Используется для более «человеческого» движения мыши.
+    Р’РµСЂРЅС‘С‚ С‚РѕС‡РєСѓ РІ СЃР»СѓС‡Р°Р№РЅРѕРј РЅР°РїСЂР°РІР»РµРЅРёРё РЅР° СЂР°СЃСЃС‚РѕСЏРЅРёРё [radius*0.3 .. radius]
+    РѕС‚ (x, y). РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ РґР»СЏ Р±РѕР»РµРµ В«С‡РµР»РѕРІРµС‡РµСЃРєРѕРіРѕВ» РґРІРёР¶РµРЅРёСЏ РјС‹С€Рё.
     """
     ang = random.uniform(0, 2 * np.pi)
     r = random.uniform(radius * 0.3, radius)
@@ -822,77 +864,77 @@ def _rand_near(x: int, y: int, radius: int = 80) -> Tuple[int, int]:
 
 def draw_monitor_region_on_screen(color: tuple[int,int,int] = (0, 0, 255), thickness: int = 4) -> None:
     """
-    Нарисовать на рабочем столе (на самой поверхности экрана) полупрозрачный (через XOR)
-    или сплошной (через GDI Rectangle) контур области MON_X, MON_Y, MON_W, MON_H.
+    РќР°СЂРёСЃРѕРІР°С‚СЊ РЅР° СЂР°Р±РѕС‡РµРј СЃС‚РѕР»Рµ (РЅР° СЃР°РјРѕР№ РїРѕРІРµСЂС…РЅРѕСЃС‚Рё СЌРєСЂР°РЅР°) РїРѕР»СѓРїСЂРѕР·СЂР°С‡РЅС‹Р№ (С‡РµСЂРµР· XOR)
+    РёР»Рё СЃРїР»РѕС€РЅРѕР№ (С‡РµСЂРµР· GDI Rectangle) РєРѕРЅС‚СѓСЂ РѕР±Р»Р°СЃС‚Рё MON_X, MON_Y, MON_W, MON_H.
 
-    Параметры:
+    РџР°СЂР°РјРµС‚СЂС‹:
     ---------
-    color : BGR-цвет рамки, например (0, 0, 255) для красного (как OpenCV).
-    thickness : толщина линии рамки в пикселях.
+    color : BGR-С†РІРµС‚ СЂР°РјРєРё, РЅР°РїСЂРёРјРµСЂ (0, 0, 255) РґР»СЏ РєСЂР°СЃРЅРѕРіРѕ (РєР°Рє OpenCV).
+    thickness : С‚РѕР»С‰РёРЅР° Р»РёРЅРёРё СЂР°РјРєРё РІ РїРёРєСЃРµР»СЏС….
 
-    При запуске этой функции вы увидите чёткую рамку на экране. Она отрисуется поверх всего,
-    но исчезнет при следующем обновлении окна или при следующем вызове (в зависимости от режима).
+    РџСЂРё Р·Р°РїСѓСЃРєРµ СЌС‚РѕР№ С„СѓРЅРєС†РёРё РІС‹ СѓРІРёРґРёС‚Рµ С‡С‘С‚РєСѓСЋ СЂР°РјРєСѓ РЅР° СЌРєСЂР°РЅРµ. РћРЅР° РѕС‚СЂРёСЃСѓРµС‚СЃСЏ РїРѕРІРµСЂС… РІСЃРµРіРѕ,
+    РЅРѕ РёСЃС‡РµР·РЅРµС‚ РїСЂРё СЃР»РµРґСѓСЋС‰РµРј РѕР±РЅРѕРІР»РµРЅРёРё РѕРєРЅР° РёР»Рё РїСЂРё СЃР»РµРґСѓСЋС‰РµРј РІС‹Р·РѕРІРµ (РІ Р·Р°РІРёСЃРёРјРѕСЃС‚Рё РѕС‚ СЂРµР¶РёРјР°).
     """
-    # 1) Сначала вычислим координаты нужного монитора через MSS:
+    # 1) РЎРЅР°С‡Р°Р»Р° РІС‹С‡РёСЃР»РёРј РєРѕРѕСЂРґРёРЅР°С‚С‹ РЅСѓР¶РЅРѕРіРѕ РјРѕРЅРёС‚РѕСЂР° С‡РµСЂРµР· MSS:
     with mss.mss() as sct:
         monitors = sct.monitors
         if 1 <= MONITOR_INDEX < len(monitors):
             mon = monitors[MONITOR_INDEX]
         else:
-            mon = monitors[1]  # если указан неверный индекс, взять первый
+            mon = monitors[1]  # РµСЃР»Рё СѓРєР°Р·Р°РЅ РЅРµРІРµСЂРЅС‹Р№ РёРЅРґРµРєСЃ, РІР·СЏС‚СЊ РїРµСЂРІС‹Р№
         MON_X, MON_Y, MON_W, MON_H = mon["left"], mon["top"], mon["width"], mon["height"]
 
-    # 2) Получаем контекст устройства (DC) для всего экрана (hwnd=0 → весь экран)
+    # 2) РџРѕР»СѓС‡Р°РµРј РєРѕРЅС‚РµРєСЃС‚ СѓСЃС‚СЂРѕР№СЃС‚РІР° (DC) РґР»СЏ РІСЃРµРіРѕ СЌРєСЂР°РЅР° (hwnd=0 в†’ РІРµСЃСЊ СЌРєСЂР°РЅ)
     hdc = ctypes.windll.user32.GetDC(0)
 
-    # 3) Создаём перо нужного цвета и толщины
-    #    В GDI цвет задаётся в формате 0x00BBGGRR, поэтому перекладываем:
+    # 3) РЎРѕР·РґР°С‘Рј РїРµСЂРѕ РЅСѓР¶РЅРѕРіРѕ С†РІРµС‚Р° Рё С‚РѕР»С‰РёРЅС‹
+    #    Р’ GDI С†РІРµС‚ Р·Р°РґР°С‘С‚СЃСЏ РІ С„РѕСЂРјР°С‚Рµ 0x00BBGGRR, РїРѕСЌС‚РѕРјСѓ РїРµСЂРµРєР»Р°РґС‹РІР°РµРј:
     b, g, r = color
     gdi_color = (r << 16) | (g << 8) | b
 
-    PS_SOLID = 0          # сплошная линия
+    PS_SOLID = 0          # СЃРїР»РѕС€РЅР°СЏ Р»РёРЅРёСЏ
     pen = ctypes.windll.gdi32.CreatePen(PS_SOLID, thickness, gdi_color)
     old_pen = ctypes.windll.gdi32.SelectObject(hdc, pen)
 
-    # 4) Получаем «пустую кисть» (NULL_BRUSH), чтобы внутри не заливать
-    NULL_BRUSH = 5  # индекс в GDI для «null brush»
+    # 4) РџРѕР»СѓС‡Р°РµРј В«РїСѓСЃС‚СѓСЋ РєРёСЃС‚СЊВ» (NULL_BRUSH), С‡С‚РѕР±С‹ РІРЅСѓС‚СЂРё РЅРµ Р·Р°Р»РёРІР°С‚СЊ
+    NULL_BRUSH = 5  # РёРЅРґРµРєСЃ РІ GDI РґР»СЏ В«null brushВ»
     brush = ctypes.windll.gdi32.GetStockObject(NULL_BRUSH)
     old_brush = ctypes.windll.gdi32.SelectObject(hdc, brush)
 
-    # 5) Рисуем прямоугольник. Параметры: hdc, left, top, right, bottom
+    # 5) Р РёСЃСѓРµРј РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРє. РџР°СЂР°РјРµС‚СЂС‹: hdc, left, top, right, bottom
     left   = MON_X
     top    = MON_Y
     right  = MON_X + MON_W
     bottom = MON_Y + MON_H
 
-    # Rectangle рисует рамку между (left, top) и (right, bottom)
+    # Rectangle СЂРёСЃСѓРµС‚ СЂР°РјРєСѓ РјРµР¶РґСѓ (left, top) Рё (right, bottom)
     ctypes.windll.gdi32.Rectangle(hdc, left, top, right, bottom)
 
-    # 6) Возвращаем предыдущее перо/кисть и удаляем созданные объекты
+    # 6) Р’РѕР·РІСЂР°С‰Р°РµРј РїСЂРµРґС‹РґСѓС‰РµРµ РїРµСЂРѕ/РєРёСЃС‚СЊ Рё СѓРґР°Р»СЏРµРј СЃРѕР·РґР°РЅРЅС‹Рµ РѕР±СЉРµРєС‚С‹
     ctypes.windll.gdi32.SelectObject(hdc, old_pen)
     ctypes.windll.gdi32.SelectObject(hdc, old_brush)
     ctypes.windll.gdi32.DeleteObject(pen)
 
-    # 7) Освобождаем DC
+    # 7) РћСЃРІРѕР±РѕР¶РґР°РµРј DC
     ctypes.windll.user32.ReleaseDC(0, hdc)
 
 
 def replace_similar_chars(word: str) -> str:
     char_map = {
-        'e': 'е',  # англ e → укр е
-        'E': 'Е',  # англ E → укр Е
-        'i': 'і',  # англ i → укр і (по необходимости)
-        'I': 'І',  # англ I → укр І
-        'a': 'а',  # англ a → укр а
-        'A': 'А',  # англ A → укр А
-        'o': 'о',  # англ o → укр о
-        'O': 'О',  # англ O → укр О
-        'c': 'с',  # англ c → укр с
-        'C': 'С',  # англ C → укр С
-        'p': 'р',  # англ p → укр р
-        'P': 'Р',  # англ P → укр Р
-        'x': 'х',  # англ x → укр х
-        'X': 'Х',  # англ X → укр Х
+        'e': 'Рµ',  # Р°РЅРіР» e в†’ СѓРєСЂ Рµ
+        'E': 'Р•',  # Р°РЅРіР» E в†’ СѓРєСЂ Р•
+        'i': 'С–',  # Р°РЅРіР» i в†’ СѓРєСЂ С– (РїРѕ РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё)
+        'I': 'Р†',  # Р°РЅРіР» I в†’ СѓРєСЂ Р†
+        'a': 'Р°',  # Р°РЅРіР» a в†’ СѓРєСЂ Р°
+        'A': 'Рђ',  # Р°РЅРіР» A в†’ СѓРєСЂ Рђ
+        'o': 'Рѕ',  # Р°РЅРіР» o в†’ СѓРєСЂ Рѕ
+        'O': 'Рћ',  # Р°РЅРіР» O в†’ СѓРєСЂ Рћ
+        'c': 'СЃ',  # Р°РЅРіР» c в†’ СѓРєСЂ СЃ
+        'C': 'РЎ',  # Р°РЅРіР» C в†’ СѓРєСЂ РЎ
+        'p': 'СЂ',  # Р°РЅРіР» p в†’ СѓРєСЂ СЂ
+        'P': 'Р ',  # Р°РЅРіР» P в†’ СѓРєСЂ Р 
+        'x': 'С…',  # Р°РЅРіР» x в†’ СѓРєСЂ С…
+        'X': 'РҐ',  # Р°РЅРіР» X в†’ СѓРєСЂ РҐ
     }
     return ''.join(char_map.get(c, c) for c in word)
 
@@ -959,22 +1001,22 @@ def click_text(
     duration: Tuple[float, float] = (0.2, 0.3),
 ) -> bool | Tuple[List[Tuple[int, int]], Tuple[int, int] | None]:
     """
-    OCR-based search: найти текст `query` на экране (в пределах MON_X..MON_W, MON_Y..MON_H)
-    и кликнуть его центр.
-    Возвращает True, если удалось найти и кликнуть, иначе False по истечении timeout.
+    OCR-based search: РЅР°Р№С‚Рё С‚РµРєСЃС‚ `query` РЅР° СЌРєСЂР°РЅРµ (РІ РїСЂРµРґРµР»Р°С… MON_X..MON_W, MON_Y..MON_H)
+    Рё РєР»РёРєРЅСѓС‚СЊ РµРіРѕ С†РµРЅС‚СЂ.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ True, РµСЃР»Рё СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё Рё РєР»РёРєРЅСѓС‚СЊ, РёРЅР°С‡Рµ False РїРѕ РёСЃС‚РµС‡РµРЅРёРё timeout.
 
-    Параметры:
+    РџР°СЂР°РјРµС‚СЂС‹:
     -----------
     query : str
-        Подстрока (без учёта регистра), которую ищем среди распознанных слов.
+        РџРѕРґСЃС‚СЂРѕРєР° (Р±РµР· СѓС‡С‘С‚Р° СЂРµРіРёСЃС‚СЂР°), РєРѕС‚РѕСЂСѓСЋ РёС‰РµРј СЃСЂРµРґРё СЂР°СЃРїРѕР·РЅР°РЅРЅС‹С… СЃР»РѕРІ.
     timeout : float
-        Максимальное время (в секундах) на попытки поиска.
+        РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ (РІ СЃРµРєСѓРЅРґР°С…) РЅР° РїРѕРїС‹С‚РєРё РїРѕРёСЃРєР°.
     lang : str
-        Язык Tesseract (например, "eng", "rus", "ukr").
+        РЇР·С‹Рє Tesseract (РЅР°РїСЂРёРјРµСЂ, "eng", "rus", "ukr").
     conf_threshold : float
-        Минимальный порог доверия (0.0–1.0) для распознанных слов.
+        РњРёРЅРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂРѕРі РґРѕРІРµСЂРёСЏ (0.0вЂ“1.0) РґР»СЏ СЂР°СЃРїРѕР·РЅР°РЅРЅС‹С… СЃР»РѕРІ.
     padding : tuple[int, int, int, int], optional
-        Смещение (left, bottom, right, top) для сужения области скриншота.
+        РЎРјРµС‰РµРЅРёРµ (left, bottom, right, top) РґР»СЏ СЃСѓР¶РµРЅРёСЏ РѕР±Р»Р°СЃС‚Рё СЃРєСЂРёРЅС€РѕС‚Р°.
     """
     LOGGER.debug(f"find and click {query},scope: {scope}")
     
@@ -1022,31 +1064,31 @@ def find_text(
     scope: tuple[int, int, int, int] | None = None,
     plus_y: int = 0,
     is_debug: bool = False,
-    occurrence: int = 1,  # номер совпадения
+    occurrence: int = 1,  # РЅРѕРјРµСЂ СЃРѕРІРїР°РґРµРЅРёСЏ
 ) -> tuple[int, int] | None:
     """
-    OCR-based search: найти текст `query` на экране (в пределах MON_X..MON_W, MON_Y..MON_H).
+    OCR-based search: РЅР°Р№С‚Рё С‚РµРєСЃС‚ `query` РЅР° СЌРєСЂР°РЅРµ (РІ РїСЂРµРґРµР»Р°С… MON_X..MON_W, MON_Y..MON_H).
 
-    Возвращает x, y центра N-го совпадения, иначе None по истечении count попыток.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ x, y С†РµРЅС‚СЂР° N-РіРѕ СЃРѕРІРїР°РґРµРЅРёСЏ, РёРЅР°С‡Рµ None РїРѕ РёСЃС‚РµС‡РµРЅРёРё count РїРѕРїС‹С‚РѕРє.
 
-    Параметры:
+    РџР°СЂР°РјРµС‚СЂС‹:
     -----------
     query : str
-        Подстрока (без учёта регистра), которую ищем среди распознанных слов.
+        РџРѕРґСЃС‚СЂРѕРєР° (Р±РµР· СѓС‡С‘С‚Р° СЂРµРіРёСЃС‚СЂР°), РєРѕС‚РѕСЂСѓСЋ РёС‰РµРј СЃСЂРµРґРё СЂР°СЃРїРѕР·РЅР°РЅРЅС‹С… СЃР»РѕРІ.
     lang : str
-        Язык Tesseract (например, "eng", "rus", "ukr").
+        РЇР·С‹Рє Tesseract (РЅР°РїСЂРёРјРµСЂ, "eng", "rus", "ukr").
     count : int
-        Кол-во попыток поиска с паузой между ними.
+        РљРѕР»-РІРѕ РїРѕРїС‹С‚РѕРє РїРѕРёСЃРєР° СЃ РїР°СѓР·РѕР№ РјРµР¶РґСѓ РЅРёРјРё.
     pause_attempt : int
-        Пауза (сек) между попытками.
+        РџР°СѓР·Р° (СЃРµРє) РјРµР¶РґСѓ РїРѕРїС‹С‚РєР°РјРё.
     scope : (x, y, w, h)
-        Область экрана для OCR. Если None — весь экран.
+        РћР±Р»Р°СЃС‚СЊ СЌРєСЂР°РЅР° РґР»СЏ OCR. Р•СЃР»Рё None вЂ” РІРµСЃСЊ СЌРєСЂР°РЅ.
     plus_y : int
-        Доп. смещение вниз по Y.
+        Р”РѕРї. СЃРјРµС‰РµРЅРёРµ РІРЅРёР· РїРѕ Y.
     is_debug : bool
-        Включить отладку.
+        Р’РєР»СЋС‡РёС‚СЊ РѕС‚Р»Р°РґРєСѓ.
     occurrence : int
-        Номер совпадения (1 = первое, 2 = второе и т.д.)
+        РќРѕРјРµСЂ СЃРѕРІРїР°РґРµРЅРёСЏ (1 = РїРµСЂРІРѕРµ, 2 = РІС‚РѕСЂРѕРµ Рё С‚.Рґ.)
     """
 
     if occurrence < 1:
@@ -1072,7 +1114,7 @@ def find_text(
 
         raw_texts = data.get("text", []) or []
         texts = [_safe_norm_text(t) for t in raw_texts]
-        ocr_texts = [w for w in texts if w]  # отбрасываем пустые
+        ocr_texts = [w for w in texts if w]  # РѕС‚Р±СЂР°СЃС‹РІР°РµРј РїСѓСЃС‚С‹Рµ
         LOGGER.debug(f"OCR texts: {ocr_texts}")
 
         if len(ocr_texts) == 0 and attempts == count:
@@ -1085,7 +1127,7 @@ def find_text(
             len(data.get("width", [])),
             len(data.get("height", [])),
         )
-        found_count = 0  # счётчик совпадений
+        found_count = 0  # СЃС‡С‘С‚С‡РёРє СЃРѕРІРїР°РґРµРЅРёР№
 
         for i in range(n_boxes - n_words + 1):
             window = texts[i:i + n_words]
@@ -1125,27 +1167,27 @@ def init_tesseract(tess_root=r"C:\Program Files\Tesseract-OCR", lang_check=("eng
     tess_exe  = os.path.join(tess_root, "tesseract.exe")
     tessdata  = os.path.join(tess_root, "tessdata")
 
-    # 1) базовые проверки
+    # 1) Р±Р°Р·РѕРІС‹Рµ РїСЂРѕРІРµСЂРєРё
     if not os.path.isfile(tess_exe):
         raise FileNotFoundError(f"tesseract.exe not found: {tess_exe}")
     if not os.path.isdir(tessdata):
         raise FileNotFoundError(f"tessdata folder not found: {tessdata}")
 
-    # 2) сбросить кривую настройку, если была
+    # 2) СЃР±СЂРѕСЃРёС‚СЊ РєСЂРёРІСѓСЋ РЅР°СЃС‚СЂРѕР№РєСѓ, РµСЃР»Рё Р±С‹Р»Р°
     os.environ.pop("TESSDATA_PREFIX", None)
-    # ВАЖНО: указывать ИМЕННО корень, НЕ tessdata
+    # Р’РђР–РќРћ: СѓРєР°Р·С‹РІР°С‚СЊ РРњР•РќРќРћ РєРѕСЂРµРЅСЊ, РќР• tessdata
     os.environ["TESSDATA_PREFIX"] = tess_root
 
-    # 3) путь к бинарнику
+    # 3) РїСѓС‚СЊ Рє Р±РёРЅР°СЂРЅРёРєСѓ
     pytesseract.pytesseract.tesseract_cmd = tess_exe
 
-    # 4) проверить наличие языков
+    # 4) РїСЂРѕРІРµСЂРёС‚СЊ РЅР°Р»РёС‡РёРµ СЏР·С‹РєРѕРІ
     missing = [lng for lng in lang_check
                if not os.path.isfile(os.path.join(tessdata, f"{lng}.traineddata"))]
     if missing:
         raise FileNotFoundError(f"Missing traineddata: {', '.join(missing)} in {tessdata}")
 
-    # 5) быстрая самопроверка (по желанию)
+    # 5) Р±С‹СЃС‚СЂР°СЏ СЃР°РјРѕРїСЂРѕРІРµСЂРєР° (РїРѕ Р¶РµР»Р°РЅРёСЋ)
     try:
         _ = pytesseract.get_tesseract_version()
     except Exception as e:
@@ -1164,17 +1206,17 @@ def find_text_any(
     font_thickness: int = 2,
 ) -> Tuple[List[Tuple[int, int]], Optional[Tuple[int, int]]] | None:
     """
-    Ищет любой из текстов `queries` на экране, визуализирует все нахождения
-    и возвращает:
-      - список абсолютных координат центров всех совпадений [(abs_x, abs_y), ...]
-      - координаты N-го по порядку совпадения (occurrence) или None
+    РС‰РµС‚ Р»СЋР±РѕР№ РёР· С‚РµРєСЃС‚РѕРІ `queries` РЅР° СЌРєСЂР°РЅРµ, РІРёР·СѓР°Р»РёР·РёСЂСѓРµС‚ РІСЃРµ РЅР°С…РѕР¶РґРµРЅРёСЏ
+    Рё РІРѕР·РІСЂР°С‰Р°РµС‚:
+      - СЃРїРёСЃРѕРє Р°Р±СЃРѕР»СЋС‚РЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚ С†РµРЅС‚СЂРѕРІ РІСЃРµС… СЃРѕРІРїР°РґРµРЅРёР№ [(abs_x, abs_y), ...]
+      - РєРѕРѕСЂРґРёРЅР°С‚С‹ N-РіРѕ РїРѕ РїРѕСЂСЏРґРєСѓ СЃРѕРІРїР°РґРµРЅРёСЏ (occurrence) РёР»Рё None
 
-    Правила:
-      - Порядок нумерации соответствует порядку обнаружения (сканирование слева направо по OCR-окнам).
-      - На картинке: все совпадения жёлтые с номером; occurrence — красная рамка.
-      - Если на последней попытке OCR не дал ни одного слова — возвращается ([], None).
+    РџСЂР°РІРёР»Р°:
+      - РџРѕСЂСЏРґРѕРє РЅСѓРјРµСЂР°С†РёРё СЃРѕРѕС‚РІРµС‚СЃС‚РІСѓРµС‚ РїРѕСЂСЏРґРєСѓ РѕР±РЅР°СЂСѓР¶РµРЅРёСЏ (СЃРєР°РЅРёСЂРѕРІР°РЅРёРµ СЃР»РµРІР° РЅР°РїСЂР°РІРѕ РїРѕ OCR-РѕРєРЅР°Рј).
+      - РќР° РєР°СЂС‚РёРЅРєРµ: РІСЃРµ СЃРѕРІРїР°РґРµРЅРёСЏ Р¶С‘Р»С‚С‹Рµ СЃ РЅРѕРјРµСЂРѕРј; occurrence вЂ” РєСЂР°СЃРЅР°СЏ СЂР°РјРєР°.
+      - Р•СЃР»Рё РЅР° РїРѕСЃР»РµРґРЅРµР№ РїРѕРїС‹С‚РєРµ OCR РЅРµ РґР°Р» РЅРё РѕРґРЅРѕРіРѕ СЃР»РѕРІР° вЂ” РІРѕР·РІСЂР°С‰Р°РµС‚СЃСЏ ([], None).
 
-    Важно: используется screen(process_for_read=True) для OCR.
+    Р’Р°Р¶РЅРѕ: РёСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ screen(process_for_read=True) РґР»СЏ OCR.
     """
     
     if occurrence < 1:
@@ -1188,7 +1230,7 @@ def find_text_any(
     while attempts < count:
         attempts += 1
 
-        # 1) Скрин области (OCR-предобработка включена)
+        # 1) РЎРєСЂРёРЅ РѕР±Р»Р°СЃС‚Рё (OCR-РїСЂРµРґРѕР±СЂР°Р±РѕС‚РєР° РІРєР»СЋС‡РµРЅР°)
         scr_bgr = screen(scope=scope, process_for_read=True, is_debug=is_debug)
         vis_bgr = scr_bgr.copy()
 
@@ -1213,12 +1255,12 @@ def find_text_any(
             return None
 
 
-        # 4) Поиск совпадений
-        matches: List[Tuple[int, int]] = []  # абсолютные центры всех совпадений
-        boxes: List[Tuple[int, int, int, int]] = []  # x1,y1,x2,y2 для визуализации
-        labels: List[str] = []  # исходный текст окна для подписи
+        # 4) РџРѕРёСЃРє СЃРѕРІРїР°РґРµРЅРёР№
+        matches: List[Tuple[int, int]] = []  # Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ С†РµРЅС‚СЂС‹ РІСЃРµС… СЃРѕРІРїР°РґРµРЅРёР№
+        boxes: List[Tuple[int, int, int, int]] = []  # x1,y1,x2,y2 РґР»СЏ РІРёР·СѓР°Р»РёР·Р°С†РёРё
+        labels: List[str] = []  # РёСЃС…РѕРґРЅС‹Р№ С‚РµРєСЃС‚ РѕРєРЅР° РґР»СЏ РїРѕРґРїРёСЃРё
         nth_abs: Optional[Tuple[int, int]] = None
-        nth_idx: Optional[int] = None  # индекс совпадения (1-based) для подсветки
+        nth_idx: Optional[int] = None  # РёРЅРґРµРєСЃ СЃРѕРІРїР°РґРµРЅРёСЏ (1-based) РґР»СЏ РїРѕРґСЃРІРµС‚РєРё
 
         scope_left, scope_top = (scope[0], scope[1]) if scope is not None else (0, 0)
 
@@ -1237,7 +1279,7 @@ def find_text_any(
                 normalized_window = [replace_similar_chars(w) for w in window]
 
                 if arrays_fuzzy_equal_as_one_str(normalized_window, normalized_query, threshold):
-                    # Собираем общий bbox по словам i..i+n_words-1
+                    # РЎРѕР±РёСЂР°РµРј РѕР±С‰РёР№ bbox РїРѕ СЃР»РѕРІР°Рј i..i+n_words-1
                     x_left = min(int(data["left"][j]) for j in range(i, i + n_words))
                     y_top = min(int(data["top"][j]) for j in range(i, i + n_words))
                     x_right = max(int(data["left"][j]) + int(data["width"][j]) for j in range(i, i + n_words))
@@ -1258,10 +1300,10 @@ def find_text_any(
                         nth_abs = (abs_x, abs_y)
                         nth_idx = found_count  # 1-based
 
-        # 5) Визуализация — нумерация всех совпадений + выделение occurrence
+        # 5) Р’РёР·СѓР°Р»РёР·Р°С†РёСЏ вЂ” РЅСѓРјРµСЂР°С†РёСЏ РІСЃРµС… СЃРѕРІРїР°РґРµРЅРёР№ + РІС‹РґРµР»РµРЅРёРµ occurrence
         if is_debug and boxes:
             for idx, ((x1, y1, x2, y2), label) in enumerate(zip(boxes, labels), start=1):
-                # Все совпадения — жёлтые
+                # Р’СЃРµ СЃРѕРІРїР°РґРµРЅРёСЏ вЂ” Р¶С‘Р»С‚С‹Рµ
                 cv2.rectangle(vis_bgr, (x1, y1), (x2, y2), (0, 255, 255), 2)
                 cv2.putText(
                     vis_bgr,
@@ -1273,11 +1315,11 @@ def find_text_any(
                     font_thickness,
                     cv2.LINE_AA,
                 )
-                # Можно дописать текст рядом при необходимости:
+                # РњРѕР¶РЅРѕ РґРѕРїРёСЃР°С‚СЊ С‚РµРєСЃС‚ СЂСЏРґРѕРј РїСЂРё РЅРµРѕР±С…РѕРґРёРјРѕСЃС‚Рё:
                 # cv2.putText(vis_bgr, label, (x1 + 18, max(0, y1 - 6)), cv2.FONT_HERSHEY_SIMPLEX,
                 #             font_scale, (0, 255, 255), max(1, font_thickness - 1), cv2.LINE_AA)
 
-            # Подсветка occurrence — красным и толще
+            # РџРѕРґСЃРІРµС‚РєР° occurrence вЂ” РєСЂР°СЃРЅС‹Рј Рё С‚РѕР»С‰Рµ
             if nth_idx is not None:
                 x1, y1, x2, y2 = boxes[nth_idx - 1]
                 cv2.rectangle(vis_bgr, (x1, y1), (x2, y2), (0, 0, 255), max(3, font_thickness + 1))
@@ -1294,12 +1336,12 @@ def find_text_any(
 
             show_image(vis_bgr)
 
-        # 6) Возвращаем массив и N-й элемент (если есть) — сразу после первой результативной попытки
+        # 6) Р’РѕР·РІСЂР°С‰Р°РµРј РјР°СЃСЃРёРІ Рё N-Р№ СЌР»РµРјРµРЅС‚ (РµСЃР»Рё РµСЃС‚СЊ) вЂ” СЃСЂР°Р·Сѓ РїРѕСЃР»Рµ РїРµСЂРІРѕР№ СЂРµР·СѓР»СЊС‚Р°С‚РёРІРЅРѕР№ РїРѕРїС‹С‚РєРё
         if matches or attempts == count:
-            # Если ничего не найдено, вернём пустой массив и None
+            # Р•СЃР»Рё РЅРёС‡РµРіРѕ РЅРµ РЅР°Р№РґРµРЅРѕ, РІРµСЂРЅС‘Рј РїСѓСЃС‚РѕР№ РјР°СЃСЃРёРІ Рё None
             return nth_abs
 
-        # Иначе ждём и повторяем
+        # РРЅР°С‡Рµ Р¶РґС‘Рј Рё РїРѕРІС‚РѕСЂСЏРµРј
         pause(pause_attempt_sec)
 
 def cursor_move_to(
@@ -1320,55 +1362,55 @@ def contrlScroll(amount:int):
     pag.scroll(amount)
 
     time.sleep(1)
-    # Отпускаем Ctrl
+    # РћС‚РїСѓСЃРєР°РµРј Ctrl
     pag.keyUp('ctrl')
     
     time.sleep(1) 
     
 def remove_green_background(src_bgr: np.ndarray) -> np.ndarray:
     """
-    Превращает зелёные блоки в чисто-белый фон, оставляя текст (и всё остальное) нетронутым.
-    Возвращает BGR-изображение, где «зелёное» стало (255,255,255).
+    РџСЂРµРІСЂР°С‰Р°РµС‚ Р·РµР»С‘РЅС‹Рµ Р±Р»РѕРєРё РІ С‡РёСЃС‚Рѕ-Р±РµР»С‹Р№ С„РѕРЅ, РѕСЃС‚Р°РІР»СЏСЏ С‚РµРєСЃС‚ (Рё РІСЃС‘ РѕСЃС‚Р°Р»СЊРЅРѕРµ) РЅРµС‚СЂРѕРЅСѓС‚С‹Рј.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ BGR-РёР·РѕР±СЂР°Р¶РµРЅРёРµ, РіРґРµ В«Р·РµР»С‘РЅРѕРµВ» СЃС‚Р°Р»Рѕ (255,255,255).
     """
-    # 1. Переводим в пространство HSV, чтобы легко отфильтровать зелёный
+    # 1. РџРµСЂРµРІРѕРґРёРј РІ РїСЂРѕСЃС‚СЂР°РЅСЃС‚РІРѕ HSV, С‡С‚РѕР±С‹ Р»РµРіРєРѕ РѕС‚С„РёР»СЊС‚СЂРѕРІР°С‚СЊ Р·РµР»С‘РЅС‹Р№
     hsv = cv2.cvtColor(src_bgr, cv2.COLOR_BGR2HSV)
 
-    # 2. Задаём диапазон «зелёного»
-    #    Нижний и верхний порог границ H, S, V — можно подкорректировать под ваш оттенок
-    lower_green = np.array([40,  40,  40])   # например: H≈60°, но OpenCV: H от 0 до 179
+    # 2. Р—Р°РґР°С‘Рј РґРёР°РїР°Р·РѕРЅ В«Р·РµР»С‘РЅРѕРіРѕВ»
+    #    РќРёР¶РЅРёР№ Рё РІРµСЂС…РЅРёР№ РїРѕСЂРѕРі РіСЂР°РЅРёС† H, S, V вЂ” РјРѕР¶РЅРѕ РїРѕРґРєРѕСЂСЂРµРєС‚РёСЂРѕРІР°С‚СЊ РїРѕРґ РІР°С€ РѕС‚С‚РµРЅРѕРє
+    lower_green = np.array([40,  40,  40])   # РЅР°РїСЂРёРјРµСЂ: Hв‰€60В°, РЅРѕ OpenCV: H РѕС‚ 0 РґРѕ 179
     upper_green = np.array([80, 255, 255])
 
-    # 3. Делаем маску: где пиксели «зеленые» → 255, остальное → 0
+    # 3. Р”РµР»Р°РµРј РјР°СЃРєСѓ: РіРґРµ РїРёРєСЃРµР»Рё В«Р·РµР»РµРЅС‹РµВ» в†’ 255, РѕСЃС‚Р°Р»СЊРЅРѕРµ в†’ 0
     mask_green = cv2.inRange(hsv, lower_green, upper_green)
 
-    # 4. Invert mask: где НЕ зелёное (текст, остальные элементы) → 255, где зелёное → 0
+    # 4. Invert mask: РіРґРµ РќР• Р·РµР»С‘РЅРѕРµ (С‚РµРєСЃС‚, РѕСЃС‚Р°Р»СЊРЅС‹Рµ СЌР»РµРјРµРЅС‚С‹) в†’ 255, РіРґРµ Р·РµР»С‘РЅРѕРµ в†’ 0
     mask_not_green = cv2.bitwise_not(mask_green)
 
-    # 5. Создаём «фон» полностью белого цвета того же размера
+    # 5. РЎРѕР·РґР°С‘Рј В«С„РѕРЅВ» РїРѕР»РЅРѕСЃС‚СЊСЋ Р±РµР»РѕРіРѕ С†РІРµС‚Р° С‚РѕРіРѕ Р¶Рµ СЂР°Р·РјРµСЂР°
     white_bg = np.full_like(src_bgr, fill_value=255)
 
-    # 6. Накладываем: на исходном изображении всё, что НЕ зелёное, оставляем (AND с mask_not_green),
-    #    а в местах «зелёного» будем брать белый фон (AND с mask_green и белый)
+    # 6. РќР°РєР»Р°РґС‹РІР°РµРј: РЅР° РёСЃС…РѕРґРЅРѕРј РёР·РѕР±СЂР°Р¶РµРЅРёРё РІСЃС‘, С‡С‚Рѕ РќР• Р·РµР»С‘РЅРѕРµ, РѕСЃС‚Р°РІР»СЏРµРј (AND СЃ mask_not_green),
+    #    Р° РІ РјРµСЃС‚Р°С… В«Р·РµР»С‘РЅРѕРіРѕВ» Р±СѓРґРµРј Р±СЂР°С‚СЊ Р±РµР»С‹Р№ С„РѕРЅ (AND СЃ mask_green Рё Р±РµР»С‹Р№)
     fg = cv2.bitwise_and(src_bgr, src_bgr, mask=mask_not_green)
     bg = cv2.bitwise_and(white_bg, white_bg, mask=mask_green)
 
-    # 7. Склеиваем: получается картинка, где «зелёное» заменено на белое
+    # 7. РЎРєР»РµРёРІР°РµРј: РїРѕР»СѓС‡Р°РµС‚СЃСЏ РєР°СЂС‚РёРЅРєР°, РіРґРµ В«Р·РµР»С‘РЅРѕРµВ» Р·Р°РјРµРЅРµРЅРѕ РЅР° Р±РµР»РѕРµ
     result = cv2.add(fg, bg)
     return result
 
 def sharpen_filter(src_bgr: np.ndarray) -> np.ndarray:
     """
-    Применяет к BGR-изображению простой фильтр резкости.
-    Возвращает «резче» BGR-изображение.
+    РџСЂРёРјРµРЅСЏРµС‚ Рє BGR-РёР·РѕР±СЂР°Р¶РµРЅРёСЋ РїСЂРѕСЃС‚РѕР№ С„РёР»СЊС‚СЂ СЂРµР·РєРѕСЃС‚Рё.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ В«СЂРµР·С‡РµВ» BGR-РёР·РѕР±СЂР°Р¶РµРЅРёРµ.
     """
-    # Определяем kernel
+    # РћРїСЂРµРґРµР»СЏРµРј kernel
     kernel = np.array([
         [ 0, -1,  0],
         [-1,  5, -1],
         [ 0, -1,  0]
     ], dtype=np.float32)
 
-    # Применяем фильтр свёртки
+    # РџСЂРёРјРµРЅСЏРµРј С„РёР»СЊС‚СЂ СЃРІС‘СЂС‚РєРё
     sharpened = cv2.filter2D(src_bgr, ddepth=-1, kernel=kernel)
     return sharpened
 
@@ -1378,54 +1420,54 @@ def unsharp_mask(src_bgr: np.ndarray,
                  amount: float = 1.5, 
                  threshold: int = 0) -> np.ndarray:
     """
-    Параметры:
-    - blur_ksize: размер ядра для GaussianBlur (должен быть нечётным, напр. (9,9)).
-    - sigma: отклонение по Гауссу (чем больше, тем сильнее сглаживание).
-    - amount: во сколько раз усиливается «маска резкости».
-    - threshold: минимальная разница яркости, при которой происходит усиление; 0 — без порога.
+    РџР°СЂР°РјРµС‚СЂС‹:
+    - blur_ksize: СЂР°Р·РјРµСЂ СЏРґСЂР° РґР»СЏ GaussianBlur (РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ РЅРµС‡С‘С‚РЅС‹Рј, РЅР°РїСЂ. (9,9)).
+    - sigma: РѕС‚РєР»РѕРЅРµРЅРёРµ РїРѕ Р“Р°СѓСЃСЃСѓ (С‡РµРј Р±РѕР»СЊС€Рµ, С‚РµРј СЃРёР»СЊРЅРµРµ СЃРіР»Р°Р¶РёРІР°РЅРёРµ).
+    - amount: РІРѕ СЃРєРѕР»СЊРєРѕ СЂР°Р· СѓСЃРёР»РёРІР°РµС‚СЃСЏ В«РјР°СЃРєР° СЂРµР·РєРѕСЃС‚РёВ».
+    - threshold: РјРёРЅРёРјР°Р»СЊРЅР°СЏ СЂР°Р·РЅРёС†Р° СЏСЂРєРѕСЃС‚Рё, РїСЂРё РєРѕС‚РѕСЂРѕР№ РїСЂРѕРёСЃС…РѕРґРёС‚ СѓСЃРёР»РµРЅРёРµ; 0 вЂ” Р±РµР· РїРѕСЂРѕРіР°.
     """
-    # 1) Сглаживаем
+    # 1) РЎРіР»Р°Р¶РёРІР°РµРј
     blurred = cv2.GaussianBlur(src_bgr, blur_ksize, sigma)
 
-    # 2) Вычисляем «маску»: оригинал − размытие
+    # 2) Р’С‹С‡РёСЃР»СЏРµРј В«РјР°СЃРєСѓВ»: РѕСЂРёРіРёРЅР°Р» в€’ СЂР°Р·РјС‹С‚РёРµ
     mask = cv2.subtract(src_bgr, blurred)
 
-    # 3) Усиливаем маску и складываем с оригиналом
+    # 3) РЈСЃРёР»РёРІР°РµРј РјР°СЃРєСѓ Рё СЃРєР»Р°РґС‹РІР°РµРј СЃ РѕСЂРёРіРёРЅР°Р»РѕРј
     sharpened = cv2.addWeighted(src_bgr, 1.0, mask, amount, 0)
 
     if threshold > 0:
-        # Дополнительно: пороговое усиление (Optional)
-        # Разница между оригиналом и размытым (по каналам)
+        # Р”РѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ: РїРѕСЂРѕРіРѕРІРѕРµ СѓСЃРёР»РµРЅРёРµ (Optional)
+        # Р Р°Р·РЅРёС†Р° РјРµР¶РґСѓ РѕСЂРёРіРёРЅР°Р»РѕРј Рё СЂР°Р·РјС‹С‚С‹Рј (РїРѕ РєР°РЅР°Р»Р°Рј)
         low_contrast_mask = np.absolute(src_bgr - blurred) < threshold
-        # В тех местах, где контраст низкий, оставляем оригинал
+        # Р’ С‚РµС… РјРµСЃС‚Р°С…, РіРґРµ РєРѕРЅС‚СЂР°СЃС‚ РЅРёР·РєРёР№, РѕСЃС‚Р°РІР»СЏРµРј РѕСЂРёРіРёРЅР°Р»
         np.copyto(sharpened, src_bgr, where=low_contrast_mask)
 
     return sharpened
 
 def preprocess_for_ocr(src_bgr: np.ndarray) -> np.ndarray:
     """
-    1) Удаляет зелёный фон (вызывая remove_green_background)
-    2) Конвертирует в серый + CLAHE (локальное выравнивание гистограммы)
-    3) Адаптивную бинаризацию (чёрно-белое)
+    1) РЈРґР°Р»СЏРµС‚ Р·РµР»С‘РЅС‹Р№ С„РѕРЅ (РІС‹Р·С‹РІР°СЏ remove_green_background)
+    2) РљРѕРЅРІРµСЂС‚РёСЂСѓРµС‚ РІ СЃРµСЂС‹Р№ + CLAHE (Р»РѕРєР°Р»СЊРЅРѕРµ РІС‹СЂР°РІРЅРёРІР°РЅРёРµ РіРёСЃС‚РѕРіСЂР°РјРјС‹)
+    3) РђРґР°РїС‚РёРІРЅСѓСЋ Р±РёРЅР°СЂРёР·Р°С†РёСЋ (С‡С‘СЂРЅРѕ-Р±РµР»РѕРµ)
     """
-    # 1) Убираем зелёный фон
+    # 1) РЈР±РёСЂР°РµРј Р·РµР»С‘РЅС‹Р№ С„РѕРЅ
     no_green = unsharp_mask(remove_green_background(src_bgr))
 
-    # 2) В оттенки серого
+    # 2) Р’ РѕС‚С‚РµРЅРєРё СЃРµСЂРѕРіРѕ
     gray = cv2.cvtColor(no_green, cv2.COLOR_BGR2GRAY)
 
-    # 3) CLAHE для повышения контраста
+    # 3) CLAHE РґР»СЏ РїРѕРІС‹С€РµРЅРёСЏ РєРѕРЅС‚СЂР°СЃС‚Р°
     clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
     equalized = clahe.apply(gray)
 
-    # 4) Адаптивная бинаризация (локальная) — чаще всего лучше, чем просто Otsu
+    # 4) РђРґР°РїС‚РёРІРЅР°СЏ Р±РёРЅР°СЂРёР·Р°С†РёСЏ (Р»РѕРєР°Р»СЊРЅР°СЏ) вЂ” С‡Р°С‰Рµ РІСЃРµРіРѕ Р»СѓС‡С€Рµ, С‡РµРј РїСЂРѕСЃС‚Рѕ Otsu
     bw = cv2.adaptiveThreshold(
         equalized,
         255,
         cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         cv2.THRESH_BINARY,
-        blockSize=11,  # нечётный размер; можно варьировать (11, 15, 21)
-        C=2             # константа, вычитаемая из среднего
+        blockSize=11,  # РЅРµС‡С‘С‚РЅС‹Р№ СЂР°Р·РјРµСЂ; РјРѕР¶РЅРѕ РІР°СЂСЊРёСЂРѕРІР°С‚СЊ (11, 15, 21)
+        C=2             # РєРѕРЅСЃС‚Р°РЅС‚Р°, РІС‹С‡РёС‚Р°РµРјР°СЏ РёР· СЃСЂРµРґРЅРµРіРѕ
     )
     return bw
 
@@ -1433,7 +1475,7 @@ def find_first_free_slot_in_day_week(scope: tuple[int,int,int,int],
                                      is_debug: bool = False
                                     ) -> tuple[int,int] | None:
 
-    # 1) Захват экрана + конверсия BGRA→BGR→HSV
+    # 1) Р—Р°С…РІР°С‚ СЌРєСЂР°РЅР° + РєРѕРЅРІРµСЂСЃРёСЏ BGRAв†’BGRв†’HSV
     with mss.mss() as sct:
         mon = _get_monitor_region(scope)
         img = sct.grab(mon)
@@ -1445,13 +1487,13 @@ def find_first_free_slot_in_day_week(scope: tuple[int,int,int,int],
         show_image(hsv)
         time.sleep(0.5)
 
-    # 2) Маска для голубого (границы берите из отладки HSV)
+    # 2) РњР°СЃРєР° РґР»СЏ РіРѕР»СѓР±РѕРіРѕ (РіСЂР°РЅРёС†С‹ Р±РµСЂРёС‚Рµ РёР· РѕС‚Р»Р°РґРєРё HSV)
     lower_blue = np.array([ 90,  30, 150])
     upper_blue = np.array([120, 255, 255])
     mask_blue = cv2.inRange(hsv, lower_blue, upper_blue)
     mask_blue = cv2.GaussianBlur(mask_blue, (5,5), 0)
 
-    # 3) Морфология для очистки
+    # 3) РњРѕСЂС„РѕР»РѕРіРёСЏ РґР»СЏ РѕС‡РёСЃС‚РєРё
     kernel     = cv2.getStructuringElement(cv2.MORPH_RECT, (5,5))
     mask_clean = cv2.morphologyEx(mask_blue, cv2.MORPH_CLOSE, kernel, iterations=2)
     mask_clean = cv2.morphologyEx(mask_clean, cv2.MORPH_OPEN,  kernel, iterations=1)
@@ -1461,7 +1503,7 @@ def find_first_free_slot_in_day_week(scope: tuple[int,int,int,int],
         show_image(mask_clean)
         time.sleep(0.5)
 
-    # 4) Ищем все контуры и сразу же фильтруем по площади и «насколько голубой» они внутри
+    # 4) РС‰РµРј РІСЃРµ РєРѕРЅС‚СѓСЂС‹ Рё СЃСЂР°Р·Сѓ Р¶Рµ С„РёР»СЊС‚СЂСѓРµРј РїРѕ РїР»РѕС‰Р°РґРё Рё В«РЅР°СЃРєРѕР»СЊРєРѕ РіРѕР»СѓР±РѕР№В» РѕРЅРё РІРЅСѓС‚СЂРё
     cnts, _ = cv2.findContours(mask_clean, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     blue_rects = []
     for cnt in cnts:
@@ -1469,23 +1511,23 @@ def find_first_free_slot_in_day_week(scope: tuple[int,int,int,int],
         if w < 30 or h < 15:
             continue
 
-        # посчитаем долю белых пикселей в первичной mask_blue внутри этого прямоугольника
+        # РїРѕСЃС‡РёС‚Р°РµРј РґРѕР»СЋ Р±РµР»С‹С… РїРёРєСЃРµР»РµР№ РІ РїРµСЂРІРёС‡РЅРѕР№ mask_blue РІРЅСѓС‚СЂРё СЌС‚РѕРіРѕ РїСЂСЏРјРѕСѓРіРѕР»СЊРЅРёРєР°
         patch_mask = mask_blue[y:y+h, x:x+w]
         blue_ratio = patch_mask.sum() / 255 / (w*h)
 
-        # дополнительно проверим, что внутри действительно цвет насыщен (чтобы не схватить
-        # светло-серый артефакт)
+        # РґРѕРїРѕР»РЅРёС‚РµР»СЊРЅРѕ РїСЂРѕРІРµСЂРёРј, С‡С‚Рѕ РІРЅСѓС‚СЂРё РґРµР№СЃС‚РІРёС‚РµР»СЊРЅРѕ С†РІРµС‚ РЅР°СЃС‹С‰РµРЅ (С‡С‚РѕР±С‹ РЅРµ СЃС…РІР°С‚РёС‚СЊ
+        # СЃРІРµС‚Р»Рѕ-СЃРµСЂС‹Р№ Р°СЂС‚РµС„Р°РєС‚)
         patch_hsv = hsv[y:y+h, x:x+w]
         mean_s = float(patch_hsv[...,1].mean())
 
-        # берем только те, где хотя бы 30% пикселей попало в маску И средняя насыщенность > 20
+        # Р±РµСЂРµРј С‚РѕР»СЊРєРѕ С‚Рµ, РіРґРµ С…РѕС‚СЏ Р±С‹ 30% РїРёРєСЃРµР»РµР№ РїРѕРїР°Р»Рѕ РІ РјР°СЃРєСѓ Р СЃСЂРµРґРЅСЏСЏ РЅР°СЃС‹С‰РµРЅРЅРѕСЃС‚СЊ > 20
         if blue_ratio > 0.3 and mean_s > 20:
             blue_rects.append((x, y, w, h))
 
     if not blue_rects:
         return None
 
-    # 5) Сортируем «сверху–влево» и возвращаем первую голубую
+    # 5) РЎРѕСЂС‚РёСЂСѓРµРј В«СЃРІРµСЂС…СѓвЂ“РІР»РµРІРѕВ» Рё РІРѕР·РІСЂР°С‰Р°РµРј РїРµСЂРІСѓСЋ РіРѕР»СѓР±СѓСЋ
     blue_rects.sort(key=lambda r: (r[1], r[0]))
     x0, y0, _, _ = blue_rects[0]
     return (x0 + scope[0], y0 + scope[1])
@@ -1499,8 +1541,8 @@ def reload_page():
 
 def get_current_layout() -> int:
     """
-    Получает текущий язык ввода активного окна.
-    Возвращает low word layout code (например, 0x409 для EN-US).
+    РџРѕР»СѓС‡Р°РµС‚ С‚РµРєСѓС‰РёР№ СЏР·С‹Рє РІРІРѕРґР° Р°РєС‚РёРІРЅРѕРіРѕ РѕРєРЅР°.
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ low word layout code (РЅР°РїСЂРёРјРµСЂ, 0x409 РґР»СЏ EN-US).
     """
     hwnd = win32gui.GetForegroundWindow()
     thread_id, _ = win32process.GetWindowThreadProcessId(hwnd)
@@ -1510,14 +1552,14 @@ def get_current_layout() -> int:
 
 def ensure_layout(target: str = "en", max_attempts: int = 5) -> bool:
     """
-    Гарантирует, что раскладка клавиатуры установлена в нужный язык.
-    Поддерживает 'en' (английский) и 'ru' (русский).
-    Возвращает True, если удалось установить раскладку, иначе False.
+    Р“Р°СЂР°РЅС‚РёСЂСѓРµС‚, С‡С‚Рѕ СЂР°СЃРєР»Р°РґРєР° РєР»Р°РІРёР°С‚СѓСЂС‹ СѓСЃС‚Р°РЅРѕРІР»РµРЅР° РІ РЅСѓР¶РЅС‹Р№ СЏР·С‹Рє.
+    РџРѕРґРґРµСЂР¶РёРІР°РµС‚ 'en' (Р°РЅРіР»РёР№СЃРєРёР№) Рё 'ru' (СЂСѓСЃСЃРєРёР№).
+    Р’РѕР·РІСЂР°С‰Р°РµС‚ True, РµСЃР»Рё СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°СЃРєР»Р°РґРєСѓ, РёРЅР°С‡Рµ False.
     """
     lang_codes = {
         "en": 0x0409,  # English (US)
         "ru": 0x0419,  # Russian
-        # можно добавить другие
+        # РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РґСЂСѓРіРёРµ
     }
 
     desired_code = lang_codes.get(target.lower())
@@ -1529,7 +1571,7 @@ def ensure_layout(target: str = "en", max_attempts: int = 5) -> bool:
         if current == desired_code:
             return True
 
-        # Переключаем Alt+Shift
+        # РџРµСЂРµРєР»СЋС‡Р°РµРј Alt+Shift
         pag.keyDown('altleft')
         pag.press('shift')
         pag.keyUp('altleft')
@@ -1540,10 +1582,10 @@ def ensure_layout(target: str = "en", max_attempts: int = 5) -> bool:
 def grab_monitor(region=None, as_rgb=False):
     """
     region:
-      - tuple/list: (x, y, w, h) абсолютные координаты виртуального рабочего стола
+      - tuple/list: (x, y, w, h) Р°Р±СЃРѕР»СЋС‚РЅС‹Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ РІРёСЂС‚СѓР°Р»СЊРЅРѕРіРѕ СЂР°Р±РѕС‡РµРіРѕ СЃС‚РѕР»Р°
       - dict: {"left":x, "top":y, "width":w, "height":h}
-      - None: весь виртуальный экран (sct.monitors[1])
-    as_rgb: True -> RGB (как у pyautogui), False -> BGR (для OpenCV)
+      - None: РІРµСЃСЊ РІРёСЂС‚СѓР°Р»СЊРЅС‹Р№ СЌРєСЂР°РЅ (sct.monitors[1])
+    as_rgb: True -> RGB (РєР°Рє Сѓ pyautogui), False -> BGR (РґР»СЏ OpenCV)
     returns: np.ndarray (H, W, 3), uint8
     """
     with mss.mss() as sct:
@@ -1588,7 +1630,7 @@ def capture_and_find_image_boundary_coordinates(
     x = x + MON_X
     region = (x, y, w, h)
     try:
-        # 0) Визуализация области захвата (опционально)
+        # 0) Р’РёР·СѓР°Р»РёР·Р°С†РёСЏ РѕР±Р»Р°СЃС‚Рё Р·Р°С…РІР°С‚Р° (РѕРїС†РёРѕРЅР°Р»СЊРЅРѕ)
         if visualize:
             show_overlay_win32_hole(
                 region=region,
@@ -1599,18 +1641,18 @@ def capture_and_find_image_boundary_coordinates(
                 click_through=False
             )
 
-        # 1) Скриншот области
+        # 1) РЎРєСЂРёРЅС€РѕС‚ РѕР±Р»Р°СЃС‚Рё
         screenshot_np = grab_monitor(region)
         if visualize:
             showImage(screenshot_np, 6000)
         LOGGER.debug("[capture_and_find_image_boundary_coordinates] Screenshot captured.")
 
-        # 2) Предобработка (если нужно)
+        # 2) РџСЂРµРґРѕР±СЂР°Р±РѕС‚РєР° (РµСЃР»Рё РЅСѓР¶РЅРѕ)
         processed_image = preprocess_image(screenshot_np) if preprocess else screenshot_np
         if visualize:
             showImage(processed_image, 6000)
 
-        # 3) Готовим изображение и шаблоны (серый + лёгкое размытие)
+        # 3) Р“РѕС‚РѕРІРёРј РёР·РѕР±СЂР°Р¶РµРЅРёРµ Рё С€Р°Р±Р»РѕРЅС‹ (СЃРµСЂС‹Р№ + Р»С‘РіРєРѕРµ СЂР°Р·РјС‹С‚РёРµ)
         img_gray = cv2.cvtColor(processed_image, cv2.COLOR_BGR2GRAY) if processed_image.ndim == 3 else processed_image
         img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
 
@@ -1619,14 +1661,14 @@ def capture_and_find_image_boundary_coordinates(
             LOGGER.debug("[capture_and_find_image_boundary_coordinates] Empty screenshot dimensions.")
             return []
 
-        # Нормализуем список шаблонов
+        # РќРѕСЂРјР°Р»РёР·СѓРµРј СЃРїРёСЃРѕРє С€Р°Р±Р»РѕРЅРѕРІ
         if not isinstance(search_images, (list, tuple)) or len(search_images) == 0:
             raise ValueError("`search_images` must be a non-empty list/tuple of images or paths.")
 
         candidates = []  # (x, y, w, h, score)
 
         for tpl in search_images:
-            # 4) Загрузка/нормализация шаблона
+            # 4) Р—Р°РіСЂСѓР·РєР°/РЅРѕСЂРјР°Р»РёР·Р°С†РёСЏ С€Р°Р±Р»РѕРЅР°
             if isinstance(tpl, str):
                 tpl_bgr = cv2.imread(tpl, cv2.IMREAD_COLOR)
                 if tpl_bgr is None:
@@ -1645,9 +1687,9 @@ def capture_and_find_image_boundary_coordinates(
             if th == 0 or tw == 0:
                 continue
 
-            # 4.1) Если шаблон больше картинки — уменьшаем
+            # 4.1) Р•СЃР»Рё С€Р°Р±Р»РѕРЅ Р±РѕР»СЊС€Рµ РєР°СЂС‚РёРЅРєРё вЂ” СѓРјРµРЅСЊС€Р°РµРј
             if th > img_h or tw > img_w:
-                scale = min(img_w / tw, img_h / th) * 0.98  # немного меньше, чтобы гарантированно поместился
+                scale = min(img_w / tw, img_h / th) * 0.98  # РЅРµРјРЅРѕРіРѕ РјРµРЅСЊС€Рµ, С‡С‚РѕР±С‹ РіР°СЂР°РЅС‚РёСЂРѕРІР°РЅРЅРѕ РїРѕРјРµСЃС‚РёР»СЃСЏ
                 new_w = max(1, int(tw * scale))
                 new_h = max(1, int(th * scale))
                 if new_w < 1 or new_h < 1:
@@ -1656,10 +1698,10 @@ def capture_and_find_image_boundary_coordinates(
                 tpl_gray = cv2.resize(tpl_gray, (new_w, new_h), interpolation=cv2.INTER_AREA)
                 th, tw = tpl_gray.shape[:2]
 
-            # 5) Сопоставление шаблона
+            # 5) РЎРѕРїРѕСЃС‚Р°РІР»РµРЅРёРµ С€Р°Р±Р»РѕРЅР°
             res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
 
-            # 6) Пики выше порога
+            # 6) РџРёРєРё РІС‹С€Рµ РїРѕСЂРѕРіР°
             ys, xs = np.where(res >= threshold)
             if len(ys) == 0:
                 continue
@@ -1668,7 +1710,7 @@ def capture_and_find_image_boundary_coordinates(
             for x0, y0, sc in zip(xs.tolist(), ys.tolist(), scores.tolist()):
                 candidates.append((int(x0), int(y0), int(tw), int(th), float(sc)))
 
-        # 7) Простая NMS, чтобы убрать пересечения
+        # 7) РџСЂРѕСЃС‚Р°СЏ NMS, С‡С‚РѕР±С‹ СѓР±СЂР°С‚СЊ РїРµСЂРµСЃРµС‡РµРЅРёСЏ
         def nms(boxes, iou_thresh=0.3):
             if not boxes:
                 return []
@@ -1704,7 +1746,7 @@ def capture_and_find_image_boundary_coordinates(
         used_y = []
 
         for (x, y, w, h) in coordinates:
-            # проверяем, нет ли уже координаты с близким y
+            # РїСЂРѕРІРµСЂСЏРµРј, РЅРµС‚ Р»Рё СѓР¶Рµ РєРѕРѕСЂРґРёРЅР°С‚С‹ СЃ Р±Р»РёР·РєРёРј y
             if not any(abs(y - uy) <= 100 for uy in used_y):
                 unique_coords.append((x, y, w, h))
                 used_y.append(y)
@@ -1717,7 +1759,7 @@ def capture_and_find_image_boundary_coordinates(
         return coordinates_sorted
 
     except Exception as e:
-        print(f"Ошибка в capture_and_find_image_boundary_coordinates: {e}")
+        print(f"РћС€РёР±РєР° РІ capture_and_find_image_boundary_coordinates: {e}")
         return []
 
 def main():
