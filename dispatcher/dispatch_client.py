@@ -51,9 +51,9 @@ DISPATCH_API_KEY = os.getenv(
     "3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87",
 )
 
-# Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ С„Р»Р°Рі РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ РґРІРѕР№РЅРѕР№ СЂРµР°РєС†РёРё
+# Global flag to prevent duplicate message handling.
 processed_messages = set()
-# РЎРµРјР°С„РѕСЂ РґР»СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№
+# Semaphore for sequential message processing.
 processing_semaphore = asyncio.Semaphore(1)
 count_y_mess_empty = 0
 copied_message_counter = 0
@@ -78,7 +78,7 @@ def reset_copy_watchdog() -> None:
     log_and_print("[copy_watchdog] reset on worker start", "info")
 
 
-# ---- РљР»РёРµРЅС‚СЃРєРёРµ РјРѕРґРµР»Рё РїРѕРґ РѕС‚РІРµС‚ СЃРµСЂРІРµСЂР° ----
+# ---- Client-side models for server response ----
 class Action(BaseModel):
     type: str
     payload: Optional[Dict[str, Any]] = None
@@ -94,13 +94,13 @@ class MatchedContact(BaseModel):
     viber_contact_name: Optional[str] = None
 
 class DispatchResult(BaseModel):
-    # РРіРЅРѕСЂРёСЂСѓРµРј РЅРµРѕР¶РёРґР°РЅРЅС‹Рµ РїРѕР»СЏ РѕС‚ Р±СЌРєРµРЅРґР°
+    # Ignore unexpected fields from backend.
     model_config = ConfigDict(extra='ignore')
 
     message_id: str
-    # РџСЂРµРІСЂР°С‰Р°РµРј null -> {}, Рё Р·Р°РґР°С‘Рј Р±РµР·РѕРїР°СЃРЅС‹Р№ РґРµС„РѕР»С‚ С‡РµСЂРµР· default_factory
+    # Convert null -> {} and keep a safe default via default_factory.
     extracted: Dict[str, Any] = Field(default_factory=dict)
-    # Р—Р°РѕРґРЅРѕ РїСЂРёРІРѕРґРёРј null -> [] РґР»СЏ СЃРїРёСЃРєРѕРІ
+    # Convert null -> [] for list fields.
     actions: List[Action] = Field(default_factory=list)
     decision: Optional[Decision] = None
     matched_contacts: List[MatchedContact] = Field(default_factory=list)
@@ -121,7 +121,7 @@ class DispatchResult(BaseModel):
         return v or []
 
 def _dispatch_base_url() -> str:
-    # РёР· "http://host/api/v1/dispatch/analyze" в†’ "http://host/api/v1/dispatch"
+    # From ".../dispatch/analyze" to ".../dispatch".
     base = get_dispatch_url().rstrip("/")
     return base.rsplit("/", 1)[0]
 
@@ -133,9 +133,9 @@ async def has_active_orders(
     retries: int = 1,
 ) -> tuple[bool, Optional[int]]:
     """
-    Р’РѕР·РІСЂР°С‰Р°РµС‚ (has_active, count|None).
-    - has_active: True/False вЂ” РµСЃС‚СЊ Р»Рё Р°РєС‚РёРІРЅС‹Рµ Р·Р°РєР°Р·С‹ РІ РѕРєРЅРµ [СЃРµРіРѕРґРЅСЏ..СЃРµРіРѕРґРЅСЏ+window_days]
-    - count: РµСЃР»Рё include_count=True вЂ” РєРѕР»РёС‡РµСЃС‚РІРѕ (РѕРіСЂР°РЅРёС‡РµРЅРѕ Р»РёРјРёС‚РѕРј РЅР° СЃРµСЂРІРµСЂРµ), РёРЅР°С‡Рµ None
+    Returns (has_active, count|None).
+    - has_active: True/False for active orders in [today..today+window_days]
+    - count: when include_count=True, returns count (subject to server limit), else None
     """
     url = _dispatch_base_url() + "/has-active-orders"
     params = {
@@ -174,7 +174,7 @@ async def has_active_orders(
 
 
 def _fallback_result(message_id: str) -> DispatchResult:
-    """Р РµР·РµСЂРІРЅС‹Р№ РѕС‚РІРµС‚, С‡С‚РѕР±С‹ РЅР°РІРµСЂС… РЅРµ СѓР»РµС‚Р°Р» None."""
+    """Fallback response to avoid returning None to callers."""
     return DispatchResult(
         message_id=message_id,
         extracted={},
@@ -189,7 +189,7 @@ def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
     if isinstance(a, dict):
         return a.get("type")
     try:
-        return a.type  # pydantic-РјРѕРґРµР»СЊ
+        return a.type  # pydantic model
     except Exception:
         return None
 
@@ -206,26 +206,26 @@ async def process_one_message_dispatcher(
     if uid_source:
         processed_messages.add(uid_source)
 
-    # РћР±СЂР°Р±Р°С‚С‹РІР°РµРј СЃРѕРѕР±С‰РµРЅРёРµ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕ СЃ РёСЃРїРѕР»СЊР·РѕРІР°РЅРёРµРј СЃРµРјР°С„РѕСЂР°
+    # Process messages sequentially using semaphore.
     async with processing_semaphore:
         try:
-            log_and_print(f"РћР±СЂР°Р±РѕС‚РєР° СЃРѕРѕР±С‰РµРЅРёСЏ: {message_text}", "info")
+            log_and_print(f"Обработка сообщения: {message_text}", "info")
             md5_hash = hashlib.md5(uid_source.encode()).hexdigest()
 
             return await send_for_analysis(
                 message_id=md5_hash,
                 text=message_text or "",
                 chat_id=name_viber_channel,
-                sender="",  # <вЂ” РѕС‚РїСЂР°РІР»СЏРµРј РёРјСЏ РѕС‚РїСЂР°РІРёС‚РµР»СЏ
+                sender="",  # sender name if available
                 attachments=None,
                 locale="uk",
                 timeout_s=float(read_setting("dispatch_timeout_s") or 15.0),
                 retries=int(read_setting("dispatch_retries") or 2),
             )
         except Exception as e:
-            log_and_print(f"OС€РёР±РєР° РїСЂРё РѕР±СЂР°Р±РѕС‚РєРµ РѕРґРЅРѕРіРѕ СЃРѕРѕР±С‰РµРЅРёСЏ: {e}", "error")
-            await asyncio.sleep(2)  # РЅРµР±РѕР»СЊС€Р°СЏ РїР°СѓР·Р°
-            # Р’РђР–РќРћ: РІСЃРµРіРґР° РІРѕР·РІСЂР°С‰Р°РµРј РЅРµ-None, С‡С‚РѕР±С‹ РЅР°РІРµСЂС…Сѓ Р»РѕРіРёРєР° РЅРµ РїР°РґР°Р»Р°
+            log_and_print(f"Ошибка при обработке одного сообщения: {e}", "error")
+            await asyncio.sleep(2)  # short pause before next attempt
+            # IMPORTANT: always return non-None so upper flow does not crash.
             return _fallback_result(message_id=md5_hash)
 
 
@@ -274,7 +274,7 @@ async def send_for_analysis(
                 log_and_print(f"[dispatch] post to {get_dispatch_url()}", "debug")
                 resp = await client.post(get_dispatch_url(), json=payload, headers=headers)
                 log_and_print(f"[dispatch] status={resp.status_code}", "debug")
-                # Р»РѕРіРёСЂСѓРµРј С‚РµР»Рѕ РІСЃРµРіРґР° вЂ” РїРѕРјРѕРіР°РµС‚ РїСЂРё РЅРµСЃРѕРІРїР°РґРµРЅРёРё РєРѕРЅС‚СЂР°РєС‚РѕРІ
+                # Always log response body; helps when contracts diverge.
                 body_preview = (
                     resp.text
                     if len(resp.text) < 2000
@@ -291,9 +291,9 @@ async def send_for_analysis(
                 try:
                     result = DispatchResult(**data)
                 except ValidationError as ve:
-                    # Р›РѕРіРёСЂСѓРµРј Рё РїСЂРѕР±СѓРµРј РјСЏРіРєРѕ РїСЂРёРІРµСЃС‚Рё actions, РµСЃР»Рё СЌС‚Рѕ СЃРїРёСЃРѕРє dict'РѕРІ
+                    # Log and try soft-normalizing actions when it's a list of dicts.
                     log_and_print(f"[dispatch] ValidationError: {ve}", "error")
-                    # РџРѕРїС‹С‚РєР° В«СЂСѓС‡РЅРѕР№В» СЃР±РѕСЂРєРё СЂРµР·СѓР»СЊС‚Р°С‚Р°
+                    # Fallback attempt to build the result manually.
                     actions_raw = data.get("actions") or []
                     actions: List[Action] = []
                     for a in actions_raw:
@@ -326,18 +326,18 @@ async def send_for_analysis(
                 log_and_print("[dispatch] IPS is empty in settings.json", "ERROR")
             
             if attempt < retries:
-                await asyncio.sleep(0.7 * (attempt + 1))  # Р»РµРіРєРёР№ backoff
+                await asyncio.sleep(0.7 * (attempt + 1))  # lightweight backoff
             else:
-                # РќР° РїРѕСЃР»РµРґРЅРµР№ РїРѕРїС‹С‚РєРµ РІРѕР·РІСЂР°С‰Р°РµРј fallback, Р° РЅРµ РІС‹Р±СЂР°СЃС‹РІР°РµРј РёСЃРєР»СЋС‡РµРЅРёРµ
+                # On final attempt return fallback instead of raising.
                 log_and_print("[dispatch] returning fallback result", "error")
                 return _fallback_result(message_id=message_id)
 
-    # С‚РµРѕСЂРµС‚РёС‡РµСЃРєРё РЅРµРґРѕСЃС‚РёР¶РёРјРѕ
+    # Theoretically unreachable.
     raise DispatchError(f"Dispatch failed: {last_exc}")
  
 def is_foto_message(scope):
 
-    pos = gd.find_text_any(queries=["РљРѕРїРёСЂРѕРІР°С‚СЊ С„РѕС‚Рѕ",],
+    pos = gd.find_text_any(queries=["Копировать фото",],
                             lang="rus", 
                             count=2, 
                             pause_attempt_sec =1, 
@@ -352,7 +352,7 @@ def is_foto_message(scope):
 
 def is_link(scope):
 
-    pos = gd.find_text_any(queries=["РљРѕРїРёСЂРѕРІР°С‚СЊ СЃСЃС‹Р»РєСѓ",],
+    pos = gd.find_text_any(queries=["Копировать ссылку",],
                             lang="rus", 
                             count=2, 
                             pause_attempt_sec =1, 
@@ -437,7 +437,7 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
         )
     else:
         pos = gd.click_text(
-            ["РљРѕРїРёСЂРѕРІР°С‚СЊ С‚РµРєСЃС‚", "РЎРєРѕРїРёСЂРѕРІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ", ],
+            ["Копировать текст", "Скопировать сообщение"],
             count_attempt_find=2,
             pause_attempt=2,
             lang="rus",
@@ -453,7 +453,7 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
         if tp == "image":
         
             pos = gd.click_text(
-                ["РљРѕРїРёСЂРѕРІР°С‚СЊ С‚РµРєСЃС‚", "РЎРєРѕРїРёСЂРѕРІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ", ],
+                ["Копировать текст", "Скопировать сообщение"],
                 count_attempt_find=2,
                 pause_attempt=2,
                 lang="rus",
@@ -474,7 +474,7 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
             
     if not pos:
         
-        log_and_print("[send_messages_from_y_mess] Not find РЎРєРѕРїРёСЂРѕРІР°С‚СЊ СЃРѕРѕР±С‰РµРЅРёРµ", "INFO")
+        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
         
         press_esq(window)    
         #if is_foto_message(scope) or is_link(scope) or is_center_continue():
@@ -488,7 +488,7 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
         #    press_esq(window)
         #    return None
 
-    log_and_print("[send_messages_from_y_mess] РџРѕРІС–РґРѕРјР»РµРЅРЅСЏ СЃРєРѕРїС–СЋРІР°РЅРѕ РІ Р±СѓС„РµСЂ РѕР±РјС–РЅСѓ", "INFO")
+    log_and_print("[send_messages_from_y_mess] Повідомлення скопійовано в буфер обміну", "INFO")
     mark_message_copied()
     return pyperclip.paste()
 
@@ -502,7 +502,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 
     for x, y in s.y_mess:
         if y:
-            log_and_print(f"[send_messages_from_y_mess] РњРµСЃРµРґР¶ y = {y}")
+            log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
             window.set_focus()
 
             x = x + s.search_board_mess_x_start + 180
@@ -522,12 +522,12 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                 continue
     
             if text == "is_foto":
-                log_and_print("[send_messages_from_y_mess] Р¤РѕС‚Рѕ РїРѕРІС–РґРѕРјР»РµРЅРЅСЏ", "INFO")
+                log_and_print("[send_messages_from_y_mess] Фото повідомлення", "INFO")
                 continue
             
             if text is None:
                 log_and_print(
-                    "[send_messages_from_y_mess] РќРµ РІРґР°Р»РѕСЃСЏ СЃРєРѕРїС–СЋРІР°С‚Рё РјРµСЃРµРґР¶, Р±СѓС„РµСЂ РѕР±РјС–РЅСѓ РїСѓСЃС‚РёР№", "INFO"
+                    "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий", "INFO"
                 )
                 
                 if is_center_ok():
@@ -540,7 +540,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                 was_new_mess = True
                 count_old_mess = 0
                 log_and_print(
-                    "[send_messages_from_y_mess] Р’С–РґРїСЂР°РІРєР° С‚Р° Р·Р±РµСЂРµР¶РµРЅРЅСЏ РЅРѕРІРѕРіРѕ СЃРїРѕРІС–С‰РµРЅРЅСЏ РґР»СЏ Р°РЅР°Р»С–Р·Сѓ", "INFO"
+                    "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу", "INFO"
                 )
                 resp = await process_one_message_dispatcher(
                     text, None,
@@ -551,7 +551,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                     f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
                 )
 
-                # РР·РІР»РµРєР°РµРј С‚РёРї РїРµСЂРІРѕР№ РєРѕРјР°РЅРґС‹ (РµСЃР»Рё РµСЃС‚СЊ)
+                # Extract type of first action (if present).
                 action_type = None
                 viber_names = []
                 
@@ -559,15 +559,15 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                     first_action = resp.actions[0]
                     action_type = _safe_action_type(first_action)
                     
-                    # 2) РґРѕСЃС‚Р°С‘Рј РёРјРµРЅР° РїРµСЂРµРІРѕР·С‡РёРєРѕРІ, РµСЃР»Рё backend РІРµСЂРЅСѓР» matched_contacts
+                    # 2) Extract carrier names if backend returned matched_contacts.
                     if hasattr(resp, "matched_contacts") and getattr(resp, "matched_contacts", None):
-                        # resp.matched_contacts вЂ” СЌС‚Рѕ СЃРїРёСЃРѕРє РѕР±СЉРµРєС‚РѕРІ РёР»Рё СЃР»РѕРІР°СЂРµР№
+                        # resp.matched_contacts may contain objects or dicts.
                         for mc in resp.matched_contacts or []:
-                            # РµСЃР»Рё СЌС‚Рѕ СЃР»РѕРІР°СЂСЊ
+                            # dict case
                             if isinstance(mc, dict):
                                 name = mc.get("viber_contact_name")
                             else:
-                                # Pydantic-РјРѕРґРµР»СЊ MatchedContact
+                                # Pydantic MatchedContact case
                                 name = getattr(mc, "viber_contact_name", None)
 
                             if name and name not in viber_names:
@@ -577,7 +577,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                 if action_type != "ignore":
                     log_and_print("++++++++++++++++++++++++++++++++++++++++++++++", "INFO")
 
-                    result = sendViberMessDispatherToРЎarrier(
+                    result = sendViberMessDispatherToCarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s
                     )
 
@@ -591,7 +591,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                             s.search_board_mess_y_start + 10,
                         )
 
-                        result = sendViberMessDispatherToРЎarrier(
+                        result = sendViberMessDispatherToCarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s
                     )
 
@@ -609,7 +609,7 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                     return was_new_mess
                 sending += 1
                 log_and_print(
-                    "[send_messages_from_y_mess] ------------------------------------- РЎРїРѕРІС–С‰РµРЅРЅСЏ РІР¶Рµ Р±СѓР»Рѕ РІС–РґРїСЂР°РІР»РµРЅРѕ", "INFO"
+                    "[send_messages_from_y_mess] ------------------------------------- Сповіщення вже було відправлено", "INFO"
                 )
                 if sending >= 2:
                     # break
@@ -726,7 +726,7 @@ def findMessage(window, x, y, viber_channel, text, s):
 
                 for x, y in s.y_mess:
                     if y:
-                        log_and_print(f"[findMessage] РњРµСЃРµРґР¶ y = {y}")
+                        log_and_print(f"[findMessage] Меседж y = {y}")
                         window.set_focus()
 
                         x = x + s.search_board_mess_x_start + 180
@@ -768,7 +768,7 @@ def findMessage(window, x, y, viber_channel, text, s):
                     s.search_board_mess_y_start + 10,
                 )
 
-def sendViberMessDispatherToРЎarrier(viber_names, window, x, y, viber_channel, text, s):
+def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, text, s):
     is_debug = _ui_debug()
 
     resultFind = findMessage(window, x, y, viber_channel, text, s)
@@ -783,7 +783,7 @@ def sendViberMessDispatherToРЎarrier(viber_names, window, x, y, viber_channel,
     gd.right_click(xRight, yRight)
 
     if not gd.click_text(
-        ["РџРµСЂРµСЃР»Р°С‚СЊ"],
+        ["Переслать"],
         count_attempt_find=2,
         pause_attempt=4,
         lang="rus",
@@ -792,10 +792,10 @@ def sendViberMessDispatherToРЎarrier(viber_names, window, x, y, viber_channel,
         plus_x = -16,
         is_debug=_ui_debug(),
     ):
-        log_and_print("Not find menu item РџРµСЂРµСЃР»Р°С‚СЊ")
+        log_and_print("Not find menu item Переслать")
         return False
 
-    log_and_print("Click РџРµСЂРµСЃР»Р°С‚СЊ")
+    log_and_print("Click Переслать")
 
     for viber_name in viber_names:
         log_and_print(f"viber_name = {viber_name}")
@@ -871,7 +871,7 @@ def sendViberMessDispatherToРЎarrier(viber_names, window, x, y, viber_channel,
 def fill_y_mess(window, viber_channel, s):
     s.y_mess = []
     window.set_focus()
-    log_and_print("РЎС‚Р°СЂС‚ fill_y_mess")
+    log_and_print("Старт fill_y_mess")
 
     height = s.search_board_mess_y_end - s.search_board_mess_y_start
     width = s.search_board_mess_x_end - s.search_board_mess_x_start
@@ -1183,10 +1183,10 @@ def window_top_focus(window):
     
     hwnd = window.handle
 
-    # РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі "РІСЃРµРіРґР° РїРѕРІРµСЂС… РѕСЃС‚Р°Р»СЊРЅС‹С…"
+    # Set "always on top" flag.
     win32gui.SetWindowPos(
         hwnd,
-        win32con.HWND_TOPMOST,  # РІРµСЂС… РІСЃРµС… РѕРєРѕРЅ
+        win32con.HWND_TOPMOST,  # above all windows
         0, 0, 0, 0,
         win32con.SWP_NOMOVE | win32con.SWP_NOSIZE
     )

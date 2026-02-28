@@ -5,11 +5,14 @@ tg_creds = None
 tg_channels = None
 settings = None
 
+def _load_json_utf8(file_path):
+    with open(file_path, 'r', encoding='utf-8') as file:
+        return json.load(file)
+
 def load_json(file_path):
     log_and_print(f"Загрузка данных из JSON файла {file_path}.", 'info')
     try:
-        with open(file_path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+        data = _load_json_utf8(file_path)
         log_and_print(f"Данные успешно загружены из {file_path}.", 'info')
         return data
     except FileNotFoundError:

@@ -16,6 +16,11 @@ import win32api, win32con, win32gui
 
 ImageLike = Union[str, np.ndarray]
 
+
+def _read_json_utf8(file_path):
+    with open(file_path, "r", encoding="utf-8") as file:
+        return json.load(file)
+
 def preprocess_image(image_np):
     """
     РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° OCR.
@@ -59,8 +64,7 @@ def read_setting(field_path) -> str | int | float | bool | list[str] | dict | No
     file_path = "settings.json"
     try:
         # Open and load the JSON file
-        with open(file_path, 'r', encoding='utf-8-sig') as file:
-            settings = json.load(file)
+        settings = _read_json_utf8(file_path)
 
         # Navigate to the desired field
         keys = field_path.split('.')
@@ -84,8 +88,7 @@ def write_setting(field_path, new_value):
 
     try:
         # Open and load the JSON file
-        with open(file_path, 'r', encoding='utf-8-sig') as file:
-            settings = json.load(file)
+        settings = _read_json_utf8(file_path)
 
         # Navigate to the desired field and set the new value
         keys = field_path.split('.')
@@ -95,7 +98,7 @@ def write_setting(field_path, new_value):
 
         value[keys[-1]] = new_value  # Set the new value at the final key
 
-        # Write the modified settings back to the file
+        # Write the modified settings back to the file in UTF-8.
         with open(file_path, 'w', encoding='utf-8') as file:
             json.dump(settings, file, indent=4)
         log_and_print(f"[write_setting] Field '{field_path}' updated successfully. new_value = {new_value}")
@@ -106,8 +109,7 @@ def write_setting(field_path, new_value):
 def load_json(file_path):
     log_and_print(f"Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… РёР· JSON С„Р°Р№Р»Р° {file_path}.", 'info')
     try:
-        with open(file_path, 'r', encoding='utf-8-sig') as file:
-            data = json.load(file)
+        data = _read_json_utf8(file_path)
         log_and_print(f"Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹ РёР· {file_path}.", 'info')
         return data
     except FileNotFoundError:
@@ -370,4 +372,5 @@ def show_overlay_win32_hole(
         win32gui.UnregisterClass(atom, hInstance)
     except Exception:
         pass
+
 
