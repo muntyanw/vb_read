@@ -1,4 +1,4 @@
-import json
+﻿import json
 from log import log_and_print
 
 tg_creds = None
@@ -6,7 +6,7 @@ tg_channels = None
 settings = None
 
 def _load_json_utf8(file_path):
-    with open(file_path, 'r', encoding='utf-8') as file:
+    with open(file_path, 'r', encoding='utf-8-sig') as file:
         return json.load(file)
 
 def load_json(file_path):
@@ -37,3 +37,4 @@ def init():
     log_and_print(f"settings {tg_channels}.", 'info')
 
     return tg_creds, tg_channels, settings
+

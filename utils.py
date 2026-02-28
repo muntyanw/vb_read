@@ -18,7 +18,7 @@ ImageLike = Union[str, np.ndarray]
 
 
 def _read_json_utf8(file_path):
-    with open(file_path, "r", encoding="utf-8") as file:
+    with open(file_path, "r", encoding="utf-8-sig") as file:
         return json.load(file)
 
 def preprocess_image(image_np):
@@ -372,5 +372,6 @@ def show_overlay_win32_hole(
         win32gui.UnregisterClass(atom, hInstance)
     except Exception:
         pass
+
 
 
