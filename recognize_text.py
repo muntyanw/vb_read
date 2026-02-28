@@ -137,24 +137,31 @@ def preprocess_image(image_np):
 
     return cleaned
 
-def perform_ocr_with_positions(image):
+def perform_ocr_with_positions(image, min_conf: int = 60, lang: str | None = None):
     custom_config = read_setting("capture_and_recognize.custom_config")
-    lang = read_setting("capture_and_recognize.lang")
+    ocr_lang = lang or read_setting("capture_and_recognize.lang")
 
-    data = pytesseract.image_to_data(image, lang=lang, config=custom_config, output_type=Output.DICT)
+    data = pytesseract.image_to_data(image, lang=ocr_lang, config=custom_config, output_type=Output.DICT)
 
     n_boxes = len(data['level'])
     words_with_positions = []
 
     for i in range(n_boxes):
-        if int(data['conf'][i]) > 60 and data['text'][i].strip() != "":
+        text = str(data['text'][i]).strip()
+        conf_raw = str(data['conf'][i]).strip()
+        try:
+            conf = float(conf_raw)
+        except Exception:
+            continue
+
+        if conf >= float(min_conf) and text != "":
             word_info = {
-                'text': data['text'][i],
+                'text': text,
                 'left': data['left'][i],
                 'top': data['top'][i],
                 'width': data['width'][i],
                 'height': data['height'][i],
-                'conf': data['conf'][i]
+                'conf': conf
             }
             words_with_positions.append(word_info)
 

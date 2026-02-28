@@ -1,4 +1,4 @@
-﻿{
+{
     "capture_and_recognize": {
         "lang": "ukr",
         "lang_comment": "Варианты: ukr | rus | eng | ukr+rus | ukr+eng | rus+eng",
@@ -60,20 +60,15 @@
     "cycle_timeout_s": 120,
     "restart_delay_s": 5,
     "settings_reload_interval_s": 30,
-      "copy_stall_restart_seconds": 3600,
-    
+    "copy_stall_restart_seconds": 3600,
     "periodic_broadcast_text": "Автоматичний пошук поїздок https://robos.biz/",
     "periodic_broadcast_interval_minutes": 0,
     "periodic_broadcast_send_on_startup": false,
     "periodic_broadcast_send_on_startup_comment": "Варианты: true | false",
-
-
     "debug_logs_mode": true,
     "debug_logs_mode_comment": "Варианты: true | false",
-    "debug_methods_mode": true,
+    "debug_methods_mode": false,
     "debug_methods_mode_comment": "Варианты: true | false",
-
-    
     "work_mode": "personal_broadcast",
     "work_mode_comment": "Варианты: reader (чтение/обработка сообщений по каналам из viber_channels) | personal_broadcast (персональная рассылка участникам одного канала из personal_broadcast_channel)",
     "personal_broadcast_text": "Автоматичний пошук поїздок https://robos.biz/",
@@ -90,7 +85,6 @@
     "personal_broadcast_participants_texts": [
         "Участники",
         "Учасники"
-        
     ],
     "personal_broadcast_role_keywords": [
         "суперадмин",
@@ -135,5 +129,7 @@
         70
     ],
     "personal_broadcast_max_scroll_steps": 120,
-    "personal_broadcast_line_top_tolerance": 14
+    "personal_broadcast_line_top_tolerance": 14,
+    "clear_logs_and_temp_on_startup": true,
+    "clear_logs_and_temp_on_startup_comment": "Варианты: true | false"
 }

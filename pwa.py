@@ -15,9 +15,11 @@ from dispatcher.personal_broadcast_config import load_personal_broadcast_config
 from dispatcher.personal_broadcast_sender import PersonalBroadcastSender
 from log import set_debug_mode, log_and_print
 import asyncio
+import logging
 from pywinauto import Application
 from pathlib import Path
 import subprocess
+import shutil
 import traceback
 import time
 
@@ -49,6 +51,56 @@ def _to_bool(val, default=False):
         if v in {"0", "false", "no", "off"}:
             return False
     return default
+
+def _clear_logs_and_temp_if_enabled():
+    enabled = _to_bool(read_setting("clear_logs_and_temp_on_startup"), False)
+    if not enabled:
+        return
+
+    # Truncate current log file through active logging handlers.
+    cleared_log = False
+    root_logger = logging.getLogger()
+    for handler in root_logger.handlers:
+        if isinstance(handler, logging.FileHandler):
+            try:
+                handler.acquire()
+                if handler.stream:
+                    handler.stream.seek(0)
+                    handler.stream.truncate(0)
+                    handler.flush()
+                    cleared_log = True
+                    break
+            except Exception:
+                pass
+            finally:
+                try:
+                    handler.release()
+                except Exception:
+                    pass
+
+    if not cleared_log:
+        try:
+            Path("log.log").write_text("", encoding="utf-8")
+        except Exception:
+            pass
+
+    # Remove previous temp snapshots for clean run diagnostics.
+    temp_dir = Path(__file__).resolve().parent / "temp_log"
+    try:
+        if temp_dir.exists():
+            for child in temp_dir.iterdir():
+                if child.is_dir():
+                    shutil.rmtree(child, ignore_errors=True)
+                else:
+                    try:
+                        child.unlink()
+                    except Exception:
+                        pass
+        else:
+            temp_dir.mkdir(parents=True, exist_ok=True)
+    except Exception as e:
+        print(f"[pwa] failed to clear temp_log: {e}")
+
 
 class Context:
     def __init__(
@@ -131,6 +183,8 @@ async def ensure_viber_ready():
 
 
 async def main():
+    _clear_logs_and_temp_if_enabled()
+
     def load_runtime_settings():
         return {
             "count_scroll_up": _to_int(read_setting("count_scroll_up"), 2),

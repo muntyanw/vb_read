@@ -1,10 +1,14 @@
-﻿import random
+import random
+import json
 import time
+from datetime import datetime
 from collections import defaultdict
+from pathlib import Path
 
 import cv2
 import pyautogui as pag
 import pyperclip
+from pywinauto import keyboard as pwa_keyboard
 
 from core import gui_driver as gd
 from dispatcher.dispatch_client import klickViberChannel, window_top_focus
@@ -24,9 +28,13 @@ class PersonalBroadcastSender:
     _NON_MEMBER_WORDS = {
         "участники",
         "учасники",
+        "учакники",
         "participants",
         "вы",
         "you",
+        "запросити",
+        "запрос",
+        "запа",
         "неизвестно",
         "--",
     }
@@ -37,8 +45,19 @@ class PersonalBroadcastSender:
         "superadmin",
         "админ",
         "администратор",
+        "адміністратор",
         "суперадмин",
+        "суперадмін",
     }
+    _ROLE_MARKERS = (
+        "admin",
+        "administrator",
+        "админ",
+        "администратор",
+        "адміністратор",
+        "суперадмин",
+        "суперадмін",
+    )
 
     def __init__(self, config: PersonalBroadcastConfig):
         self._config = config
@@ -75,7 +94,9 @@ class PersonalBroadcastSender:
 
         for step in range(self._config.max_scroll_steps):
             log_and_print(f"[personal_broadcast] scan step={step+1}/{self._config.max_scroll_steps}", "debug")
-            candidates = self._read_candidates_from_scope()
+            if not self._ensure_participants_list(window):
+                return
+            candidates, scan_id = self._read_candidates_from_scope(channel_name=channel_name, step=step + 1)
             if step == 0 and candidates:
                 first_candidate = min(candidates, key=lambda c: (c["y"], c["x"]))
                 candidates = [c for c in candidates if c is not first_candidate]
@@ -84,19 +105,26 @@ class PersonalBroadcastSender:
                     f"at ({first_candidate['x']},{first_candidate['y']})",
                     "debug",
                 )
-            log_and_print(f"[personal_broadcast] candidates found={len(candidates)}", "debug")
+            log_and_print(f"[personal_broadcast] candidates found={len(candidates)} scan_id={scan_id}", "debug")
             sent_any = False
+            raw_count = len(candidates)
+            skip_registry = 0
+            skip_gender = 0
+            send_attempted = 0
 
             for candidate in candidates:
                 name = candidate["name"]
                 if self._registry.has(name):
-                    log_and_print(f"[personal_broadcast] skip already sent: {name}", "debug")
+                    skip_registry += 1
+                    log_and_print(f"[personal_broadcast] skip already sent: {name} scan_id={scan_id}", "debug")
                     continue
                 if not self._gender_matches(name):
-                    log_and_print(f"[personal_broadcast] skip gender filter: {name}", "debug")
+                    skip_gender += 1
+                    log_and_print(f"[personal_broadcast] skip gender filter: {name} scan_id={scan_id}", "debug")
                     continue
 
-                if self._send_to_member(window, s, candidate, channel_name):
+                send_attempted += 1
+                if self._send_to_member(window, s, candidate, channel_name, scan_id=scan_id):
                     self._registry.add(name)
                     sent_any = True
                     pause = random.uniform(0, max(self._config.max_pause_seconds, 0.0))
@@ -106,6 +134,15 @@ class PersonalBroadcastSender:
                     if not self._open_participants(window):
                         return
                     break
+
+            after_registry = raw_count - skip_registry
+            after_gender = after_registry - skip_gender
+            log_and_print(
+                f"[personal_broadcast] candidate pipeline raw={raw_count} "
+                f"after_registry={after_registry} after_gender={after_gender} "
+                f"send_attempted={send_attempted} scan_id={scan_id}",
+                "debug",
+            )
 
             if sent_any:
                 continue
@@ -151,13 +188,81 @@ class PersonalBroadcastSender:
         ):
             log_and_print("[personal_broadcast] cannot click participants", "error")
             return False
+        gd.pause(2.0)
         return True
 
-    def _read_candidates_from_scope(self) -> list[dict]:
+    def _ensure_participants_list(self, window) -> bool:
+        window.set_focus()
+        clicked = gd.click_text(
+            self._config.participants_texts,
+            count_attempt_find=1,
+            pause_attempt=0.2,
+            lang="ukr",
+            scope=self._config.participants_click_scope,
+            threshold=0.6,
+            is_debug=_ui_debug(),
+            count_click=1,
+        )
+        if clicked:
+            log_and_print("[personal_broadcast] participants label visible; open participants list", "debug")
+            gd.pause(0.6)
+        return True
+
+    def _scan_meta_path(self, scan_id: str) -> Path:
+        out_dir = Path(__file__).resolve().parents[1] / "temp_log"
+        return out_dir / f"{scan_id}.json"
+
+    def _update_scan_metadata(self, scan_id: str, **fields) -> None:
+        try:
+            meta_path = self._scan_meta_path(scan_id)
+            if meta_path.exists():
+                data = json.loads(meta_path.read_text(encoding="utf-8"))
+            else:
+                data = {"scan_id": scan_id}
+            for k, v in fields.items():
+                data[k] = v
+            meta_path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        except Exception as e:
+            log_and_print(f"[personal_broadcast] metadata update failed scan_id={scan_id}: {e}", "error")
+
+    def _save_scan_snapshot(self, image_np, channel_name: str, step: int, scope: tuple[int, int, int, int]) -> tuple[str, str | None]:
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        safe_channel = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(channel_name or "unknown"))
+        scan_id = f"pb_{safe_channel}_step{int(step):03d}_{ts}"
+        try:
+            out_dir = Path(__file__).resolve().parents[1] / "temp_log"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            image_path = out_dir / f"{scan_id}.png"
+            meta_path = out_dir / f"{scan_id}.json"
+
+            # take_screenshot returns RGB; cv2.imwrite expects BGR
+            image_bgr = cv2.cvtColor(image_np, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(str(image_path), image_bgr)
+
+            meta = {
+                "scan_id": scan_id,
+                "channel": str(channel_name or "unknown"),
+                "step": int(step),
+                "scope": [int(scope[0]), int(scope[1]), int(scope[2]), int(scope[3])],
+                "saved_at": datetime.now().isoformat(timespec="seconds"),
+                "image": str(image_path.resolve()),
+                "cwd": str(Path.cwd()),
+            }
+            meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+
+            log_and_print(f"[personal_broadcast] snapshot saved scan_id={scan_id} image={image_path}", "debug")
+            return scan_id, str(image_path)
+        except Exception as e:
+            log_and_print(f"[personal_broadcast] snapshot save failed scan_id={scan_id}: {e}", "error")
+            return scan_id, None
+
+    def _read_candidates_from_scope(self, channel_name: str, step: int) -> tuple[list[dict], str]:
+        skip_stats = {"role_line": 0, "role_label": 0, "no_avatar": 0, "bad_token": 0, "short_name": 0}
         scope = self._config.members_scope
         log_and_print(f"[personal_broadcast] OCR scope={scope}", "debug")
         gd.pause(1.0)
         img = take_screenshot(scope)
+        scan_id, _snapshot_path = self._save_scan_snapshot(img, channel_name=channel_name, step=step, scope=scope)
         processed = preprocess_image(img)
         circles = self._detect_avatar_circles(img)
         log_and_print(f"[personal_broadcast] avatar circles={len(circles)}", "debug")
@@ -165,10 +270,34 @@ class PersonalBroadcastSender:
             # quick preview for debug mode without stopping the loop
             showImage(img, 0, title=f"[personal_broadcast] OCR raw scope={scope}")
             showImage(processed, 0, title=f"[personal_broadcast] OCR processed scope={scope}")
-        words = perform_ocr_with_positions(processed)
+        words = perform_ocr_with_positions(processed, min_conf=40, lang="ukr+eng+rus")
+        if len(words) < 8:
+            raw_words = perform_ocr_with_positions(img, min_conf=45, lang="ukr+eng+rus")
+            if raw_words:
+                seen = {(w["text"], int(w["left"]), int(w["top"])) for w in words}
+                added = 0
+                for w in raw_words:
+                    key = (w["text"], int(w["left"]), int(w["top"]))
+                    if key in seen:
+                        continue
+                    words.append(w)
+                    seen.add(key)
+                    added += 1
+                log_and_print(
+                    f"[personal_broadcast] OCR fallback merged raw words: +{added}, total={len(words)} scan_id={scan_id}",
+                    "debug",
+                )
         if not words:
-            log_and_print("[personal_broadcast] OCR returned 0 words", "debug")
-            return []
+            self._update_scan_metadata(
+                scan_id,
+                ocr_words_count=0,
+                avatar_circles_count=len(circles),
+                skip_stats=skip_stats,
+                candidates_count=0,
+                candidates=[],
+            )
+            log_and_print(f"[personal_broadcast] OCR returned 0 words scan_id={scan_id}", "debug")
+            return [], scan_id
 
         lines = defaultdict(list)
         for w in words:
@@ -184,7 +313,8 @@ class PersonalBroadcastSender:
             low = line_text.lower()
             role_keywords = set(self._config.role_keywords) | self._BUILTIN_ROLE_KEYWORDS
             if any(role in low for role in role_keywords):
-                log_and_print(f"[personal_broadcast] role detected, skip line='{line_text}'", "debug")
+                skip_stats["role_line"] += 1
+                log_and_print(f"[personal_broadcast] role detected, skip line='{line_text}' scan_id={scan_id}", "debug")
                 continue
 
             chosen = None
@@ -195,11 +325,13 @@ class PersonalBroadcastSender:
                     chosen = w
                     break
             if not chosen:
+                skip_stats["bad_token"] += 1
                 continue
 
             raw_name = str(chosen["text"]).strip()
             name = self._normalize_name(raw_name)
             if len(name) < 2:
+                skip_stats["short_name"] += 1
                 continue
 
             chosen_left = int(chosen["left"])
@@ -208,32 +340,20 @@ class PersonalBroadcastSender:
             chosen_h = int(chosen["height"])
             chosen_right = chosen_left + chosen_w
             chosen_bottom = chosen_top + chosen_h
-            has_right_text = False
-            for w in words:
-                text = str(w.get("text", "")).strip()
-                if not text:
-                    continue
-                w_left = int(w["left"])
-                if w_left < chosen_right + self._RIGHT_TEXT_MIN_GAP_PX:
-                    continue
-                w_top = int(w["top"])
-                w_bottom = w_top + int(w["height"])
-                # Same row by vertical overlap (robust to OCR line split).
-                overlap = max(0, min(chosen_bottom, w_bottom) - max(chosen_top, w_top))
-                if overlap >= max(4, min(chosen_h, int(w["height"])) // 3):
-                    has_right_text = True
-                    break
-            if has_right_text:
+            if self._row_has_role_label(words, chosen_left, chosen_top, chosen_w, chosen_h):
+                skip_stats["role_label"] += 1
                 log_and_print(
-                    f"[personal_broadcast] skip right-side text for name='{name}' line='{line_text}'",
+                    f"[personal_broadcast] skip role label on row for name='{name}' line='{line_text}' scan_id={scan_id}",
                     "debug",
                 )
                 continue
+            # Right-side OCR noise is common; keep candidate if role checks passed.
 
             local_center_x = int(chosen["left"]) + int(chosen["width"]) // 2
             local_center_y = int(chosen["top"]) + int(chosen["height"]) // 2
             if not self._has_avatar_left(local_center_x, local_center_y, circles):
-                log_and_print(f"[personal_broadcast] skip no avatar near name='{name}' line='{line_text}'", "debug")
+                skip_stats["no_avatar"] += 1
+                log_and_print(f"[personal_broadcast] skip no avatar near name='{name}' line='{line_text}' scan_id={scan_id}", "debug")
                 continue
 
             center_x = scope[0] + local_center_x
@@ -246,30 +366,73 @@ class PersonalBroadcastSender:
             if key not in unique:
                 unique[key] = c
         result = list(unique.values())
+        self._update_scan_metadata(
+            scan_id,
+            ocr_words_count=len(words),
+            avatar_circles_count=len(circles),
+            skip_stats=skip_stats,
+            candidates_count=len(result),
+            candidates=[{"name": c["name"], "x": int(c["x"]), "y": int(c["y"])} for c in result[:80]],
+        )
         if result:
             preview = ", ".join(f"{c['name']}@({c['x']},{c['y']})" for c in result[:15])
-            log_and_print(f"[personal_broadcast] candidates: {preview}", "debug")
+            log_and_print(f"[personal_broadcast] candidates: {preview} scan_id={scan_id}", "debug")
         else:
             ocr_preview = [str(w.get("text", "")).strip() for w in words if str(w.get("text", "")).strip()]
             if ocr_preview:
                 log_and_print(
-                    f"[personal_broadcast] no candidates from OCR words: {', '.join(ocr_preview[:25])}",
+                    f"[personal_broadcast] no candidates from OCR words: {', '.join(ocr_preview[:25])} scan_id={scan_id}",
                     "debug",
                 )
             else:
-                log_and_print("[personal_broadcast] no candidates: OCR words are empty after filtering", "debug")
-        return result
+                log_and_print(f"[personal_broadcast] no candidates: OCR words are empty after filtering scan_id={scan_id}", "debug")
+        return result, scan_id
 
     @classmethod
     def _is_member_name_token(cls, token: str) -> bool:
         if len(token) < 2:
             return False
         low = token.lower()
+        if low.startswith(("учасн", "участн", "учакн", "запрос", "запа")):
+            return False
         if low in cls._NON_MEMBER_WORDS:
             return False
         if not any(ch.isalpha() for ch in token):
             return False
         return True
+
+    @classmethod
+    def _contains_role_marker(cls, text: str) -> bool:
+        low = str(text or "").strip().lower()
+        if not low:
+            return False
+        return any(marker in low for marker in cls._ROLE_MARKERS)
+
+    def _row_has_role_label(
+        self,
+        words: list[dict],
+        chosen_left: int,
+        chosen_top: int,
+        chosen_w: int,
+        chosen_h: int,
+    ) -> bool:
+        chosen_right = chosen_left + chosen_w
+        chosen_bottom = chosen_top + chosen_h
+        for w in words:
+            text = str(w.get("text", "")).strip()
+            if not text:
+                continue
+            if not self._contains_role_marker(text):
+                continue
+            w_left = int(w["left"])
+            if w_left < chosen_right + 40:
+                continue
+            w_top = int(w["top"])
+            w_bottom = w_top + int(w["height"])
+            overlap = max(0, min(chosen_bottom, w_bottom) - max(chosen_top, w_top))
+            if overlap >= max(4, min(chosen_h, int(w["height"])) // 3):
+                return True
+        return False
 
     @staticmethod
     def _detect_avatar_circles(image_np) -> list[tuple[int, int, int]]:
@@ -300,12 +463,18 @@ class PersonalBroadcastSender:
                 return True
         return False
 
-    def _send_to_member(self, window, s, candidate: dict, channel_name: str) -> bool:
+    def _send_to_member(self, window, s, candidate: dict, channel_name: str, scan_id: str | None = None) -> bool:
         name = candidate["name"]
         x = candidate["x"]
         y = candidate["y"]
-        log_and_print(f"[personal_broadcast] sending to {name}", "info")
-        log_and_print(f"[personal_broadcast] click member name='{name}' at x={x}, y={y}", "debug")
+        sid = scan_id or "na"
+
+        if self._has_role_in_member_row(y, scan_id=sid):
+            log_and_print(f"[personal_broadcast] skip role account before send: {name} scan_id={sid}", "debug")
+            return False
+
+        log_and_print(f"[personal_broadcast] sending to {name} scan_id={sid}", "info")
+        log_and_print(f"[personal_broadcast] click member name='{name}' at x={x}, y={y} scan_id={sid}", "debug")
 
         window.set_focus()
         gd.click(x, y)
@@ -327,13 +496,13 @@ class PersonalBroadcastSender:
             multiscale=False,
             is_debug=_ui_debug(),
         ):
-            log_and_print(f"[personal_broadcast] row send icon not found for {name}", "error")
+            log_and_print(f"[personal_broadcast] row send icon not found for {name} scan_id={sid}", "error")
             return False
-        log_and_print(f"[personal_broadcast] row send clicked, scope={send_scope}", "debug")
+        log_and_print(f"[personal_broadcast] row send clicked, scope={send_scope} scan_id={sid}", "debug")
 
         window.set_focus()
         if not self._insert_message_text(window):
-            log_and_print(f"[personal_broadcast] cannot insert message text for {name}", "error")
+            log_and_print(f"[personal_broadcast] cannot insert message text for {name} scan_id={sid}", "error")
             return False
 
         dialog_send_scope = self._config.dialog_send_scope
@@ -346,12 +515,36 @@ class PersonalBroadcastSender:
             multiscale=True,
             is_debug=_ui_debug(),
         ):
-            log_and_print(f"[personal_broadcast] dialog send icon not found for {name}", "error")
+            log_and_print(f"[personal_broadcast] dialog send icon not found for {name} scan_id={sid}", "error")
             return False
-        log_and_print(f"[personal_broadcast] dialog send clicked, scope={dialog_send_scope}", "debug")
+        log_and_print(f"[personal_broadcast] dialog send clicked, scope={dialog_send_scope} scan_id={sid}", "debug")
 
         log_sent_message(channel_name=channel_name, text=self._config.message_text, source=f"personal:{name}")
         return True
+
+    def _has_role_in_member_row(self, member_center_y: int, scan_id: str | None = None) -> bool:
+        scope = self._config.members_scope
+        left = scope[0] + int(scope[2] * 0.55)
+        top = max(scope[1], int(member_center_y) - 28)
+        right = scope[0] + scope[2]
+        bottom = min(scope[1] + scope[3], int(member_center_y) + 28)
+        if right - left < 20 or bottom - top < 10:
+            return False
+
+        row_scope = (left, top, right, bottom)
+        img = take_screenshot(row_scope)
+        processed = preprocess_image(img)
+        words = perform_ocr_with_positions(processed, min_conf=30, lang="ukr+eng+rus")
+        if not words:
+            words = perform_ocr_with_positions(img, min_conf=35, lang="ukr+eng+rus")
+        if not words:
+            return False
+        row_text = " ".join(str(w.get("text", "")).strip() for w in words if str(w.get("text", "")).strip())
+        if self._contains_role_marker(row_text):
+            sid = scan_id or "na"
+            log_and_print(f"[personal_broadcast] role marker in right column: '{row_text}' scan_id={sid}", "debug")
+            return True
+        return False
 
     def _insert_message_text(self, window) -> bool:
         text = self._config.message_text
@@ -361,15 +554,17 @@ class PersonalBroadcastSender:
 
         x, y = self._config.message_input_xy
         last_error = None
-        for attempt in range(1, 4):
+        for attempt in range(1, 2):
             try:
                 window.set_focus()
                 gd.click(x, y)
+                gd.pause(0.08)
+                gd.click(x, y)
                 log_and_print(
-                    f"[personal_broadcast] click message input at {(x, y)} attempt={attempt}/3",
+                    f"[personal_broadcast] double-click message input at {(x, y)} attempt={attempt}/3",
                     "debug",
                 )
-                gd.pause(0.2)
+                gd.pause(0.25)
 
                 # Try to focus and clear current text before paste.
                 pag.hotkey("ctrl", "a")
@@ -377,18 +572,37 @@ class PersonalBroadcastSender:
                 pag.press("backspace")
                 gd.pause(0.05)
 
+                # Strategy 1: Ctrl+V
                 pyperclip.copy(text)
                 pag.hotkey("ctrl", "v")
                 gd.pause(0.2)
+                if self._input_contains_text(text):
+                    log_and_print(f"[personal_broadcast] message paste done via ctrl+v attempt={attempt}/3", "debug")
+                    return True
 
-                # Fallback insert for apps/windows where Ctrl+V is intercepted.
-                if pyperclip.paste() != text:
-                    pyperclip.copy(text)
+                # Strategy 2: Shift+Insert
+                pyperclip.copy(text)
                 pag.hotkey("shift", "insert")
-                gd.pause(0.15)
+                gd.pause(0.2)
+                if self._input_contains_text(text):
+                    log_and_print(f"[personal_broadcast] message paste done via shift+insert attempt={attempt}/3", "debug")
+                    return True
+                # Strategy 3: pywinauto Ctrl+V fallback
+                pyperclip.copy(text)
+                pwa_keyboard.send_keys("^v")
+                gd.pause(0.2)
+                if self._input_contains_text(text):
+                    log_and_print(f"[personal_broadcast] message paste done via pywinauto ctrl+v attempt={attempt}/3", "debug")
+                    return True
+                # No direct typing fallback here: it can duplicate text when paste already worked.
 
-                log_and_print(f"[personal_broadcast] message paste done attempt={attempt}/3", "debug")
+
+                log_and_print(
+                    "[personal_broadcast] paste verification failed; proceed without retry to avoid duplicate input",
+                    "warning",
+                )
                 return True
+
             except Exception as exc:
                 last_error = exc
                 log_and_print(f"[personal_broadcast] paste attempt={attempt}/3 failed: {exc}", "error")
@@ -397,6 +611,37 @@ class PersonalBroadcastSender:
         if last_error:
             log_and_print(f"[personal_broadcast] paste failed after retries: {last_error}", "error")
         return False
+
+    @staticmethod
+    def _input_contains_text(expected: str) -> bool:
+        if not expected:
+            return False
+        try:
+            old_clip = pyperclip.paste()
+        except Exception:
+            old_clip = None
+
+        try:
+            marker = "__pb_clip_marker__"
+            pyperclip.copy(marker)
+            pag.hotkey("ctrl", "a")
+            gd.pause(0.04)
+            pag.hotkey("ctrl", "c")
+            gd.pause(0.08)
+            current = (pyperclip.paste() or "").strip().lower()
+            target = expected.strip().lower()
+            # If marker remains in clipboard, copy-from-input did not happen.
+            if not current or current == marker:
+                return False
+            return target in current or current in target
+        except Exception:
+            return False
+        finally:
+            if old_clip is not None:
+                try:
+                    pyperclip.copy(old_clip)
+                except Exception:
+                    pass
 
     def _back_to_group(self, window) -> bool:
         window.set_focus()
@@ -444,3 +689,5 @@ class PersonalBroadcastSender:
             if ch.isalpha() or ch in {"-", "'"}:
                 allowed.append(ch)
         return "".join(allowed).strip()
+
+
