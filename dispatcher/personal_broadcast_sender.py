@@ -133,7 +133,6 @@ class PersonalBroadcastSender:
                         return
                     if not self._open_participants(window):
                         return
-                    break
 
             after_registry = raw_count - skip_registry
             after_gender = after_registry - skip_gender
@@ -145,9 +144,9 @@ class PersonalBroadcastSender:
             )
 
             if sent_any:
-                continue
-
-            log_and_print("[personal_broadcast] no candidate sent, scroll down", "debug")
+                log_and_print("[personal_broadcast] processed current scan, scroll down", "debug")
+            else:
+                log_and_print("[personal_broadcast] no candidate sent, scroll down", "debug")
             scroll_with_mouse(window, count_scroll=2, direction="down")
             gd.pause(0.3)
 
@@ -506,6 +505,21 @@ class PersonalBroadcastSender:
             return False
 
         dialog_send_scope = self._config.dialog_send_scope
+        mic_pos = gd.find_image(
+            "microfon.png",
+            scope=dialog_send_scope,
+            timeout=0.2,
+            confidence=0.75,
+            multiscale=True,
+            is_debug=_ui_debug(),
+        )
+        if mic_pos:
+            log_and_print(
+                f"[personal_broadcast] microphone is visible at {mic_pos}; "
+                f"text likely not inserted, skip send scan_id={sid}",
+                "error",
+            )
+            return False
 
         if not gd.click_image(
             self._config.dialog_send_image,
@@ -554,7 +568,7 @@ class PersonalBroadcastSender:
 
         x, y = self._config.message_input_xy
         last_error = None
-        for attempt in range(1, 2):
+        for attempt in range(1, 4):
             try:
                 window.set_focus()
                 gd.click(x, y)
@@ -598,10 +612,10 @@ class PersonalBroadcastSender:
 
 
                 log_and_print(
-                    "[personal_broadcast] paste verification failed; proceed without retry to avoid duplicate input",
+                    f"[personal_broadcast] paste verification failed attempt={attempt}/3",
                     "warning",
                 )
-                return True
+                continue
 
             except Exception as exc:
                 last_error = exc

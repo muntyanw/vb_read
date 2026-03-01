@@ -832,10 +832,10 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
         
         if not gd.click_image(
             "select.png",
-            scope=(580, 400, 740, 520),
-            confidence=0.88,
+            scope=(580, 400, 940, 620),
+            confidence=0.97,
             count_click=1,
-            multiscale=True,
+            multiscale=False,
             is_debug=_ui_debug(),
         ): 
 
