@@ -164,6 +164,14 @@
         "documentation": {}
     },
     {
+        "label": "Path",
+        "importPath": "pathlib",
+        "description": "pathlib",
+        "isExtraImport": true,
+        "detail": "pathlib",
+        "documentation": {}
+    },
+    {
         "label": "datetime",
         "kind": 6,
         "isExtraImport": true,
@@ -190,6 +198,14 @@
     },
     {
         "label": "timezone",
+        "importPath": "datetime",
+        "description": "datetime",
+        "isExtraImport": true,
+        "detail": "datetime",
+        "documentation": {}
+    },
+    {
+        "label": "datetime",
         "importPath": "datetime",
         "description": "datetime",
         "isExtraImport": true,
@@ -1056,6 +1072,14 @@
         "documentation": {}
     },
     {
+        "label": "keyboard",
+        "importPath": "pywinauto",
+        "description": "pywinauto",
+        "isExtraImport": true,
+        "detail": "pywinauto",
+        "documentation": {}
+    },
+    {
         "label": "Application",
         "importPath": "pywinauto",
         "description": "pywinauto",
@@ -1208,6 +1232,15 @@
         "documentation": {}
     },
     {
+        "label": "json",
+        "kind": 6,
+        "isExtraImport": true,
+        "importPath": "json",
+        "description": "json",
+        "detail": "json",
+        "documentation": {}
+    },
+    {
         "label": "defaultdict",
         "importPath": "collections",
         "description": "collections",
@@ -1237,15 +1270,6 @@
         "description": "dispatcher.personal_broadcast_registry",
         "isExtraImport": true,
         "detail": "dispatcher.personal_broadcast_registry",
-        "documentation": {}
-    },
-    {
-        "label": "json",
-        "kind": 6,
-        "isExtraImport": true,
-        "importPath": "json",
-        "description": "json",
-        "detail": "json",
         "documentation": {}
     },
     {
@@ -2200,7 +2224,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None\n    reason: Optional[str] = None\nclass MatchedContact(BaseModel):\n    order_id: int\n    carrier_id: int\n    viber_contact_name: Optional[str] = None\nclass DispatchResult(BaseModel):\n    # РРіРЅРѕСЂРёСЂСѓРµРј РЅРµРѕР¶РёРґР°РЅРЅС‹Рµ РїРѕР»СЏ РѕС‚ Р±СЌРєРµРЅРґР°",
+        "peekOfCode": "class Decision(BaseModel):\n    matches: Optional[bool] = None\n    confidence: Optional[float] = None\n    reason: Optional[str] = None\nclass MatchedContact(BaseModel):\n    order_id: int\n    carrier_id: int\n    viber_contact_name: Optional[str] = None\nclass DispatchResult(BaseModel):\n    # Ignore unexpected fields from backend.",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2209,7 +2233,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class MatchedContact(BaseModel):\n    order_id: int\n    carrier_id: int\n    viber_contact_name: Optional[str] = None\nclass DispatchResult(BaseModel):\n    # РРіРЅРѕСЂРёСЂСѓРµРј РЅРµРѕР¶РёРґР°РЅРЅС‹Рµ РїРѕР»СЏ РѕС‚ Р±СЌРєРµРЅРґР°\n    model_config = ConfigDict(extra='ignore')\n    message_id: str\n    # РџСЂРµРІСЂР°С‰Р°РµРј null -> {}, Рё Р·Р°РґР°С‘Рј Р±РµР·РѕРїР°СЃРЅС‹Р№ РґРµС„РѕР»С‚ С‡РµСЂРµР· default_factory\n    extracted: Dict[str, Any] = Field(default_factory=dict)",
+        "peekOfCode": "class MatchedContact(BaseModel):\n    order_id: int\n    carrier_id: int\n    viber_contact_name: Optional[str] = None\nclass DispatchResult(BaseModel):\n    # Ignore unexpected fields from backend.\n    model_config = ConfigDict(extra='ignore')\n    message_id: str\n    # Convert null -> {} and keep a safe default via default_factory.\n    extracted: Dict[str, Any] = Field(default_factory=dict)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2218,7 +2242,7 @@
         "kind": 6,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "class DispatchResult(BaseModel):\n    # РРіРЅРѕСЂРёСЂСѓРµРј РЅРµРѕР¶РёРґР°РЅРЅС‹Рµ РїРѕР»СЏ РѕС‚ Р±СЌРєРµРЅРґР°\n    model_config = ConfigDict(extra='ignore')\n    message_id: str\n    # РџСЂРµРІСЂР°С‰Р°РµРј null -> {}, Рё Р·Р°РґР°С‘Рј Р±РµР·РѕРїР°СЃРЅС‹Р№ РґРµС„РѕР»С‚ С‡РµСЂРµР· default_factory\n    extracted: Dict[str, Any] = Field(default_factory=dict)\n    # Р—Р°РѕРґРЅРѕ РїСЂРёРІРѕРґРёРј null -> [] РґР»СЏ СЃРїРёСЃРєРѕРІ\n    actions: List[Action] = Field(default_factory=list)\n    decision: Optional[Decision] = None\n    matched_contacts: List[MatchedContact] = Field(default_factory=list)",
+        "peekOfCode": "class DispatchResult(BaseModel):\n    # Ignore unexpected fields from backend.\n    model_config = ConfigDict(extra='ignore')\n    message_id: str\n    # Convert null -> {} and keep a safe default via default_factory.\n    extracted: Dict[str, Any] = Field(default_factory=dict)\n    # Convert null -> [] for list fields.\n    actions: List[Action] = Field(default_factory=list)\n    decision: Optional[Decision] = None\n    matched_contacts: List[MatchedContact] = Field(default_factory=list)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2245,7 +2269,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def reset_copy_watchdog() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter = 0\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(\"[copy_watchdog] reset on worker start\", \"info\")\n# ---- РљР»РёРµРЅС‚СЃРєРёРµ РјРѕРґРµР»Рё РїРѕРґ РѕС‚РІРµС‚ СЃРµСЂРІРµСЂР° ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):",
+        "peekOfCode": "def reset_copy_watchdog() -> None:\n    global copied_message_counter, last_message_copy_monotonic\n    copied_message_counter = 0\n    last_message_copy_monotonic = time.monotonic()\n    log_and_print(\"[copy_watchdog] reset on worker start\", \"info\")\n# ---- Client-side models for server response ----\nclass Action(BaseModel):\n    type: str\n    payload: Optional[Dict[str, Any]] = None\nclass Decision(BaseModel):",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2254,7 +2278,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_foto_message(scope):\n    pos = gd.find_text_any(queries=[\"РљРѕРїРёСЂРѕРІР°С‚СЊ С„РѕС‚Рѕ\",],\n                            lang=\"rus\", \n                            count=2, \n                            pause_attempt_sec =1, \n                            scope=scope, \n                            threshold = 0.8,\n                            is_debug=_ui_debug(), \n                            occurrence = 1)\n    if pos:",
+        "peekOfCode": "def is_foto_message(scope):\n    pos = gd.find_text_any(queries=[\"Копировать фото\",],\n                            lang=\"rus\", \n                            count=2, \n                            pause_attempt_sec =1, \n                            scope=scope, \n                            threshold = 0.8,\n                            is_debug=_ui_debug(), \n                            occurrence = 1)\n    if pos:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2263,7 +2287,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def is_link(scope):\n    pos = gd.find_text_any(queries=[\"РљРѕРїРёСЂРѕРІР°С‚СЊ СЃСЃС‹Р»РєСѓ\",],\n                            lang=\"rus\", \n                            count=2, \n                            pause_attempt_sec =1, \n                            scope=scope, \n                            threshold = 0.8,\n                            is_debug=_ui_debug(), \n                            occurrence = 1)\n    if pos:",
+        "peekOfCode": "def is_link(scope):\n    pos = gd.find_text_any(queries=[\"Копировать ссылку\",],\n                            lang=\"rus\", \n                            count=2, \n                            pause_attempt_sec =1, \n                            scope=scope, \n                            threshold = 0.8,\n                            is_debug=_ui_debug(), \n                            occurrence = 1)\n    if pos:",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2308,7 +2332,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def clickLastMess(window, name_viber_channel):\n    window.set_focus()\n    if not gd.click_image(\n        f\"{name_viber_channel}\\\\last_mess.png\",\n        scope=(880, 910, 1100, 990),\n        confidence=0.7,\n        count_click=1,\n        multiscale=True,\n        is_debug=_ui_debug(),\n    ):",
+        "peekOfCode": "def clickLastMess(window, name_viber_channel):\n    window.set_focus()\n    # OLD (image search) kept for rollback:\n    # if not gd.click_image(\n    #     f\"{name_viber_channel}\\\\last_mess.png\",\n    #     scope=(880, 910, 1100, 990),\n    #     confidence=0.7,\n    #     count_click=1,\n    #     multiscale=True,\n    #     is_debug=_ui_debug(),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2358,11 +2382,11 @@
         "documentation": {}
     },
     {
-        "label": "sendViberMessDispatherToРЎarrier",
+        "label": "sendViberMessDispatherToCarrier",
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def sendViberMessDispatherToРЎarrier(viber_names, window, x, y, viber_channel, text, s):\n    is_debug = _ui_debug()\n    resultFind = findMessage(window, x, y, viber_channel, text, s)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 70\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
+        "peekOfCode": "def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, text, s):\n    is_debug = _ui_debug()\n    resultFind = findMessage(window, x, y, viber_channel, text, s)\n    if resultFind:\n        x, y = resultFind\n    else:\n        return False\n    xRight = x - 70\n    yRight = y + 20\n    gd.right_click(xRight, yRight)",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2371,7 +2395,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def fill_y_mess(window, viber_channel, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"РЎС‚Р°СЂС‚ fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = gd.capture_and_find_image_boundary_coordinates(\n        (x, y, 800, height),",
+        "peekOfCode": "def fill_y_mess(window, viber_channel, s):\n    s.y_mess = []\n    window.set_focus()\n    log_and_print(\"Старт fill_y_mess\")\n    height = s.search_board_mess_y_end - s.search_board_mess_y_start\n    width = s.search_board_mess_x_end - s.search_board_mess_x_start\n    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start\n    log_and_print(f\"x = {x} y = {y} height = {height}, width = {width}\")\n    coordinates = gd.capture_and_find_image_boundary_coordinates(\n        (x, y, 800, height),",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2443,7 +2467,7 @@
         "kind": 2,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "def window_top_focus(window):\n    hwnd = window.handle\n    # РЈСЃС‚Р°РЅР°РІР»РёРІР°РµРј С„Р»Р°Рі \"РІСЃРµРіРґР° РїРѕРІРµСЂС… РѕСЃС‚Р°Р»СЊРЅС‹С…\"\n    win32gui.SetWindowPos(\n        hwnd,\n        win32con.HWND_TOPMOST,  # РІРµСЂС… РІСЃРµС… РѕРєРѕРЅ\n        0, 0, 0, 0,\n        win32con.SWP_NOMOVE | win32con.SWP_NOSIZE\n    )\n    window.set_focus()",
+        "peekOfCode": "def window_top_focus(window):\n    hwnd = window.handle\n    # Set \"always on top\" flag.\n    win32gui.SetWindowPos(\n        hwnd,\n        win32con.HWND_TOPMOST,  # above all windows\n        0, 0, 0, 0,\n        win32con.SWP_NOMOVE | win32con.SWP_NOSIZE\n    )\n    window.set_focus()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2479,7 +2503,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Р“Р»РѕР±Р°Р»СЊРЅС‹Р№ С„Р»Р°Рі РґР»СЏ РїСЂРµРґРѕС‚РІСЂР°С‰РµРЅРёСЏ РґРІРѕР№РЅРѕР№ СЂРµР°РєС†РёРё\nprocessed_messages = set()\n# РЎРµРјР°С„РѕСЂ РґР»СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0",
+        "peekOfCode": "DISPATCH_API_KEY = os.getenv(\n    \"DISPATCH_API_KEY\",\n    \"3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87\",\n)\n# Global flag to prevent duplicate message handling.\nprocessed_messages = set()\n# Semaphore for sequential message processing.\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2488,7 +2512,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "processed_messages = set()\n# РЎРµРјР°С„РѕСЂ РґР»СЏ РїРѕСЃР»РµРґРѕРІР°С‚РµР»СЊРЅРѕР№ РѕР±СЂР°Р±РѕС‚РєРё СЃРѕРѕР±С‰РµРЅРёР№\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic",
+        "peekOfCode": "processed_messages = set()\n# Semaphore for sequential message processing.\nprocessing_semaphore = asyncio.Semaphore(1)\ncount_y_mess_empty = 0\ncopied_message_counter = 0\nlast_message_copy_monotonic = time.monotonic()\nclass DispatchError(Exception):\n    pass\ndef mark_message_copied() -> None:\n    global copied_message_counter, last_message_copy_monotonic",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2533,7 +2557,7 @@
         "kind": 5,
         "importPath": "dispatcher.dispatch_client",
         "description": "dispatcher.dispatch_client",
-        "peekOfCode": "count_old_mess = 0\nasync def send_messages_from_y_mess(window, viber_channel, s):\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:\n            log_and_print(f\"[send_messages_from_y_mess] РњРµСЃРµРґР¶ y = {y}\")\n            window.set_focus()",
+        "peekOfCode": "count_old_mess = 0\nasync def send_messages_from_y_mess(window, viber_channel, s):\n    window.set_focus()\n    sending = 0\n    was_new_mess = False\n    global count_old_mess\n    for x, y in s.y_mess:\n        if y:\n            log_and_print(f\"[send_messages_from_y_mess] Меседж y = {y}\")\n            window.set_focus()",
         "detail": "dispatcher.dispatch_client",
         "documentation": {}
     },
@@ -2614,7 +2638,7 @@
         "kind": 6,
         "importPath": "dispatcher.personal_broadcast_sender",
         "description": "dispatcher.personal_broadcast_sender",
-        "peekOfCode": "class PersonalBroadcastSender:\n    _NON_MEMBER_WORDS = {\n        \"участники\",\n        \"учасники\",\n        \"participants\",\n        \"вы\",\n        \"you\",\n        \"неизвестно\",\n        \"--\",\n    }",
+        "peekOfCode": "class PersonalBroadcastSender:\n    _NON_MEMBER_WORDS = {\n        \"участники\",\n        \"учасники\",\n        \"учакники\",\n        \"participants\",\n        \"вы\",\n        \"you\",\n        \"запросити\",\n        \"запрос\",",
         "detail": "dispatcher.personal_broadcast_sender",
         "documentation": {}
     },
@@ -2650,7 +2674,7 @@
         "kind": 2,
         "importPath": "init",
         "description": "init",
-        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')\n        return None",
+        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        data = _load_json_utf8(file_path)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')\n        return None\n    except json.JSONDecodeError:",
         "detail": "init",
         "documentation": {}
     },
@@ -2668,7 +2692,7 @@
         "kind": 5,
         "importPath": "init",
         "description": "init",
-        "peekOfCode": "tg_creds = None\ntg_channels = None\nsettings = None\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data",
+        "peekOfCode": "tg_creds = None\ntg_channels = None\nsettings = None\ndef _load_json_utf8(file_path):\n    with open(file_path, 'r', encoding='utf-8-sig') as file:\n        return json.load(file)\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        data = _load_json_utf8(file_path)",
         "detail": "init",
         "documentation": {}
     },
@@ -2677,7 +2701,7 @@
         "kind": 5,
         "importPath": "init",
         "description": "init",
-        "peekOfCode": "tg_channels = None\nsettings = None\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:",
+        "peekOfCode": "tg_channels = None\nsettings = None\ndef _load_json_utf8(file_path):\n    with open(file_path, 'r', encoding='utf-8-sig') as file:\n        return json.load(file)\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        data = _load_json_utf8(file_path)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')",
         "detail": "init",
         "documentation": {}
     },
@@ -2686,7 +2710,7 @@
         "kind": 5,
         "importPath": "init",
         "description": "init",
-        "peekOfCode": "settings = None\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8') as file:\n            data = json.load(file)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Файл {file_path} не найден.\", 'error')",
+        "peekOfCode": "settings = None\ndef _load_json_utf8(file_path):\n    with open(file_path, 'r', encoding='utf-8-sig') as file:\n        return json.load(file)\ndef load_json(file_path):\n    log_and_print(f\"Загрузка данных из JSON файла {file_path}.\", 'info')\n    try:\n        data = _load_json_utf8(file_path)\n        log_and_print(f\"Данные успешно загружены из {file_path}.\", 'info')\n        return data",
         "detail": "init",
         "documentation": {}
     },
@@ -2695,7 +2719,7 @@
         "kind": 2,
         "importPath": "log",
         "description": "log",
-        "peekOfCode": "def set_debug_mode(enabled: bool) -> None:\n    global DEBUG_MODE\n    DEBUG_MODE = bool(enabled)\n    logging.getLogger().setLevel(logging.DEBUG if DEBUG_MODE else logging.INFO)\n    logging.info(f\"[log] debug_logs_mode={'on' if DEBUG_MODE else 'off'}\")\ndef log_and_print(message: str, level: str = \"debug\"):\n    level = level.lower()\n    now = datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")\n    if level in (\"info\", \"warning\", \"error\", \"critical\") or (level == \"debug\" and DEBUG_MODE):\n        print(f\"[{now}] {message}\")",
+        "peekOfCode": "def set_debug_mode(enabled: bool) -> None:\n    global DEBUG_MODE, _SESSION_LOGGED\n    DEBUG_MODE = bool(enabled)\n    logging.getLogger().setLevel(logging.DEBUG if DEBUG_MODE else logging.INFO)\n    _configure_third_party_loggers()\n    if not _SESSION_LOGGED:\n        logging.info(f\"[log] session_start run_id={RUN_ID}\")\n        _SESSION_LOGGED = True\n    logging.info(f\"[log] run_id={RUN_ID} debug_logs_mode={'on' if DEBUG_MODE else 'off'}\")\ndef log_and_print(message: str, level: str = \"debug\"):",
         "detail": "log",
         "documentation": {}
     },
@@ -2713,7 +2737,7 @@
         "kind": 5,
         "importPath": "log",
         "description": "log",
-        "peekOfCode": "FMT = \"%(asctime)s - %(levelname)s - %(message)s\"\nDEBUG_MODE = False\nlogging.basicConfig(\n    level=logging.INFO,\n    format=FMT,\n    handlers=[\n        logging.FileHandler(\"log.log\", mode=\"w\", encoding=\"utf-8\"),\n        logging.StreamHandler(),\n    ],\n    force=True,",
+        "peekOfCode": "FMT = \"%(asctime)s - %(levelname)s - %(message)s\"\nDEBUG_MODE = False\nRUN_ID = datetime.now().strftime(\"%Y%m%d_%H%M%S_%f\")\n_SESSION_LOGGED = False\ndef _configure_third_party_loggers() -> None:\n    # Silence verbose library debug logs (font matching, image internals, etc.)\n    logging.getLogger(\"matplotlib\").setLevel(logging.WARNING)\n    logging.getLogger(\"matplotlib.font_manager\").setLevel(logging.WARNING)\n    logging.getLogger(\"PIL\").setLevel(logging.WARNING)\nlogging.basicConfig(",
         "detail": "log",
         "documentation": {}
     },
@@ -2722,7 +2746,25 @@
         "kind": 5,
         "importPath": "log",
         "description": "log",
-        "peekOfCode": "DEBUG_MODE = False\nlogging.basicConfig(\n    level=logging.INFO,\n    format=FMT,\n    handlers=[\n        logging.FileHandler(\"log.log\", mode=\"w\", encoding=\"utf-8\"),\n        logging.StreamHandler(),\n    ],\n    force=True,\n)",
+        "peekOfCode": "DEBUG_MODE = False\nRUN_ID = datetime.now().strftime(\"%Y%m%d_%H%M%S_%f\")\n_SESSION_LOGGED = False\ndef _configure_third_party_loggers() -> None:\n    # Silence verbose library debug logs (font matching, image internals, etc.)\n    logging.getLogger(\"matplotlib\").setLevel(logging.WARNING)\n    logging.getLogger(\"matplotlib.font_manager\").setLevel(logging.WARNING)\n    logging.getLogger(\"PIL\").setLevel(logging.WARNING)\nlogging.basicConfig(\n    level=logging.INFO,",
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "RUN_ID",
+        "kind": 5,
+        "importPath": "log",
+        "description": "log",
+        "peekOfCode": "RUN_ID = datetime.now().strftime(\"%Y%m%d_%H%M%S_%f\")\n_SESSION_LOGGED = False\ndef _configure_third_party_loggers() -> None:\n    # Silence verbose library debug logs (font matching, image internals, etc.)\n    logging.getLogger(\"matplotlib\").setLevel(logging.WARNING)\n    logging.getLogger(\"matplotlib.font_manager\").setLevel(logging.WARNING)\n    logging.getLogger(\"PIL\").setLevel(logging.WARNING)\nlogging.basicConfig(\n    level=logging.INFO,\n    format=FMT,",
+        "detail": "log",
+        "documentation": {}
+    },
+    {
+        "label": "_SESSION_LOGGED",
+        "kind": 5,
+        "importPath": "log",
+        "description": "log",
+        "peekOfCode": "_SESSION_LOGGED = False\ndef _configure_third_party_loggers() -> None:\n    # Silence verbose library debug logs (font matching, image internals, etc.)\n    logging.getLogger(\"matplotlib\").setLevel(logging.WARNING)\n    logging.getLogger(\"matplotlib.font_manager\").setLevel(logging.WARNING)\n    logging.getLogger(\"PIL\").setLevel(logging.WARNING)\nlogging.basicConfig(\n    level=logging.INFO,\n    format=FMT,\n    handlers=[",
         "detail": "log",
         "documentation": {}
     },
@@ -2947,7 +2989,7 @@
         "kind": 2,
         "importPath": "recognize_text",
         "description": "recognize_text",
-        "peekOfCode": "def perform_ocr_with_positions(image):\n    custom_config = read_setting(\"capture_and_recognize.custom_config\")\n    lang = read_setting(\"capture_and_recognize.lang\")\n    data = pytesseract.image_to_data(image, lang=lang, config=custom_config, output_type=Output.DICT)\n    n_boxes = len(data['level'])\n    words_with_positions = []\n    for i in range(n_boxes):\n        if int(data['conf'][i]) > 60 and data['text'][i].strip() != \"\":\n            word_info = {\n                'text': data['text'][i],",
+        "peekOfCode": "def perform_ocr_with_positions(image, min_conf: int = 60, lang: str | None = None):\n    custom_config = read_setting(\"capture_and_recognize.custom_config\")\n    ocr_lang = lang or read_setting(\"capture_and_recognize.lang\")\n    data = pytesseract.image_to_data(image, lang=ocr_lang, config=custom_config, output_type=Output.DICT)\n    n_boxes = len(data['level'])\n    words_with_positions = []\n    for i in range(n_boxes):\n        text = str(data['text'][i]).strip()\n        conf_raw = str(data['conf'][i]).strip()\n        try:",
         "detail": "recognize_text",
         "documentation": {}
     },
@@ -3100,7 +3142,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def read_setting(field_path) -> str | int | float | bool | list[str] | dict | None:\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8-sig') as file:\n            settings = json.load(file)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:",
+        "peekOfCode": "def read_setting(field_path) -> str | int | float | bool | list[str] | dict | None:\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        settings = _read_json_utf8(file_path)\n        # Navigate to the desired field\n        keys = field_path.split('.')\n        value = settings\n        for key in keys:\n            value = value[key]",
         "detail": "utils",
         "documentation": {}
     },
@@ -3109,7 +3151,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def write_setting(field_path, new_value):\n    \"\"\"\n    Writes a new value to a specific field in a JSON settings file.\n    :param field_path: Dot-separated path to the field (e.g., \"capture_and_recognize.lang\").\n    :param new_value: The new value to set for the specified field.\n    \"\"\"\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        with open(file_path, 'r', encoding='utf-8-sig') as file:",
+        "peekOfCode": "def write_setting(field_path, new_value):\n    \"\"\"\n    Writes a new value to a specific field in a JSON settings file.\n    :param field_path: Dot-separated path to the field (e.g., \"capture_and_recognize.lang\").\n    :param new_value: The new value to set for the specified field.\n    \"\"\"\n    file_path = \"settings.json\"\n    try:\n        # Open and load the JSON file\n        settings = _read_json_utf8(file_path)",
         "detail": "utils",
         "documentation": {}
     },
@@ -3118,7 +3160,7 @@
         "kind": 2,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… РёР· JSON С„Р°Р№Р»Р° {file_path}.\", 'info')\n    try:\n        with open(file_path, 'r', encoding='utf-8-sig') as file:\n            data = json.load(file)\n        log_and_print(f\"Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹ РёР· {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Р¤Р°Р№Р» {file_path} РЅРµ РЅР°Р№РґРµРЅ.\", 'error')\n        return None",
+        "peekOfCode": "def load_json(file_path):\n    log_and_print(f\"Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… РёР· JSON С„Р°Р№Р»Р° {file_path}.\", 'info')\n    try:\n        data = _read_json_utf8(file_path)\n        log_and_print(f\"Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹ РёР· {file_path}.\", 'info')\n        return data\n    except FileNotFoundError:\n        log_and_print(f\"Р¤Р°Р№Р» {file_path} РЅРµ РЅР°Р№РґРµРЅ.\", 'error')\n        return None\n    except json.JSONDecodeError:",
         "detail": "utils",
         "documentation": {}
     },
@@ -3190,7 +3232,7 @@
         "kind": 5,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "os.environ[\"QT_LOGGING_RULES\"] = \"qt.qpa.windows.debug=false\"\nfrom typing import Tuple, Optional\nimport time\nimport win32api, win32con, win32gui\nImageLike = Union[str, np.ndarray]\ndef preprocess_image(image_np):\n    \"\"\"\n    РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° OCR.\n    :param image_np: РР·РѕР±СЂР°Р¶РµРЅРёРµ РІ С„РѕСЂРјР°С‚Рµ NumPy РјР°СЃСЃРёРІР° (RGB)\n    :return: РћР±СЂР°Р±РѕС‚Р°РЅРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ РѕС‚С‚РµРЅРєР°С… СЃРµСЂРѕРіРѕ",
+        "peekOfCode": "os.environ[\"QT_LOGGING_RULES\"] = \"qt.qpa.windows.debug=false\"\nfrom typing import Tuple, Optional\nimport time\nimport win32api, win32con, win32gui\nImageLike = Union[str, np.ndarray]\ndef _read_json_utf8(file_path):\n    with open(file_path, \"r\", encoding=\"utf-8-sig\") as file:\n        return json.load(file)\ndef preprocess_image(image_np):\n    \"\"\"",
         "detail": "utils",
         "documentation": {}
     },
@@ -3199,7 +3241,7 @@
         "kind": 5,
         "importPath": "utils",
         "description": "utils",
-        "peekOfCode": "ImageLike = Union[str, np.ndarray]\ndef preprocess_image(image_np):\n    \"\"\"\n    РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° OCR.\n    :param image_np: РР·РѕР±СЂР°Р¶РµРЅРёРµ РІ С„РѕСЂРјР°С‚Рµ NumPy РјР°СЃСЃРёРІР° (RGB)\n    :return: РћР±СЂР°Р±РѕС‚Р°РЅРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ РѕС‚С‚РµРЅРєР°С… СЃРµСЂРѕРіРѕ\n    \"\"\"\n    # РџСЂРѕРІРµСЂСЏРµРј СЂР°Р·РјРµСЂРЅРѕСЃС‚СЊ РјР°СЃСЃРёРІР°\n    if len(image_np.shape) != 3 or image_np.shape[2] != 3:\n        raise ValueError(\"РР·РѕР±СЂР°Р¶РµРЅРёРµ РґРѕР»Р¶РЅРѕ Р±С‹С‚СЊ С†РІРµС‚РЅС‹Рј (3 РєР°РЅР°Р»Р°).\")",
+        "peekOfCode": "ImageLike = Union[str, np.ndarray]\ndef _read_json_utf8(file_path):\n    with open(file_path, \"r\", encoding=\"utf-8-sig\") as file:\n        return json.load(file)\ndef preprocess_image(image_np):\n    \"\"\"\n    РџСЂРµРѕР±СЂР°Р·СѓРµС‚ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РґР»СЏ СѓР»СѓС‡С€РµРЅРёСЏ РєР°С‡РµСЃС‚РІР° OCR.\n    :param image_np: РР·РѕР±СЂР°Р¶РµРЅРёРµ РІ С„РѕСЂРјР°С‚Рµ NumPy РјР°СЃСЃРёРІР° (RGB)\n    :return: РћР±СЂР°Р±РѕС‚Р°РЅРЅРѕРµ РёР·РѕР±СЂР°Р¶РµРЅРёРµ РІ РѕС‚С‚РµРЅРєР°С… СЃРµСЂРѕРіРѕ\n    \"\"\"",
         "detail": "utils",
         "documentation": {}
     },

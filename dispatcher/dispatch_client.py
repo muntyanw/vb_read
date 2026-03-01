@@ -619,17 +619,20 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
-    if not gd.click_image(
-        f"{name_viber_channel}\\last_mess.png",
-        scope=(880, 910, 1100, 990),
-        confidence=0.7,
-        count_click=1,
-        multiscale=True,
-        is_debug=_ui_debug(),
-    ):
-        log_and_print("Not find icon LastMessage", "INFO")
-        return False
-        
+    # OLD (image search) kept for rollback:
+    # if not gd.click_image(
+    #     f"{name_viber_channel}\\last_mess.png",
+    #     scope=(880, 910, 1100, 990),
+    #     confidence=0.7,
+    #     count_click=1,
+    #     multiscale=True,
+    #     is_debug=_ui_debug(),
+    # ):
+    #     log_and_print("Not find icon LastMessage", "INFO")
+    #     return False
+
+    gd.click(920, 960)
+    gd.pause(0.2)
     
     log_and_print("Click down to last messages", "INFO")
     #scroll_with_mouse(window, count_scroll=2, direction="up")

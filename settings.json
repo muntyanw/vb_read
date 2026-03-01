@@ -1,4 +1,4 @@
-{
+﻿{
     "capture_and_recognize": {
         "lang": "ukr",
         "lang_comment": "Варианты: ukr | rus | eng | ukr+rus | ukr+eng | rus+eng",
@@ -65,11 +65,15 @@
     "periodic_broadcast_interval_minutes": 0,
     "periodic_broadcast_send_on_startup": false,
     "periodic_broadcast_send_on_startup_comment": "Варианты: true | false",
+    
+    
     "debug_logs_mode": true,
     "debug_logs_mode_comment": "Варианты: true | false",
     "debug_methods_mode": false,
     "debug_methods_mode_comment": "Варианты: true | false",
-    "work_mode": "personal_broadcast",
+
+
+    "work_mode": "reader",
     "work_mode_comment": "Варианты: reader (чтение/обработка сообщений по каналам из viber_channels) | personal_broadcast (персональная рассылка участникам одного канала из personal_broadcast_channel)",
     "personal_broadcast_text": "Автоматичний пошук поїздок https://robos.biz/",
     "personal_broadcast_max_pause_seconds": 8,
