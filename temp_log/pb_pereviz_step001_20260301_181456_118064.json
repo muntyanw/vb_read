@@ -1,0 +1,106 @@
+{
+  "scan_id": "pb_pereviz_step001_20260301_181456_118064",
+  "channel": "pereviz",
+  "step": 1,
+  "scope": [
+    800,
+    50,
+    300,
+    880
+  ],
+  "saved_at": "2026-03-01T18:14:56",
+  "image": "D:\\prjs\\vb_read\\temp_log\\pb_pereviz_step001_20260301_181456_118064.png",
+  "cwd": "D:\\prjs\\vb_read",
+  "ocr_words_count": 94,
+  "avatar_circles_count": 59,
+  "skip_stats": {
+    "role_line": 8,
+    "role_label": 1,
+    "no_avatar": 1,
+    "bad_token": 11,
+    "short_name": 0
+  },
+  "candidates_count": 16,
+  "candidates": [
+    {
+      "name": "Валерий",
+      "x": 896,
+      "y": 176
+    },
+    {
+      "name": "здминистратор",
+      "x": 1022,
+      "y": 371
+    },
+    {
+      "name": "адманистратор",
+      "x": 1022,
+      "y": 466
+    },
+    {
+      "name": "Nina",
+      "x": 859,
+      "y": 469
+    },
+    {
+      "name": "вадім",
+      "x": 863,
+      "y": 519
+    },
+    {
+      "name": "Андрій",
+      "x": 866,
+      "y": 567
+    },
+    {
+      "name": "Мауа",
+      "x": 862,
+      "y": 616
+    },
+    {
+      "name": "Тетяна",
+      "x": 866,
+      "y": 714
+    },
+    {
+      "name": "Samik",
+      "x": 861,
+      "y": 763
+    },
+    {
+      "name": "snc",
+      "x": 863,
+      "y": 763
+    },
+    {
+      "name": "Biranix",
+      "x": 866,
+      "y": 812
+    },
+    {
+      "name": "Sania",
+      "x": 859,
+      "y": 861
+    },
+    {
+      "name": "sora",
+      "x": 861,
+      "y": 861
+    },
+    {
+      "name": "олександр",
+      "x": 879,
+      "y": 912
+    },
+    {
+      "name": "Bagi",
+      "x": 861,
+      "y": 518
+    },
+    {
+      "name": "Тишик",
+      "x": 910,
+      "y": 812
+    }
+  ]
+}

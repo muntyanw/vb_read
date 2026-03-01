@@ -884,17 +884,23 @@ def fill_y_mess(window, viber_channel, s):
 
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
 
+    heart_templates = []
+    channel_name = viber_channel["name_viber_channel"]
+    for idx in range(1, 8):
+        file_name = "heart.png" if idx == 1 else f"heart{idx}.png"
+        file_path = f"images\\{channel_name}\\{file_name}"
+        if not os.path.exists(file_path):
+            log_and_print(f"[fill_y_mess] template not found, stop heart scan list: {file_path}", "debug")
+            break
+        heart_templates.append(file_path)
+
+    if not heart_templates:
+        log_and_print(f"[fill_y_mess] no heart templates found for channel={channel_name}", "error")
+        return
+
     coordinates = gd.capture_and_find_image_boundary_coordinates(
         (x, y, 800, height),
-        [
-            f"images\\{viber_channel["name_viber_channel"]}\\heart.png",
-            f"images\\{viber_channel["name_viber_channel"]}\\heart2.png",
-            f"images\\{viber_channel["name_viber_channel"]}\\heart3.png",
-            f"images\\{viber_channel["name_viber_channel"]}\\heart4.png",
-            f"images\\{viber_channel["name_viber_channel"]}\\heart5.png",
-            f"images\\{viber_channel["name_viber_channel"]}\\heart6.png",
-            f"images\\{viber_channel["name_viber_channel"]}\\heart5.png",
-        ],
+        heart_templates,
         visualize=False,
         threshold=0.88,
     )

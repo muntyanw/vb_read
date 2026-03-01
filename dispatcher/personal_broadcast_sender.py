@@ -1,4 +1,4 @@
-import random
+﻿import random
 import json
 import time
 from datetime import datetime
@@ -26,16 +26,16 @@ def _ui_debug() -> bool:
 
 class PersonalBroadcastSender:
     _NON_MEMBER_WORDS = {
-        "участники",
-        "учасники",
-        "учакники",
+        "СѓС‡Р°СЃС‚РЅРёРєРё",
+        "СѓС‡Р°СЃРЅРёРєРё",
+        "СѓС‡Р°РєРЅРёРєРё",
         "participants",
-        "вы",
+        "РІС‹",
         "you",
-        "запросити",
-        "запрос",
-        "запа",
-        "неизвестно",
+        "Р·Р°РїСЂРѕСЃРёС‚Рё",
+        "Р·Р°РїСЂРѕСЃ",
+        "Р·Р°РїР°",
+        "РЅРµРёР·РІРµСЃС‚РЅРѕ",
         "--",
     }
     _RIGHT_TEXT_MIN_GAP_PX = 110
@@ -43,21 +43,24 @@ class PersonalBroadcastSender:
         "admin",
         "administrator",
         "superadmin",
-        "админ",
-        "администратор",
-        "адміністратор",
-        "суперадмин",
-        "суперадмін",
+        "Р°РґРјРёРЅ",
+        "Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ",
+        "Р°РґРјС–РЅС–СЃС‚СЂР°С‚РѕСЂ",
+        "СЃСѓРїРµСЂР°РґРјРёРЅ",
+        "СЃСѓРїРµСЂР°РґРјС–РЅ",
     }
     _ROLE_MARKERS = (
         "admin",
         "administrator",
-        "админ",
-        "администратор",
-        "адміністратор",
-        "суперадмин",
-        "суперадмін",
+        "Р°РґРјРёРЅ",
+        "Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ",
+        "Р°РґРјС–РЅС–СЃС‚СЂР°С‚РѕСЂ",
+        "СЃСѓРїРµСЂР°РґРјРёРЅ",
+        "СЃСѓРїРµСЂР°РґРјС–РЅ",
     )
+
+    _INFO_STATE_EPS = 0.015
+    _NAME_MAX_X_RATIO = 0.62
 
     def __init__(self, config: PersonalBroadcastConfig):
         self._config = config
@@ -154,41 +157,141 @@ class PersonalBroadcastSender:
         self._back_to_group(window)
 
     def _open_participants(self, window) -> bool:
-        window.set_focus()
-        log_and_print(
-            f"[personal_broadcast] click info image={self._config.open_info_image}, scope={self._config.open_info_scope}",
-            "debug",
-        )
-        if not gd.click_image(
-            self._config.open_info_image,
-            scope=self._config.open_info_scope,
-            confidence=0.8,
-            count_click=1,
-            multiscale=True,
-            is_debug=_ui_debug(),
-        ):
-            log_and_print("[personal_broadcast] cannot open info panel", "error")
-            return False
+        for attempt in range(1, 4):
+            window.set_focus()
+            state, score_unselect, score_info = self._detect_info_icon_state()
+            log_and_print(
+                f"[personal_broadcast] info state attempt={attempt}/3 "
+                f"state={state} score_unselect={score_unselect:.3f} score_info={score_info:.3f}",
+                "debug",
+            )
 
+            if state != "open":
+                log_and_print(
+                    f"[personal_broadcast] click info image={self._config.open_info_image}, "
+                    f"scope={self._config.open_info_scope} attempt={attempt}/3",
+                    "debug",
+                )
+                gd.click_image(
+                    self._config.open_info_image,
+                    scope=self._config.open_info_scope,
+                    confidence=0.8,
+                    count_click=1,
+                    multiscale=True,
+                    is_debug=_ui_debug(),
+                )
+                gd.pause(0.6)
+            else:
+                log_and_print("[personal_broadcast] info already open (info.png dominates), skip info click", "debug")
+
+            if self._click_participants_text():
+                gd.pause(2.0)
+                return True
+
+            log_and_print(
+                f"[personal_broadcast] participants text not found, retry open info attempt={attempt}/3",
+                "warning",
+            )
+            gd.pause(0.8)
+
+        log_and_print("[personal_broadcast] cannot click participants", "error")
+        return False
+
+    def _click_participants_text(self) -> bool:
         log_and_print(
             f"[personal_broadcast] click participants text in scope={self._config.participants_click_scope}",
             "debug",
         )
         gd.pause(1.0)
-        if not gd.click_text(
-            self._config.participants_texts,
-            count_attempt_find=2,
-            pause_attempt=1,
-            lang="ukr",
-            scope=self._config.participants_click_scope,
-            threshold=0.6,
-            is_debug=_ui_debug(),
-            count_click=1,
-        ):
-            log_and_print("[personal_broadcast] cannot click participants", "error")
-            return False
-        gd.pause(2.0)
-        return True
+        return bool(
+            gd.click_text(
+                self._config.participants_texts,
+                count_attempt_find=2,
+                pause_attempt=1,
+                lang="ukr",
+                scope=self._config.participants_click_scope,
+                threshold=0.6,
+                is_debug=_ui_debug(),
+                count_click=1,
+            )
+        )
+
+    def _detect_info_icon_state(self) -> tuple[str, float, float]:
+        """
+        Returns (state, score_unselect, score_info):
+        - state=open: info.png is more similar (info panel likely already opened)
+        - state=closed: info_unselect.png is more similar
+        - state=unknown: similarity is too close or templates not available
+        """
+        scope = self._config.open_info_scope
+        if scope is None:
+            return "unknown", -1.0, -1.0
+
+        score_unselect = self._template_score_in_scope(self._config.open_info_image, scope)
+        score_info = self._template_score_in_scope("info.png", scope)
+
+        if score_unselect < 0 and score_info < 0:
+            return "unknown", score_unselect, score_info
+        if score_info > score_unselect + self._INFO_STATE_EPS:
+            return "open", score_unselect, score_info
+        if score_unselect > score_info + self._INFO_STATE_EPS:
+            return "closed", score_unselect, score_info
+        return "unknown", score_unselect, score_info
+
+    def _template_score_in_scope(self, image_name: str, scope: tuple[int, int, int, int]) -> float:
+        path = self._resolve_template_path(image_name)
+        if path is None:
+            return -1.0
+
+        left, bottom, right, top = [int(v) for v in scope]
+        width = max(1, right - left)
+        height = max(1, top - bottom)
+        snap_rgb = take_screenshot((left, bottom, width, height))
+        snap_bgr = cv2.cvtColor(snap_rgb, cv2.COLOR_RGB2BGR)
+
+        tpl = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        if tpl is None:
+            return -1.0
+
+        mask = None
+        if tpl.ndim == 3 and tpl.shape[2] == 4:
+            alpha = tpl[:, :, 3]
+            _, mask = cv2.threshold(alpha, 0, 255, cv2.THRESH_BINARY)
+            tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_BGRA2BGR)
+        elif tpl.ndim == 3:
+            tpl_bgr = tpl
+        else:
+            tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_GRAY2BGR)
+
+        ih, iw = snap_bgr.shape[:2]
+        th, tw = tpl_bgr.shape[:2]
+        if th < 1 or tw < 1 or th > ih or tw > iw:
+            return -1.0
+
+        if mask is not None:
+            res = cv2.matchTemplate(snap_bgr, tpl_bgr, cv2.TM_CCORR_NORMED, mask=mask)
+            _, max_val, _, _ = cv2.minMaxLoc(res)
+            return float(max_val)
+
+        img_gray = cv2.cvtColor(snap_bgr, cv2.COLOR_BGR2GRAY)
+        tpl_gray = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY)
+        res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        return float(max_val)
+
+    @staticmethod
+    def _resolve_template_path(image_name: str) -> Path | None:
+        p = Path(str(image_name))
+        candidates = [
+            p,
+            Path.cwd() / p,
+            Path.cwd() / "images" / p.name,
+            Path(__file__).resolve().parents[1] / "images" / p.name,
+        ]
+        for c in candidates:
+            if c.exists():
+                return c
+        return None
 
     def _ensure_participants_list(self, window) -> bool:
         window.set_focus()
@@ -269,23 +372,23 @@ class PersonalBroadcastSender:
             # quick preview for debug mode without stopping the loop
             showImage(img, 0, title=f"[personal_broadcast] OCR raw scope={scope}")
             showImage(processed, 0, title=f"[personal_broadcast] OCR processed scope={scope}")
-        words = perform_ocr_with_positions(processed, min_conf=40, lang="ukr+eng+rus")
-        if len(words) < 8:
-            raw_words = perform_ocr_with_positions(img, min_conf=45, lang="ukr+eng+rus")
-            if raw_words:
-                seen = {(w["text"], int(w["left"]), int(w["top"])) for w in words}
-                added = 0
-                for w in raw_words:
-                    key = (w["text"], int(w["left"]), int(w["top"]))
-                    if key in seen:
-                        continue
-                    words.append(w)
-                    seen.add(key)
-                    added += 1
-                log_and_print(
-                    f"[personal_broadcast] OCR fallback merged raw words: +{added}, total={len(words)} scan_id={scan_id}",
-                    "debug",
-                )
+        words = perform_ocr_with_positions(processed, min_conf=35, lang="ukr+eng+rus")
+        raw_words = perform_ocr_with_positions(img, min_conf=35, lang="ukr+eng+rus")
+        if raw_words:
+            seen = {(w["text"], int(w["left"]), int(w["top"])) for w in words}
+            added = 0
+            for w in raw_words:
+                key = (w["text"], int(w["left"]), int(w["top"]))
+                if key in seen:
+                    continue
+                words.append(w)
+                seen.add(key)
+                added += 1
+            log_and_print(
+                f"[personal_broadcast] OCR merged raw+processed: raw={len(raw_words)} "
+                f"added={added}, total={len(words)} scan_id={scan_id}",
+                "debug",
+            )
         if not words:
             self._update_scan_metadata(
                 scan_id,
@@ -350,6 +453,14 @@ class PersonalBroadcastSender:
 
             local_center_x = int(chosen["left"]) + int(chosen["width"]) // 2
             local_center_y = int(chosen["top"]) + int(chosen["height"]) // 2
+            if local_center_x > int(scope[2] * self._NAME_MAX_X_RATIO):
+                skip_stats["bad_token"] += 1
+                log_and_print(
+                    f"[personal_broadcast] skip right-column token name='{name}' x={local_center_x} "
+                    f"scope_w={scope[2]} scan_id={scan_id}",
+                    "debug",
+                )
+                continue
             if not self._has_avatar_left(local_center_x, local_center_y, circles):
                 skip_stats["no_avatar"] += 1
                 log_and_print(f"[personal_broadcast] skip no avatar near name='{name}' line='{line_text}' scan_id={scan_id}", "debug")
@@ -392,7 +503,9 @@ class PersonalBroadcastSender:
         if len(token) < 2:
             return False
         low = token.lower()
-        if low.startswith(("учасн", "участн", "учакн", "запрос", "запа")):
+        if cls._looks_like_role_word(low):
+            return False
+        if low.startswith(("СѓС‡Р°СЃРЅ", "СѓС‡Р°СЃС‚РЅ", "СѓС‡Р°РєРЅ", "Р·Р°РїСЂРѕСЃ", "Р·Р°РїР°")):
             return False
         if low in cls._NON_MEMBER_WORDS:
             return False
@@ -400,6 +513,22 @@ class PersonalBroadcastSender:
             return False
         return True
 
+    @staticmethod
+    def _looks_like_role_word(low: str) -> bool:
+        low = (low or "").lower()
+        if not low:
+            return False
+        role_parts = (
+            "admin",
+            "dmin",
+            "superadmin",
+            "админ",
+            "дмин",
+            "министратор",
+            "дминистратор",
+            "суперадмин",
+        )
+        return any(p in low for p in role_parts)
     @classmethod
     def _contains_role_marker(cls, text: str) -> bool:
         low = str(text or "").strip().lower()
@@ -442,10 +571,10 @@ class PersonalBroadcastSender:
             cv2.HOUGH_GRADIENT,
             dp=1.2,
             minDist=26,
-            param1=90,
-            param2=20,
-            minRadius=10,
-            maxRadius=28,
+            param1=80,
+            param2=16,
+            minRadius=9,
+            maxRadius=34,
         )
         if circles is None:
             return []
@@ -458,7 +587,7 @@ class PersonalBroadcastSender:
                 continue
             dx = name_x - cx
             dy = abs(name_y - cy)
-            if 15 <= dx <= 140 and dy <= 30:
+            if 10 <= dx <= 180 and dy <= 45:
                 return True
         return False
 
@@ -545,7 +674,8 @@ class PersonalBroadcastSender:
         if right - left < 20 or bottom - top < 10:
             return False
 
-        row_scope = (left, top, right, bottom)
+        # take_screenshot expects (x, y, width, height)
+        row_scope = (left, top, right - left, bottom - top)
         img = take_screenshot(row_scope)
         processed = preprocess_image(img)
         words = perform_ocr_with_positions(processed, min_conf=30, lang="ukr+eng+rus")
@@ -693,8 +823,8 @@ class PersonalBroadcastSender:
         if not n:
             return False
         # Heuristic for ukr/rus/eng OCR names:
-        # female names often end with: а/я (cyrillic) or a (latin).
-        return n[-1] in {"а", "я", "a"}
+        # female names often end with: Р°/СЏ (cyrillic) or a (latin).
+        return n[-1] in {"Р°", "СЏ", "a"}
 
     @staticmethod
     def _normalize_name(name: str) -> str:
@@ -703,5 +833,8 @@ class PersonalBroadcastSender:
             if ch.isalpha() or ch in {"-", "'"}:
                 allowed.append(ch)
         return "".join(allowed).strip()
+
+
+
 
 
