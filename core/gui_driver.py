@@ -839,6 +839,11 @@ def click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.
 def right_click(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):
     human_move_and_right_click(x, y) 
     
+def double_click(x: int = None, y: int = None, duration: Tuple[float, float] = (0.4, 0.9)):
+    if x == None:
+        x, y = pag.position()
+    human_move_and_click(x, y, count_click=2)
+    
 def click_diff(x: int, y: int, duration: Tuple[float, float] = (0.4, 0.9)):
     human_move_and_click_diff(x, y)
     
