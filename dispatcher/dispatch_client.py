@@ -633,6 +633,8 @@ def clickLastMess(window, name_viber_channel):
 
     gd.click(920, 960)
     gd.pause(0.2)
+    gd.double_click(1060, 960)
+    gd.pause(0.2)
     
     log_and_print("Click down to last messages", "INFO")
     #scroll_with_mouse(window, count_scroll=2, direction="up")
