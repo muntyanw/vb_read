@@ -1,0 +1,101 @@
+{
+  "scan_id": "pb_pereviz_step006_20260302_113237_867444",
+  "channel": "pereviz",
+  "step": 6,
+  "scope": [
+    800,
+    50,
+    300,
+    880
+  ],
+  "saved_at": "2026-03-02T11:32:37",
+  "image": "D:\\prjs\\vb_read\\temp_log\\pb_pereviz_step006_20260302_113237_867444.png",
+  "cwd": "D:\\prjs\\vb_read",
+  "ocr_words_count": 119,
+  "avatar_circles_count": 41,
+  "skip_stats": {
+    "role_line": 0,
+    "role_label": 0,
+    "no_avatar": 0,
+    "bad_token": 19,
+    "short_name": 0
+  },
+  "candidates_count": 15,
+  "candidates": [
+    {
+      "name": "Boga",
+      "x": 877,
+      "y": 219
+    },
+    {
+      "name": "Олександр",
+      "x": 897,
+      "y": 266
+    },
+    {
+      "name": "Христина",
+      "x": 889,
+      "y": 415
+    },
+    {
+      "name": "Юрій",
+      "x": 878,
+      "y": 464
+    },
+    {
+      "name": "Зоряна",
+      "x": 884,
+      "y": 513
+    },
+    {
+      "name": "Вадим",
+      "x": 882,
+      "y": 563
+    },
+    {
+      "name": "Саша",
+      "x": 878,
+      "y": 610
+    },
+    {
+      "name": "Kata",
+      "x": 873,
+      "y": 660
+    },
+    {
+      "name": "Тетяна",
+      "x": 881,
+      "y": 757
+    },
+    {
+      "name": "Березович",
+      "x": 932,
+      "y": 856
+    },
+    {
+      "name": "Hagia",
+      "x": 876,
+      "y": 903
+    },
+    {
+      "name": "Кузьома",
+      "x": 942,
+      "y": 367
+    },
+    {
+      "name": "Ivanna",
+      "x": 882,
+      "y": 805
+    },
+    {
+      "name": "МаТВи",
+      "x": 886,
+      "y": 171
+    },
+    {
+      "name": "Оїапаф",
+      "x": 885,
+      "y": 708
+    }
+  ]
+}

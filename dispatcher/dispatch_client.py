@@ -1103,6 +1103,8 @@ async def processViberMess(
                         f"[copy_watchdog] no message copies for {int(idle_seconds)}s "
                         f"(limit {copy_stall_restart_seconds}s)"
                     )
+            # Keep group list pane in expected state at the beginning of each reader loop.
+            click_folder()
 
             log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
             if empty_send_count > 4:

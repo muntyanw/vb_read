@@ -1,0 +1,14 @@
+{
+  "scan_id": "pb_pereviz_step015_20260302_113721_094719",
+  "channel": "pereviz",
+  "step": 15,
+  "scope": [
+    800,
+    50,
+    300,
+    880
+  ],
+  "saved_at": "2026-03-02T11:37:21",
+  "image": "D:\\prjs\\vb_read\\temp_log\\pb_pereviz_step015_20260302_113721_094719.png",
+  "cwd": "D:\\prjs\\vb_read"
+}

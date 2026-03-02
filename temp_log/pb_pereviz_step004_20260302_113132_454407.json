@@ -1,0 +1,111 @@
+{
+  "scan_id": "pb_pereviz_step004_20260302_113132_454407",
+  "channel": "pereviz",
+  "step": 4,
+  "scope": [
+    800,
+    50,
+    300,
+    880
+  ],
+  "saved_at": "2026-03-02T11:31:32",
+  "image": "D:\\prjs\\vb_read\\temp_log\\pb_pereviz_step004_20260302_113132_454407.png",
+  "cwd": "D:\\prjs\\vb_read",
+  "ocr_words_count": 121,
+  "avatar_circles_count": 40,
+  "skip_stats": {
+    "role_line": 0,
+    "role_label": 0,
+    "no_avatar": 0,
+    "bad_token": 10,
+    "short_name": 0
+  },
+  "candidates_count": 17,
+  "candidates": [
+    {
+      "name": "Піхоцький",
+      "x": 930,
+      "y": 181
+    },
+    {
+      "name": "Volodymyr",
+      "x": 894,
+      "y": 228
+    },
+    {
+      "name": "Ярослав",
+      "x": 887,
+      "y": 279
+    },
+    {
+      "name": "Микола",
+      "x": 886,
+      "y": 327
+    },
+    {
+      "name": "Maryna",
+      "x": 885,
+      "y": 377
+    },
+    {
+      "name": "Андрей",
+      "x": 885,
+      "y": 424
+    },
+    {
+      "name": "Артем",
+      "x": 880,
+      "y": 471
+    },
+    {
+      "name": "Чечіль-Винницький",
+      "x": 969,
+      "y": 524
+    },
+    {
+      "name": "Масовець",
+      "x": 941,
+      "y": 573
+    },
+    {
+      "name": "Sasha",
+      "x": 877,
+      "y": 672
+    },
+    {
+      "name": "TRANS",
+      "x": 906,
+      "y": 719
+    },
+    {
+      "name": "MYKOLA",
+      "x": 890,
+      "y": 770
+    },
+    {
+      "name": "Саша",
+      "x": 878,
+      "y": 817
+    },
+    {
+      "name": "Анжела",
+      "x": 884,
+      "y": 865
+    },
+    {
+      "name": "Code",
+      "x": 930,
+      "y": 914
+    },
+    {
+      "name": "Vita",
+      "x": 872,
+      "y": 915
+    },
+    {
+      "name": "Tanyusha",
+      "x": 896,
+      "y": 622
+    }
+  ]
+}

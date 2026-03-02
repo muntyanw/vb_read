@@ -322,6 +322,53 @@ def type_text(text: str, interval: Tuple[float, float] = (0.05, 0.12)) -> None:
         pag.typewrite(ch)
         time.sleep(random.uniform(*interval))
 
+def type_text_unicode(text: str, interval_s: float = 0.0) -> bool:
+    """
+    Type text via WinAPI SendInput with KEYEVENTF_UNICODE.
+    This is layout-independent and works better for Cyrillic in some apps.
+    """
+    if text is None:
+        return False
+    user32 = ctypes.windll.user32
+    INPUT_KEYBOARD = 1
+    KEYEVENTF_KEYUP = 0x0002
+    KEYEVENTF_UNICODE = 0x0004
+    ULONG_PTR = ctypes.c_ulonglong if ctypes.sizeof(ctypes.c_void_p) == 8 else ctypes.c_ulong
+
+    class KEYBDINPUT(ctypes.Structure):
+        _fields_ = [
+            ("wVk", ctypes.c_ushort),
+            ("wScan", ctypes.c_ushort),
+            ("dwFlags", ctypes.c_uint),
+            ("time", ctypes.c_uint),
+            ("dwExtraInfo", ULONG_PTR),
+        ]
+
+    class _INPUTUNION(ctypes.Union):
+        _fields_ = [("ki", KEYBDINPUT)]
+
+    class INPUT(ctypes.Structure):
+        _anonymous_ = ("u",)
+        _fields_ = [
+            ("type", ctypes.c_uint),
+            ("u", _INPUTUNION),
+        ]
+
+    try:
+        for ch in str(text):
+            scan = ord(ch)
+            down = INPUT(type=INPUT_KEYBOARD, ki=KEYBDINPUT(0, scan, KEYEVENTF_UNICODE, 0, 0))
+            up = INPUT(type=INPUT_KEYBOARD, ki=KEYBDINPUT(0, scan, KEYEVENTF_UNICODE | KEYEVENTF_KEYUP, 0, 0))
+            sent_down = user32.SendInput(1, ctypes.byref(down), ctypes.sizeof(INPUT))
+            sent_up = user32.SendInput(1, ctypes.byref(up), ctypes.sizeof(INPUT))
+            if sent_down != 1 or sent_up != 1:
+                return False
+            if interval_s > 0:
+                time.sleep(interval_s)
+        return True
+    except Exception:
+        return False
+
 def show_image(img) -> None:
     # Show debug image on the right side of the screen when backend allows.
     plt.figure(figsize=(8, 5))
@@ -1558,13 +1605,13 @@ def get_current_layout() -> int:
 def ensure_layout(target: str = "en", max_attempts: int = 5) -> bool:
     """
     Р“Р°СЂР°РЅС‚РёСЂСѓРµС‚, С‡С‚Рѕ СЂР°СЃРєР»Р°РґРєР° РєР»Р°РІРёР°С‚СѓСЂС‹ СѓСЃС‚Р°РЅРѕРІР»РµРЅР° РІ РЅСѓР¶РЅС‹Р№ СЏР·С‹Рє.
-    РџРѕРґРґРµСЂР¶РёРІР°РµС‚ 'en' (Р°РЅРіР»РёР№СЃРєРёР№) Рё 'ru' (СЂСѓСЃСЃРєРёР№).
+    РџРѕРґРґРµСЂР¶РёРІР°РµС‚ 'en' (Р°РЅРіР»РёР№СЃРєРёР№), 'ru' (СЂСѓСЃСЃРєРёР№), 'uk' (СѓРєСЂР°РёРЅСЃРєРёР№).
     Р’РѕР·РІСЂР°С‰Р°РµС‚ True, РµСЃР»Рё СѓРґР°Р»РѕСЃСЊ СѓСЃС‚Р°РЅРѕРІРёС‚СЊ СЂР°СЃРєР»Р°РґРєСѓ, РёРЅР°С‡Рµ False.
     """
     lang_codes = {
         "en": 0x0409,  # English (US)
         "ru": 0x0419,  # Russian
-        # РјРѕР¶РЅРѕ РґРѕР±Р°РІРёС‚СЊ РґСЂСѓРіРёРµ
+        "uk": 0x0422,  # Ukrainian
     }
 
     desired_code = lang_codes.get(target.lower())
