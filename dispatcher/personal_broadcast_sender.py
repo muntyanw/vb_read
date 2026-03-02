@@ -386,6 +386,51 @@ class PersonalBroadcastSender:
         _, max_val, _, _ = cv2.minMaxLoc(res)
         return float(max_val)
 
+    def _template_score_in_scope_glyph(self, image_name: str, scope: tuple[int, int, int, int]) -> float:
+        """
+        Template score using only bright low-saturation pixels (white glyph),
+        which separates send arrow from microphone better than full-icon matching.
+        """
+        path = self._resolve_template_path(image_name)
+        if path is None:
+            return -1.0
+
+        left, top, right, bottom = [int(v) for v in scope]
+        width = max(1, right - left)
+        height = max(1, bottom - top)
+        snap_rgb = take_screenshot((left, top, width, height))
+        snap_bgr = cv2.cvtColor(snap_rgb, cv2.COLOR_RGB2BGR)
+
+        tpl = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        if tpl is None:
+            return -1.0
+        if tpl.ndim == 3 and tpl.shape[2] == 4:
+            tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_BGRA2BGR)
+        elif tpl.ndim == 3:
+            tpl_bgr = tpl
+        else:
+            tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_GRAY2BGR)
+
+        ih, iw = snap_bgr.shape[:2]
+        th, tw = tpl_bgr.shape[:2]
+        if th < 1 or tw < 1 or th > ih or tw > iw:
+            return -1.0
+
+        hsv = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2HSV)
+        glyph_mask = cv2.inRange(hsv, (0, 0, 170), (179, 70, 255))
+        if int(cv2.countNonZero(glyph_mask)) < 20:
+            g = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY)
+            edges = cv2.Canny(g, 60, 140)
+            glyph_mask = cv2.threshold(edges, 0, 255, cv2.THRESH_BINARY)[1]
+            if int(cv2.countNonZero(glyph_mask)) < 20:
+                return -1.0
+
+        img_gray = cv2.cvtColor(snap_bgr, cv2.COLOR_BGR2GRAY)
+        tpl_gray = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY)
+        res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCORR_NORMED, mask=glyph_mask)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        return float(max_val)
+
     @staticmethod
     def _resolve_template_path(image_name: str) -> Path | None:
         p = Path(str(image_name))
@@ -836,7 +881,7 @@ class PersonalBroadcastSender:
             return False
 
         dialog_send_scope = self._config.dialog_send_scope
-        action_state, send_score, mic_score = self._detect_dialog_action_state(dialog_send_scope)
+        action_state, send_score, mic_score = self._detect_dialog_action_state_with_pause(dialog_send_scope, pause_s=1.0)
         log_and_print(
             f"[personal_broadcast] dialog action state={action_state} "
             f"send_score={send_score:.3f} mic_score={mic_score:.3f} scan_id={sid}",
@@ -1094,9 +1139,20 @@ class PersonalBroadcastSender:
         return False
 
     def _detect_dialog_action_state(self, scope: tuple[int, int, int, int]) -> tuple[str, float, float]:
-        send_score = self._template_score_in_scope(self._config.dialog_send_image, scope)
-        mic_score = self._template_score_in_scope("microfon.png", scope)
-        eps = 0.001
+        send_raw = self._template_score_in_scope(self._config.dialog_send_image, scope)
+        mic_raw = self._template_score_in_scope("microfon.png", scope)
+        send_glyph = self._template_score_in_scope_glyph(self._config.dialog_send_image, scope)
+        mic_glyph = self._template_score_in_scope_glyph("microfon.png", scope)
+        send_score = (0.35 * send_raw) + (0.65 * send_glyph)
+        mic_score = (0.35 * mic_raw) + (0.65 * mic_glyph)
+        eps = 0.008
+
+        log_and_print(
+            f"[personal_broadcast] dialog score details raw(send={send_raw:.3f}, mic={mic_raw:.3f}) "
+            f"glyph(send={send_glyph:.3f}, mic={mic_glyph:.3f}) "
+            f"final(send={send_score:.3f}, mic={mic_score:.3f})",
+            "debug",
+        )
 
         if send_score < 0 and mic_score < 0:
             return "unknown", send_score, mic_score
@@ -1105,6 +1161,15 @@ class PersonalBroadcastSender:
         if mic_score >= 0 and mic_score > send_score + eps:
             return "microphone", send_score, mic_score
         return "unknown", send_score, mic_score
+
+    def _detect_dialog_action_state_with_pause(
+        self,
+        scope: tuple[int, int, int, int],
+        pause_s: float = 1.0,
+    ) -> tuple[str, float, float]:
+        if pause_s and pause_s > 0:
+            gd.pause(float(pause_s))
+        return self._detect_dialog_action_state(scope)
 
     def _has_role_in_member_row(self, member_center_y: int, scan_id: str | None = None) -> bool:
         scope = self._config.members_scope
@@ -1175,7 +1240,7 @@ class PersonalBroadcastSender:
                     # Strategy 1: keyboard typing first (requested) via pywinauto.
                     typed = self._type_with_pywinauto(text)
                     gd.pause(0.2)
-                    state, send_score, mic_score = self._detect_dialog_action_state(dialog_send_scope)
+                    state, send_score, mic_score = self._detect_dialog_action_state_with_pause(dialog_send_scope, pause_s=1.0)
                     log_and_print(
                         f"[personal_broadcast] post-keyboard-type state={state} typed={typed} "
                         f"send_score={send_score:.3f} mic_score={mic_score:.3f} attempt={attempt}/3",
@@ -1192,7 +1257,7 @@ class PersonalBroadcastSender:
                     pyperclip.copy(text)
                     self._paste_ctrl_v()
                     gd.pause(0.25)
-                    state, send_score, mic_score = self._detect_dialog_action_state(dialog_send_scope)
+                    state, send_score, mic_score = self._detect_dialog_action_state_with_pause(dialog_send_scope, pause_s=1.0)
                     log_and_print(
                         f"[personal_broadcast] post-paste(ctrl+v) state={state} "
                         f"send_score={send_score:.3f} mic_score={mic_score:.3f} attempt={attempt}/3",
@@ -1209,7 +1274,7 @@ class PersonalBroadcastSender:
                     pyperclip.copy(text)
                     self._paste_shift_insert()
                     gd.pause(0.25)
-                    state, send_score, mic_score = self._detect_dialog_action_state(dialog_send_scope)
+                    state, send_score, mic_score = self._detect_dialog_action_state_with_pause(dialog_send_scope, pause_s=1.0)
                     log_and_print(
                         f"[personal_broadcast] post-paste(shift+insert) state={state} "
                         f"send_score={send_score:.3f} mic_score={mic_score:.3f} attempt={attempt}/3",
@@ -1231,7 +1296,7 @@ class PersonalBroadcastSender:
                             return True
 
 
-                    state, send_score, mic_score = self._detect_dialog_action_state(dialog_send_scope)
+                    state, send_score, mic_score = self._detect_dialog_action_state_with_pause(dialog_send_scope, pause_s=1.0)
                     log_and_print(
                         f"[personal_broadcast] paste verification failed attempt={attempt}/3 "
                         f"(state={state}, send_score={send_score:.3f}, mic_score={mic_score:.3f})",
@@ -1323,7 +1388,7 @@ class PersonalBroadcastSender:
                         except Exception:
                             pass
             gd.pause(0.2)
-            state, send_score, mic_score = self._detect_dialog_action_state(self._config.dialog_send_scope)
+            state, send_score, mic_score = self._detect_dialog_action_state_with_pause(self._config.dialog_send_scope, pause_s=1.0)
             log_and_print(
                 f"[personal_broadcast] manual-typing fallback state={state} "
                 f"send_score={send_score:.3f} mic_score={mic_score:.3f}",
