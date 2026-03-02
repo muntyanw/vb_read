@@ -822,16 +822,16 @@ class PersonalBroadcastSender:
             )
             return False
 
+        if not self._is_private_chat_context():
+            log_and_print(
+                f"[personal_broadcast] private-chat check failed (likely group), skip before input scan_id={sid}",
+                "error",
+            )
+            return False
+
         window.set_focus()
         if not self._insert_message_text(window):
             log_and_print(f"[personal_broadcast] cannot insert message text for {name} scan_id={sid}", "error")
-            return False
-
-        if not self._is_private_chat_context():
-            log_and_print(
-                f"[personal_broadcast] private-chat check failed (likely group), skip send scan_id={sid}",
-                "error",
-            )
             return False
 
         dialog_send_scope = self._config.dialog_send_scope
