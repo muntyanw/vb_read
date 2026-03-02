@@ -1031,12 +1031,16 @@ class PersonalBroadcastSender:
             has_info_icon = False
 
         has_participants_word = self._scope_has_participants_label(self._config.participants_click_scope)
+        # Extra guard: if "Учасники/Участники" is visible near top header area,
+        # this is a group chat with opened participants list.
+        has_participants_header = self._scope_has_participants_label((850, 55, 1070, 110))
         log_and_print(
             f"[personal_broadcast] private-chat check: has_info_icon={has_info_icon}, "
-            f"has_participants_word={has_participants_word}",
+            f"has_participants_word={has_participants_word}, "
+            f"has_participants_header={has_participants_header}",
             "debug",
         )
-        return has_info_icon and (not has_participants_word)
+        return has_info_icon and (not has_participants_word) and (not has_participants_header)
 
     def _scope_has_participants_label(self, scope: tuple[int, int, int, int]) -> bool:
         left, top, right, bottom = [int(v) for v in scope]
