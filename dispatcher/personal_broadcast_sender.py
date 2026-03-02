@@ -3,6 +3,7 @@ import json
 import time
 from datetime import datetime
 from collections import defaultdict
+from difflib import SequenceMatcher
 from pathlib import Path
 
 import cv2
@@ -1030,10 +1031,18 @@ class PersonalBroadcastSender:
         except Exception:
             has_info_icon = False
 
-        has_participants_word = self._scope_has_participants_label(self._config.participants_click_scope)
+        has_participants_word = self._scope_has_participants_label(
+            self._config.participants_click_scope,
+            strict=False,
+            min_conf=30,
+        )
         # Extra guard: if "Учасники/Участники" is visible near top header area,
         # this is a group chat with opened participants list.
-        has_participants_header = self._scope_has_participants_label((850, 55, 1070, 110))
+        has_participants_header = self._scope_has_participants_label(
+            (850, 55, 1070, 110),
+            strict=True,
+            min_conf=62,
+        )
         log_and_print(
             f"[personal_broadcast] private-chat check: has_info_icon={has_info_icon}, "
             f"has_participants_word={has_participants_word}, "
@@ -1042,19 +1051,25 @@ class PersonalBroadcastSender:
         )
         return has_info_icon and (not has_participants_word) and (not has_participants_header)
 
-    def _scope_has_participants_label(self, scope: tuple[int, int, int, int]) -> bool:
+    def _scope_has_participants_label(
+        self,
+        scope: tuple[int, int, int, int],
+        strict: bool = False,
+        min_conf: int = 30,
+    ) -> bool:
         left, top, right, bottom = [int(v) for v in scope]
         width = max(1, right - left)
         height = max(1, bottom - top)
         snap = take_screenshot((left, top, width, height))
         processed = preprocess_image(snap)
 
-        words = perform_ocr_with_positions(processed, min_conf=30, lang="ukr+rus+eng")
-        raw_words = perform_ocr_with_positions(snap, min_conf=30, lang="ukr+rus+eng")
+        words = perform_ocr_with_positions(processed, min_conf=min_conf, lang="ukr+rus+eng")
+        raw_words = perform_ocr_with_positions(snap, min_conf=min_conf, lang="ukr+rus+eng")
         all_words = words + raw_words
 
         labels = [str(x).strip().lower() for x in (self._config.participants_texts or []) if str(x).strip()]
         labels += ["учасники", "участники", "participants"]
+        labels_norm = ["".join(ch for ch in label if ch.isalnum()) for label in labels if label]
 
         for w in all_words:
             token = str(w.get("text", "")).strip().lower()
@@ -1063,12 +1078,19 @@ class PersonalBroadcastSender:
             token = "".join(ch for ch in token if ch.isalnum())
             if not token:
                 continue
-            if token.startswith("учас") or token.startswith("участ") or token.startswith("participant"):
-                return True
-            for label in labels:
-                norm_label = "".join(ch for ch in label.lower() if ch.isalnum())
-                if norm_label and (norm_label in token or token in norm_label):
+            if strict:
+                # Header scope is noisy; require near-exact OCR match.
+                for norm_label in labels_norm:
+                    if not norm_label:
+                        continue
+                    if SequenceMatcher(None, token, norm_label).ratio() >= 0.90:
+                        return True
+            else:
+                if token.startswith("учас") or token.startswith("участ") or token.startswith("participant"):
                     return True
+                for norm_label in labels_norm:
+                    if norm_label and (norm_label in token or token in norm_label):
+                        return True
         return False
 
     def _detect_dialog_action_state(self, scope: tuple[int, int, int, int]) -> tuple[str, float, float]:
