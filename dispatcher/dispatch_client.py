@@ -5,12 +5,13 @@ import asyncio
 import httpx
 from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigDict
 from datetime import datetime, timezone
+from pathlib import Path
 from find_message import load_previous_text, save_current_text
 from log import log_and_print
 from core import gui_driver as gd
 import pyperclip
 import pyautogui as pag
-from utils import read_setting
+from utils import read_setting, take_screenshot
 import hashlib
 import ctypes
 from vb_utils import scroll_with_mouse
@@ -18,6 +19,8 @@ from recognize_text import text_includes_fast
 import time
 import random
 import win32gui
+import cv2
+import numpy as np
 import win32con
 from pywinauto import keyboard
 
@@ -28,6 +31,197 @@ ip_numbber = 0
 def _ui_debug() -> bool:
     return bool(read_setting("debug_methods_mode"))
 
+
+
+
+def _save_last_mess_debug(scope: tuple[int, int, int, int], channel_name: str, reason: str) -> str | None:
+    try:
+        left, top, right, bottom = [int(v) for v in scope]
+        width = max(1, right - left)
+        height = max(1, bottom - top)
+        snap = take_screenshot((left, top, width, height))
+        out_dir = Path(__file__).resolve().parents[1] / "temp_log"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        safe_channel = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(channel_name or "unknown"))
+        safe_reason = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(reason or "unknown"))
+        path = out_dir / f"last_mess_{safe_channel}_{safe_reason}_{ts}.png"
+        cv2.imwrite(str(path), cv2.cvtColor(snap, cv2.COLOR_RGB2BGR))
+        return str(path)
+    except Exception as exc:
+        log_and_print(f"[last_mess] debug screenshot save failed: {exc}", "error")
+        return None
+
+
+def _save_last_mess_annotated(
+    scope: tuple[int, int, int, int],
+    channel_name: str,
+    recognized_rect: tuple[int, int, int, int],
+    click_pos: tuple[int, int],
+    tm_score: float,
+    color_score: float,
+    template_name: str,
+) -> str | None:
+    try:
+        left, top, right, bottom = [int(v) for v in scope]
+        width = max(1, right - left)
+        height = max(1, bottom - top)
+        snap = take_screenshot((left, top, width, height))
+        bgr = cv2.cvtColor(snap, cv2.COLOR_RGB2BGR)
+
+        rx, ry, rw, rh = [int(v) for v in recognized_rect]
+        x1 = max(0, min(width - 1, rx))
+        y1 = max(0, min(height - 1, ry))
+        x2 = max(x1 + 1, min(width - 1, rx + rw))
+        y2 = max(y1 + 1, min(height - 1, ry + rh))
+        cv2.rectangle(bgr, (x1, y1), (x2, y2), (0, 255, 0), 2)
+
+        cx, cy = int(click_pos[0]), int(click_pos[1])
+        local_x = max(0, min(width - 1, cx - left))
+        local_y = max(0, min(height - 1, cy - top))
+        cv2.circle(bgr, (local_x, local_y), 4, (0, 0, 255), -1)
+
+        label = f"tm={tm_score:.3f} color={color_score:.3f} tpl={template_name}"
+        cv2.putText(bgr, label[:110], (6, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1, cv2.LINE_AA)
+
+        out_dir = Path(__file__).resolve().parents[1] / "temp_log"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        safe_channel = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(channel_name or "unknown"))
+        path = out_dir / f"last_mess_{safe_channel}_after_{ts}.png"
+        cv2.imwrite(str(path), bgr)
+        return str(path)
+    except Exception as exc:
+        log_and_print(f"[last_mess] annotated screenshot save failed: {exc}", "error")
+        return None
+
+
+def _last_mess_template_paths(channel_name: str) -> list[Path]:
+    images_dir = Path(__file__).resolve().parents[1] / "images"
+    candidates: list[Path] = []
+
+    channel_dir = images_dir / str(channel_name)
+    if channel_dir.exists():
+        candidates.extend(sorted(channel_dir.glob("last_mess*.png")))
+
+    candidates.extend(sorted(images_dir.glob("last_mess*.png")))
+
+    seen = set()
+    uniq = []
+    for p in candidates:
+        key = str(p.resolve())
+        if key in seen:
+            continue
+        seen.add(key)
+        uniq.append(p)
+    return uniq
+
+
+def _match_template_score(scr_bgr: np.ndarray, tpl_path: Path, scale: float) -> tuple[float, tuple[int, int], int, int] | None:
+    tpl = cv2.imread(str(tpl_path), cv2.IMREAD_UNCHANGED)
+    if tpl is None:
+        return None
+
+    if tpl.ndim == 3 and tpl.shape[2] == 4:
+        tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_BGRA2BGR)
+        alpha = tpl[:, :, 3]
+        _, mask = cv2.threshold(alpha, 0, 255, cv2.THRESH_BINARY)
+    elif tpl.ndim == 3:
+        tpl_bgr = tpl
+        mask = None
+    else:
+        tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_GRAY2BGR)
+        mask = None
+
+    th0, tw0 = tpl_bgr.shape[:2]
+    tw = max(1, int(round(tw0 * float(scale))))
+    th = max(1, int(round(th0 * float(scale))))
+    if tw > scr_bgr.shape[1] or th > scr_bgr.shape[0]:
+        return None
+
+    interp = cv2.INTER_AREA if scale < 1.0 else cv2.INTER_LINEAR
+    tpl_s = cv2.resize(tpl_bgr, (tw, th), interpolation=interp)
+    mask_s = None
+    if mask is not None:
+        mask_s = cv2.resize(mask, (tw, th), interpolation=cv2.INTER_NEAREST)
+
+    if mask_s is not None:
+        res = cv2.matchTemplate(scr_bgr, tpl_s, cv2.TM_CCORR_NORMED, mask=mask_s)
+    else:
+        img_gray = cv2.cvtColor(scr_bgr, cv2.COLOR_BGR2GRAY)
+        tpl_gray = cv2.cvtColor(tpl_s, cv2.COLOR_BGR2GRAY)
+        img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
+        tpl_gray = cv2.GaussianBlur(tpl_gray, (3, 3), 0)
+        res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+
+    _, max_val, _, max_loc = cv2.minMaxLoc(res)
+    return float(max_val), max_loc, tw, th
+
+
+def _last_mess_color_score(roi_bgr: np.ndarray) -> tuple[float, bool]:
+    if roi_bgr is None or roi_bgr.size == 0:
+        return 0.0, False
+    hsv = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2HSV)
+
+    purple = cv2.inRange(hsv, (112, 35, 40), (168, 255, 255))
+    light = cv2.inRange(hsv, (0, 0, 170), (179, 85, 255))
+
+    total = float(max(1, roi_bgr.shape[0] * roi_bgr.shape[1]))
+    purple_ratio = float(cv2.countNonZero(purple)) / total
+    light_ratio = float(cv2.countNonZero(light)) / total
+
+    purple_term = min(1.0, purple_ratio / 0.08)
+    light_term = min(1.0, light_ratio / 0.02)
+    score = 0.65 * purple_term + 0.35 * light_term
+
+    is_valid = purple_ratio >= 0.04 and light_ratio >= 0.008
+    return float(score), bool(is_valid)
+
+
+def _find_last_mess_match(scope: tuple[int, int, int, int], channel_name: str):
+    left, top, right, bottom = [int(v) for v in scope]
+    width = max(1, right - left)
+    height = max(1, bottom - top)
+    snap = take_screenshot((left, top, width, height))
+    scr_bgr = cv2.cvtColor(snap, cv2.COLOR_RGB2BGR)
+
+    templates = _last_mess_template_paths(channel_name)
+    if not templates:
+        return None
+
+    scales = np.linspace(0.85, 1.20, 15)
+    best = None
+    best_any = None
+    for tpl in templates:
+        for sc in scales:
+            m = _match_template_score(scr_bgr, tpl, float(sc))
+            if m is None:
+                continue
+            tm_score, (x, y), tw, th = m
+            if tm_score < 0.72:
+                continue
+            roi = scr_bgr[y:y + th, x:x + tw]
+            color_score, color_ok = _last_mess_color_score(roi)
+            final_score = 0.78 * float(tm_score) + 0.22 * float(color_score)
+            cand = {
+                "tm_score": float(tm_score),
+                "color_score": float(color_score),
+                "final_score": float(final_score),
+                "color_ok": bool(color_ok),
+                "x": int(x),
+                "y": int(y),
+                "w": int(tw),
+                "h": int(th),
+                "template": tpl.name,
+                "abs_center": (int(left + x + tw // 2), int(top + y + th // 2)),
+            }
+            if best_any is None or cand["final_score"] > best_any["final_score"]:
+                best_any = cand
+            if cand["color_ok"]:
+                if best is None or cand["final_score"] > best["final_score"]:
+                    best = cand
+
+    return best if best is not None else best_any
 
 def _get_ips() -> list[str]:
     ips = read_setting("IPS") or []
@@ -620,58 +814,33 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
 
-    image_name = f"{name_viber_channel}\\last_mess.png"
     base_scope = (880, 910, 1060, 1000)
-
-    # 1) Strict pass to reduce false positive clicks on empty area.
-    pos = gd.find_image(
-        image_name,
-        timeout=1.2,
-        confidence=0.90,
-        scope=base_scope,
-        multiscale=False,
-        is_debug=_ui_debug(),
-    )
-
-    # 2) Fallback for scaled UI.
-    if not pos:
-        pos = gd.find_image(
-            image_name,
-            timeout=1.5,
-            confidence=0.86,
-            scope=base_scope,
-            multiscale=True,
-            is_debug=_ui_debug(),
-        )
-
-    if not pos:
+    match = _find_last_mess_match(base_scope, name_viber_channel)
+    if not match:
         log_and_print("Not find icon LastMessage", "INFO")
         return False
 
-    # 3) Confirmation pass around found point.
-    px, py = int(pos[0]), int(pos[1])
-    confirm_scope = (
-        max(base_scope[0], px - 70),
-        max(base_scope[1], py - 45),
-        min(base_scope[2], px + 70),
-        min(base_scope[3], py + 45),
-    )
-    pos_confirm = gd.find_image(
-        image_name,
-        timeout=0.6,
-        confidence=0.90,
-        scope=confirm_scope,
-        multiscale=False,
-        is_debug=_ui_debug(),
-    )
-    if not pos_confirm:
-        log_and_print(
-            f"Skip LastMessage click: unconfirmed match at ({px}, {py})",
-            "DEBUG",
+    click_pos = match["abs_center"]
+    if _ui_debug():
+        debug_after_path = _save_last_mess_annotated(
+            base_scope,
+            name_viber_channel,
+            (int(match["x"]), int(match["y"]), int(match["w"]), int(match["h"])),
+            (int(click_pos[0]), int(click_pos[1])),
+            float(match["tm_score"]),
+            float(match["color_score"]),
+            str(match["template"]),
         )
-        return False
+        if debug_after_path:
+            log_and_print(f"[last_mess] after snapshot: {debug_after_path}", "DEBUG")
 
-    gd.click(int(pos_confirm[0]), int(pos_confirm[1]))
+    log_and_print(
+        f"[last_mess] match final={match['final_score']:.3f} tm={match['tm_score']:.3f} "
+        f"color={match['color_score']:.3f} tpl={match['template']} pos={click_pos}",
+        "DEBUG",
+    )
+
+    gd.click(int(click_pos[0]), int(click_pos[1]))
     log_and_print("Click down to last messages", "INFO")
     return True
 def moveToContactsAndScrollUp():
