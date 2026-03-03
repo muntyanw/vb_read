@@ -24,6 +24,11 @@ class PersonalBroadcastConfig:
     return_scope: tuple[int, int, int, int] | None
     max_scroll_steps: int
     line_top_tolerance: int
+    processing_mode: str
+    position_row_height: int
+    position_row_center_offset: int
+    position_click_x_offset: int
+    position_processed_file: str
     target_channel: dict
 
     @property
@@ -114,6 +119,35 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
     except Exception:
         line_top_tolerance = 14
 
+    processing_mode = str(read_setting("personal_broadcast_processing_mode") or "by_names").strip().lower()
+    if processing_mode not in {"by_names", "by_positions"}:
+        processing_mode = "by_names"
+
+    try:
+        position_row_height = int(read_setting("personal_broadcast_position_row_height") or 50)
+    except Exception:
+        position_row_height = 50
+    position_row_height = max(30, min(position_row_height, 120))
+
+    try:
+        position_row_center_offset = int(
+            read_setting("personal_broadcast_position_row_center_offset") or (position_row_height // 2)
+        )
+    except Exception:
+        position_row_center_offset = position_row_height // 2
+    position_row_center_offset = max(8, min(position_row_center_offset, position_row_height - 4))
+
+    try:
+        position_click_x_offset = int(read_setting("personal_broadcast_position_click_x_offset") or 80)
+    except Exception:
+        position_click_x_offset = 80
+    position_click_x_offset = max(20, min(position_click_x_offset, 220))
+
+    position_processed_file = str(
+        read_setting("personal_broadcast_position_processed_file")
+        or "personal_broadcast_positions_processed.txt"
+    )
+
     target_channel = read_setting("personal_broadcast_channel")
     if not isinstance(target_channel, dict):
         target_channel = {
@@ -150,5 +184,10 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         return_scope=return_scope,
         max_scroll_steps=max_scroll_steps,
         line_top_tolerance=line_top_tolerance,
+        processing_mode=processing_mode,
+        position_row_height=position_row_height,
+        position_row_center_offset=position_row_center_offset,
+        position_click_x_offset=position_click_x_offset,
+        position_processed_file=position_processed_file,
         target_channel=target_channel,
     )

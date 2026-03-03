@@ -13,6 +13,7 @@ from dispatcher.periodic_broadcast_config import load_periodic_broadcast_config
 from dispatcher.periodic_broadcast_sender import PeriodicBroadcastSender
 from dispatcher.personal_broadcast_config import load_personal_broadcast_config
 from dispatcher.personal_broadcast_sender import PersonalBroadcastSender
+from dispatcher.personal_broadcast_position_sender import PersonalBroadcastPositionSender
 from log import set_debug_mode, log_and_print
 import asyncio
 import logging
@@ -226,7 +227,11 @@ async def main():
 
     gd.ensure_layout()
     periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
-    personal_sender = PersonalBroadcastSender(load_personal_broadcast_config())
+    personal_config = load_personal_broadcast_config()
+    if personal_config.processing_mode == "by_positions":
+        personal_sender = PersonalBroadcastPositionSender(personal_config)
+    else:
+        personal_sender = PersonalBroadcastSender(personal_config)
 
     def stop_requested():
         if STOP_FILE.exists():
@@ -260,7 +265,19 @@ async def main():
                 set_debug_mode(runtime_settings["debug_logs_mode"])
                 refresh_context_from_settings(s)
                 periodic_sender.update_config(load_periodic_broadcast_config())
-                personal_sender.update_config(load_personal_broadcast_config())
+                new_personal_config = load_personal_broadcast_config()
+                is_position_sender = isinstance(personal_sender, PersonalBroadcastPositionSender)
+                if (new_personal_config.processing_mode == "by_positions") != is_position_sender:
+                    if new_personal_config.processing_mode == "by_positions":
+                        personal_sender = PersonalBroadcastPositionSender(new_personal_config)
+                    else:
+                        personal_sender = PersonalBroadcastSender(new_personal_config)
+                    log_and_print(
+                        f"[pwa] personal sender switched to {new_personal_config.processing_mode}",
+                        "debug",
+                    )
+                else:
+                    personal_sender.update_config(new_personal_config)
                 log_and_print(
                     f"[pwa] settings reloaded; mode={runtime_settings['work_mode']}",
                     "debug",

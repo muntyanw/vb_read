@@ -1,4 +1,4 @@
-﻿import random
+import random
 import json
 import time
 from datetime import datetime
@@ -61,6 +61,7 @@ class PersonalBroadcastSender:
     )
 
     _INFO_STATE_EPS = 0.015
+    _INFO_CLICK_MIN_SCORE = 0.99
     _NAME_MAX_X_RATIO = 0.62
     _LAYOUT_CODE_TO_NAME = {
         0x0409: "en",
@@ -162,22 +163,33 @@ class PersonalBroadcastSender:
         step = 0
         while step < self._config.max_scroll_steps:
             log_and_print(f"[personal_broadcast] scan step={step+1}/{self._config.max_scroll_steps}", "debug")
+            self._dismiss_no_personal_messages_popup(scan_id=f"pre_scan_step{step+1}", context="pre_scan")
             if not self._ensure_participants_list(window):
                 return
             candidates, scan_id = self._read_candidates_from_scope(channel_name=channel_name, step=step + 1)
-            if step == 0 and candidates:
+            if candidates:
                 first_candidate = min(candidates, key=lambda c: (c["y"], c["x"]))
                 top_y = int(first_candidate["y"])
-                # Skip the whole first visible row (self row can produce 2+ OCR tokens).
+                # Skip the whole first visible row (header/self row can produce 2+ OCR tokens).
                 top_row_window = 14
                 filtered = [c for c in candidates if abs(int(c["y"]) - top_y) > top_row_window]
                 skipped_top = len(candidates) - len(filtered)
                 candidates = filtered
-                log_and_print(
-                    f"[personal_broadcast] first pass skip top row around y={top_y}, "
-                    f"skipped={skipped_top}",
-                    "debug",
-                )
+                if skipped_top > 0:
+                    log_and_print(
+                        f"[personal_broadcast] skip top row around y={top_y}, "
+                        f"skipped={skipped_top}",
+                        "debug",
+                    )
+            if step == 0:
+                before = len(candidates)
+                candidates = self._dedupe_candidates_by_position(candidates)
+                removed = before - len(candidates)
+                if removed > 0:
+                    log_and_print(
+                        f"[personal_broadcast] dedupe by position removed={removed} scan_id={scan_id}",
+                        "debug",
+                    )
             log_and_print(f"[personal_broadcast] candidates found={len(candidates)} scan_id={scan_id}", "debug")
             sent_any = False
             raw_count = len(candidates)
@@ -186,6 +198,8 @@ class PersonalBroadcastSender:
             skip_registry = 0
             skip_gender = 0
             send_attempted = 0
+            force_scroll_rescan = False
+            force_rescan_same_step = False
 
             for candidate in candidates:
                 name = candidate["name"]
@@ -193,14 +207,31 @@ class PersonalBroadcastSender:
                     skip_registry += 1
                     log_and_print(f"[personal_broadcast] skip already sent: {name} scan_id={scan_id}", "debug")
                     continue
+                if step > 0:
+                    similar = self._registry.find_similar(name, min_ratio=0.86, max_len_diff=4)
+                    if similar:
+                        skip_registry += 1
+                        log_and_print(
+                            f"[personal_broadcast] skip similar sent: {name} ~ {similar[0]} ({similar[1]:.2f}) scan_id={scan_id}",
+                            "debug",
+                        )
+                        continue
                 if not self._gender_matches(name):
                     skip_gender += 1
                     log_and_print(f"[personal_broadcast] skip gender filter: {name} scan_id={scan_id}", "debug")
                     continue
 
+                if self._is_participants_label(name):
+                    skip_registry += 1
+                    log_and_print(
+                        f"[personal_broadcast] skip participants label: {name} scan_id={scan_id}",
+                        "debug",
+                    )
+                    continue
+
                 send_attempted += 1
-                if self._send_to_member(window, s, candidate, channel_name, scan_id=scan_id):
-                    self._registry.add(name)
+                send_result = self._send_to_member(window, s, candidate, channel_name, scan_id=scan_id)
+                if send_result == "sent":
                     sent_any = True
                     pause = random.uniform(0, max(self._config.max_pause_seconds, 0.0))
                     time.sleep(pause)
@@ -208,19 +239,30 @@ class PersonalBroadcastSender:
                         return had_candidates_total
                     if not self._open_participants(window):
                         return had_candidates_total
-                    # After return from dialog, members list can shift/reset.
+                    # After return from dialog, members list can shift/reset. Restore scroll position.
+                    self._restore_scroll_position(window, step)
                     # Re-scan immediately instead of using stale candidates from old screenshot.
                     break
-                else:
+                elif send_result == "recover":
                     log_and_print(
-                        f"[personal_broadcast] send failed for '{name}', recover participants list scan_id={scan_id}",
+                        f"[personal_broadcast] recover participants list after '{name}' scan_id={scan_id}",
                         "warning",
                     )
                     if not self._open_participants(window):
-                        if not self._back_to_group(window):
-                            return had_candidates_total
-                        if not self._open_participants(window):
-                            return had_candidates_total
+                        log_and_print(
+                            "[personal_broadcast] participants reopen failed; scroll and rescan without return-to-group",
+                            "warning",
+                        )
+                        force_scroll_rescan = True
+                        break
+                    # Participants list may visually shift after recover; old candidate coordinates become stale.
+                    force_rescan_same_step = True
+                    break
+                else:
+                    log_and_print(
+                        f"[personal_broadcast] skip candidate without recovery: '{name}' scan_id={scan_id}",
+                        "debug",
+                    )
 
             after_registry = raw_count - skip_registry
             after_gender = after_registry - skip_gender
@@ -234,17 +276,31 @@ class PersonalBroadcastSender:
             if sent_any:
                 log_and_print("[personal_broadcast] message sent, refresh members screenshot", "debug")
                 continue
+            if force_rescan_same_step:
+                log_and_print("[personal_broadcast] recover completed; rescan current step with fresh coordinates", "debug")
+                continue
+            if force_scroll_rescan:
+                log_and_print("[personal_broadcast] force scroll after participants reopen failure", "debug")
             else:
                 log_and_print("[personal_broadcast] no candidate sent, scroll down", "debug")
             self._scroll_members_down(window)
-            gd.pause(0.3)
+            gd.pause(1.5)
             step += 1
 
         log_and_print(f"[personal_broadcast] no more candidates in {channel_name}", "info")
         self._back_to_group(window)
         return had_candidates_total
 
-    def _scroll_members_down(self, window) -> None:
+
+    def _restore_scroll_position(self, window, steps: int) -> None:
+        if steps <= 0:
+            return
+        log_and_print(f"[personal_broadcast] restore scroll position steps={steps}", "debug")
+        for i in range(int(steps)):
+            # Heavy UIA wheel fallback is needed only for the first jump.
+            self._scroll_members_down(window, use_mouse_fallback=(i == 0))
+
+    def _scroll_members_down(self, window, use_mouse_fallback: bool = True) -> None:
         """
         Strong scroll in members list (similar power to dispatch_client scrolling).
         """
@@ -256,12 +312,13 @@ class PersonalBroadcastSender:
         log_and_print(f"[personal_broadcast] scroll members at x={cx}, y={cy}", "debug")
         gd.human_move(cx, cy)
         gd.pause(0.05)
-        # Large wheel distance, then UIA mouse-scroll fallback.
+        # Large wheel distance. UIA mouse-scroll fallback is expensive; use only when requested.
         gd.scroll(-2600)
         gd.pause(0.08)
         gd.scroll(-2600)
         gd.pause(0.08)
-        scroll_with_mouse(window, count_scroll=8, direction="down")
+        if use_mouse_fallback:
+            scroll_with_mouse(window, count_scroll=6, direction="down")
 
     def _open_participants(self, window) -> bool:
         for attempt in range(1, 4):
@@ -273,7 +330,8 @@ class PersonalBroadcastSender:
                 "debug",
             )
 
-            if state != "open":
+            should_click_info = state == "closed" and score_unselect >= self._INFO_CLICK_MIN_SCORE
+            if should_click_info:
                 log_and_print(
                     f"[personal_broadcast] click info image={self._config.open_info_image}, "
                     f"scope={self._config.open_info_scope} attempt={attempt}/3",
@@ -289,7 +347,10 @@ class PersonalBroadcastSender:
                 )
                 gd.pause(0.6)
             else:
-                log_and_print("[personal_broadcast] info already open (info.png dominates), skip info click", "debug")
+                log_and_print(
+                    "[personal_broadcast] skip info click (not confidently closed or score too low)",
+                    "debug",
+                )
 
             if self._click_participants_text():
                 gd.pause(2.0)
@@ -383,6 +444,44 @@ class PersonalBroadcastSender:
         img_gray = cv2.cvtColor(snap_bgr, cv2.COLOR_BGR2GRAY)
         tpl_gray = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY)
         res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+        _, max_val, _, _ = cv2.minMaxLoc(res)
+        return float(max_val)
+
+
+    def _template_score_in_scope_edges(self, image_name: str, scope: tuple[int, int, int, int]) -> float:
+        path = self._resolve_template_path(image_name)
+        if path is None:
+            return -1.0
+
+        left, top, right, bottom = [int(v) for v in scope]
+        width = max(1, right - left)
+        height = max(1, bottom - top)
+        snap_rgb = take_screenshot((left, top, width, height))
+        snap_bgr = cv2.cvtColor(snap_rgb, cv2.COLOR_RGB2BGR)
+
+        tpl = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        if tpl is None:
+            return -1.0
+        if tpl.ndim == 3 and tpl.shape[2] == 4:
+            tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_BGRA2BGR)
+        elif tpl.ndim == 3:
+            tpl_bgr = tpl
+        else:
+            tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_GRAY2BGR)
+
+        ih, iw = snap_bgr.shape[:2]
+        th, tw = tpl_bgr.shape[:2]
+        if th < 1 or tw < 1 or th > ih or tw > iw:
+            return -1.0
+
+        snap_gray = cv2.cvtColor(snap_bgr, cv2.COLOR_BGR2GRAY)
+        tpl_gray = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY)
+        snap_edges = cv2.Canny(snap_gray, 50, 140)
+        tpl_edges = cv2.Canny(tpl_gray, 50, 140)
+        if int(cv2.countNonZero(tpl_edges)) < 20:
+            return -1.0
+
+        res = cv2.matchTemplate(snap_edges, tpl_edges, cv2.TM_CCORR_NORMED)
         _, max_val, _, _ = cv2.minMaxLoc(res)
         return float(max_val)
 
@@ -510,6 +609,101 @@ class PersonalBroadcastSender:
             log_and_print(f"[personal_broadcast] snapshot save failed scan_id={scan_id}: {e}", "error")
             return scan_id, None
 
+
+    def _save_dialog_action_snapshot(
+        self,
+        scope: tuple[int, int, int, int],
+        reason: str,
+        state: str | None = None,
+        send_score: float | None = None,
+        mic_score: float | None = None,
+        scan_id: str | None = None,
+        member_name: str | None = None,
+    ) -> None:
+        try:
+            left, top, right, bottom = [int(v) for v in scope]
+            width = max(1, right - left)
+            height = max(1, bottom - top)
+            snap = take_screenshot((left, top, width, height))
+
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            safe_reason = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(reason or "unknown"))
+            safe_name = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(member_name or "unknown"))
+            if len(safe_name) > 40:
+                safe_name = safe_name[:40]
+            sid = str(scan_id or "na")
+
+            out_dir = Path(__file__).resolve().parents[1] / "temp_log"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            image_path = out_dir / f"pb_dialog_{safe_reason}_{safe_name}_{sid}_{ts}.png"
+            meta_path = out_dir / f"pb_dialog_{safe_reason}_{safe_name}_{sid}_{ts}.json"
+
+            snap_bgr = cv2.cvtColor(snap, cv2.COLOR_RGB2BGR)
+            cv2.imwrite(str(image_path), snap_bgr)
+
+            meta = {
+                "reason": str(reason or "unknown"),
+                "state": str(state or ""),
+                "send_score": None if send_score is None else float(send_score),
+                "mic_score": None if mic_score is None else float(mic_score),
+                "member_name": str(member_name or ""),
+                "scan_id": sid,
+                "scope": [int(left), int(top), int(right), int(bottom)],
+                "saved_at": datetime.now().isoformat(timespec="seconds"),
+                "image": str(image_path.resolve()),
+                "cwd": str(Path.cwd()),
+            }
+            meta_path.write_text(json.dumps(meta, ensure_ascii=False, indent=2), encoding="utf-8")
+            log_and_print(
+                f"[personal_broadcast] dialog snapshot saved reason={reason} image={image_path} scan_id={sid}",
+                "debug",
+            )
+        except Exception as e:
+            log_and_print(f"[personal_broadcast] dialog snapshot save failed reason={reason}: {e}", "error")
+
+
+    def _dedupe_candidates_by_position(self, candidates: list[dict], max_dx: int = 18, max_dy: int = 12) -> list[dict]:
+        if not candidates:
+            return []
+        kept = []
+        # sort top-to-bottom then left-to-right
+        for c in sorted(candidates, key=lambda x: (int(x.get("y", 0)), int(x.get("x", 0)))):
+            cx = int(c.get("x", 0))
+            cy = int(c.get("y", 0))
+            found_index = None
+            for i, k in enumerate(kept):
+                kx = int(k.get("x", 0))
+                ky = int(k.get("y", 0))
+                if abs(cx - kx) <= max_dx and abs(cy - ky) <= max_dy:
+                    found_index = i
+                    break
+            if found_index is None:
+                kept.append(c)
+                continue
+            # pick the longer name when positions overlap
+            if len(str(c.get("name", ""))) > len(str(kept[found_index].get("name", ""))):
+                kept[found_index] = c
+        return kept
+
+
+    def _is_participants_label(self, name: str) -> bool:
+        raw = "".join(ch for ch in str(name or "").strip().lower() if ch.isalnum())
+        if not raw:
+            return False
+        labels = [str(x).strip().lower() for x in (self._config.participants_texts or []) if str(x).strip()]
+        labels += ["????????", "?????????", "participants"]
+        for label in labels:
+            norm = "".join(ch for ch in label if ch.isalnum())
+            if not norm:
+                continue
+            if raw == norm or raw in norm or norm in raw:
+                return True
+        if raw.startswith("??") and ("?????" in raw or "????" in raw):
+            return True
+        if raw.startswith("?????") or raw.startswith("????") or raw.startswith("participant"):
+            return True
+        return False
+
     def _read_candidates_from_scope(self, channel_name: str, step: int) -> tuple[list[dict], str]:
         skip_stats = {"role_line": 0, "role_label": 0, "no_avatar": 0, "bad_token": 0, "short_name": 0}
         scope = self._config.members_scope
@@ -577,23 +771,39 @@ class PersonalBroadcastSender:
                 log_and_print(f"[personal_broadcast] role detected, skip line='{line_text}' scan_id={scan_id}", "debug")
                 continue
 
-            chosen = self._select_best_name_word(line_words)
-            if not chosen:
+            name_parts = []
+            token_boxes = []
+            for w in line_words:
+                token_raw = str(w.get("text", "")).strip()
+                if not token_raw:
+                    continue
+                token_norm = self._normalize_name(token_raw)
+                if not self._is_member_name_token(token_norm):
+                    continue
+                name_parts.append(token_raw)
+                token_boxes.append(w)
+
+            if not name_parts:
                 skip_stats["bad_token"] += 1
                 continue
 
-            raw_name = str(chosen["text"]).strip()
+            raw_name = " ".join(name_parts).strip()
             name = self._normalize_name(raw_name)
             if len(name) < 2:
                 skip_stats["short_name"] += 1
                 continue
 
-            chosen_left = int(chosen["left"])
-            chosen_top = int(chosen["top"])
-            chosen_w = int(chosen["width"])
-            chosen_h = int(chosen["height"])
-            chosen_right = chosen_left + chosen_w
-            chosen_bottom = chosen_top + chosen_h
+            lefts = [int(b["left"]) for b in token_boxes]
+            tops = [int(b["top"]) for b in token_boxes]
+            rights = [int(b["left"]) + int(b["width"]) for b in token_boxes]
+            bottoms = [int(b["top"]) + int(b["height"]) for b in token_boxes]
+            chosen_left = min(lefts)
+            chosen_top = min(tops)
+            chosen_right = max(rights)
+            chosen_bottom = max(bottoms)
+            chosen_w = max(1, chosen_right - chosen_left)
+            chosen_h = max(1, chosen_bottom - chosen_top)
+
             if self._row_has_role_label(words, chosen_left, chosen_top, chosen_w, chosen_h):
                 skip_stats["role_label"] += 1
                 log_and_print(
@@ -603,8 +813,8 @@ class PersonalBroadcastSender:
                 continue
             # Right-side OCR noise is common; keep candidate if role checks passed.
 
-            local_center_x = int(chosen["left"]) + int(chosen["width"]) // 2
-            local_center_y = int(chosen["top"]) + int(chosen["height"]) // 2
+            local_center_x = int(chosen_left) + int(chosen_w) // 2
+            local_center_y = int(chosen_top) + int(chosen_h) // 2
             if local_center_x > int(scope[2] * self._NAME_MAX_X_RATIO):
                 skip_stats["bad_token"] += 1
                 log_and_print(
@@ -822,7 +1032,7 @@ class PersonalBroadcastSender:
                 return True
         return False
 
-    def _send_to_member(self, window, s, candidate: dict, channel_name: str, scan_id: str | None = None) -> bool:
+    def _send_to_member(self, window, s, candidate: dict, channel_name: str, scan_id: str | None = None) -> str:
         name = candidate["name"]
         x = candidate["x"]
         y = candidate["y"]
@@ -830,7 +1040,7 @@ class PersonalBroadcastSender:
 
         if self._has_role_in_member_row(y, scan_id=sid):
             log_and_print(f"[personal_broadcast] skip role account before send: {name} scan_id={sid}", "debug")
-            return False
+            return "skip"
 
         log_and_print(f"[personal_broadcast] sending to {name} scan_id={sid}", "info")
         log_and_print(f"[personal_broadcast] click member name='{name}' at x={x}, y={y} scan_id={sid}", "debug")
@@ -856,29 +1066,40 @@ class PersonalBroadcastSender:
             is_debug=_ui_debug(),
         ):
             log_and_print(f"[personal_broadcast] row send icon not found for {name} scan_id={sid}", "error")
-            return False
+            return "recover"
         log_and_print(f"[personal_broadcast] row send clicked, scope={send_scope} scan_id={sid}", "debug")
 
         # Required order: check popup before any message input.
-        if self._handle_no_personal_messages_popup(scan_id=sid):
-            self._registry.add(name)
+        if self._dismiss_no_personal_messages_popup(scan_id=sid, context="before_input"):
             log_and_print(
-                f"[personal_broadcast] skip input/send because popup visible, mark processed: {name} scan_id={sid}",
+                f"[personal_broadcast] skip input/send because popup visible: {name} scan_id={sid}",
                 "warning",
             )
-            return False
+            return "recover"
 
         if not self._is_private_chat_context():
             log_and_print(
                 f"[personal_broadcast] private-chat check failed (likely group), skip before input scan_id={sid}",
                 "error",
             )
-            return False
+            return "recover"
+
+        if self._already_sent_recl1():
+            self._registry.add(name)
+            log_and_print(
+                f"[personal_broadcast] already-sent indicator detected (recl1.png), mark processed and exit dialog scan_id={sid}",
+                "info",
+            )
+            try:
+                self._back_to_group(window)
+            except Exception:
+                pass
+            return "recover"
 
         window.set_focus()
         if not self._insert_message_text(window):
             log_and_print(f"[personal_broadcast] cannot insert message text for {name} scan_id={sid}", "error")
-            return False
+            return "recover"
 
         dialog_send_scope = self._config.dialog_send_scope
         action_state, send_score, mic_score = self._detect_dialog_action_state_with_pause(dialog_send_scope, pause_s=1.0)
@@ -893,23 +1114,40 @@ class PersonalBroadcastSender:
                 f"text likely not inserted, skip send scan_id={sid}",
                 "error",
             )
-            return False
+            self._save_dialog_action_snapshot(
+                dialog_send_scope,
+                reason="dialog_action_microphone",
+                state=action_state,
+                send_score=send_score,
+                mic_score=mic_score,
+                scan_id=sid,
+                member_name=name,
+            )
+            return "recover"
         if action_state == "unknown":
             log_and_print(
                 f"[personal_broadcast] cannot confidently determine send icon, "
                 f"skip click to avoid microphone misclick scan_id={sid}",
                 "error",
             )
-            return False
+            self._save_dialog_action_snapshot(
+                dialog_send_scope,
+                reason="dialog_action_unknown",
+                state=action_state,
+                send_score=send_score,
+                mic_score=mic_score,
+                scan_id=sid,
+                member_name=name,
+            )
+            return "recover"
 
         # If error popup is already visible, do not click send again.
-        if self._handle_no_personal_messages_popup(scan_id=sid):
-            self._registry.add(name)
+        if self._dismiss_no_personal_messages_popup(scan_id=sid, context="before_send_click"):
             log_and_print(
-                f"[personal_broadcast] skip send click because popup already visible, mark processed: {name} scan_id={sid}",
+                f"[personal_broadcast] skip send click because popup already visible: {name} scan_id={sid}",
                 "warning",
             )
-            return False
+            return "recover"
 
         if not gd.click_image(
             self._config.dialog_send_image,
@@ -920,20 +1158,39 @@ class PersonalBroadcastSender:
             is_debug=_ui_debug(),
         ):
             log_and_print(f"[personal_broadcast] dialog send icon not found for {name} scan_id={sid}", "error")
-            return False
+            self._save_dialog_action_snapshot(
+                dialog_send_scope,
+                reason="dialog_send_not_found",
+                state=action_state,
+                send_score=send_score,
+                mic_score=mic_score,
+                scan_id=sid,
+                member_name=name,
+            )
+            return "recover"
         log_and_print(f"[personal_broadcast] dialog send clicked, scope={dialog_send_scope} scan_id={sid}", "debug")
 
         # After clicking send, some contacts can show "cannot receive personal messages".
-        if self._handle_no_personal_messages_popup(scan_id=sid):
-            self._registry.add(name)
+        if self._dismiss_no_personal_messages_popup(scan_id=sid, context="after_send_click"):
             log_and_print(
-                f"[personal_broadcast] mark processed after no-personal-messages popup: {name} scan_id={sid}",
+                f"[personal_broadcast] no-personal-messages popup after send: {name} scan_id={sid}",
                 "warning",
             )
-            return False
+            return "recover"
 
+        self._registry.add(name)
         log_sent_message(channel_name=channel_name, text=self._config.message_text, source=f"personal:{name}")
-        return True
+        return "sent"
+
+    def _dismiss_no_personal_messages_popup(self, scan_id: str | None = None, context: str = "") -> bool:
+        handled = self._handle_no_personal_messages_popup(scan_id=scan_id)
+        if handled and context:
+            sid = scan_id or "na"
+            log_and_print(
+                f"[personal_broadcast] dismissed no-personal-messages popup context={context} scan_id={sid}",
+                "debug",
+            )
+        return handled
 
     def _handle_no_personal_messages_popup(self, scan_id: str | None = None) -> bool:
         sid = scan_id or "na"
@@ -1060,7 +1317,31 @@ class PersonalBroadcastSender:
         )
         return hits >= 2
 
+    def _scroll_info_panel_up_for_private_check(self) -> None:
+        """Before private/group detection, force list panel to top for stable UI signals."""
+        try:
+            scope = self._config.members_scope
+            cx = int(scope[0] + scope[2] // 2)
+            cy = int(scope[1] + scope[3] // 2)
+            log_and_print(
+                f"[personal_broadcast] private-chat precheck scroll up at x={cx}, y={cy}",
+                "debug",
+            )
+            gd.human_move(cx, cy)
+            gd.pause(0.05)
+            gd.scroll(2600)
+            gd.pause(0.08)
+            gd.scroll(2600)
+            gd.pause(0.08)
+            gd.scroll(2600)
+            gd.pause(0.08)
+            gd.scroll(2600)
+            gd.pause(0.25)
+        except Exception as exc:
+            log_and_print(f"[personal_broadcast] precheck scroll up failed: {exc}", "debug")
+
     def _is_private_chat_context(self) -> bool:
+        self._scroll_info_panel_up_for_private_check()
         has_info_icon = False
         try:
             has_info_icon = bool(
@@ -1081,20 +1362,45 @@ class PersonalBroadcastSender:
             strict=False,
             min_conf=30,
         )
-        # Extra guard: if "Учасники/Участники" is visible near top header area,
+        # Extra guard: if "????????/?????????" is visible near top header area,
         # this is a group chat with opened participants list.
         has_participants_header = self._scope_has_participants_label(
             (850, 55, 1070, 110),
             strict=True,
             min_conf=62,
         )
+
+        action_visible, action_state, send_score, mic_score = self._dialog_action_icon_visible()
+
         log_and_print(
             f"[personal_broadcast] private-chat check: has_info_icon={has_info_icon}, "
             f"has_participants_word={has_participants_word}, "
-            f"has_participants_header={has_participants_header}",
+            f"has_participants_header={has_participants_header}, "
+            f"action_visible={action_visible}, action_state={action_state} "
+            f"send_score={send_score:.3f} mic_score={mic_score:.3f}",
             "debug",
         )
-        return has_info_icon and (not has_participants_word) and (not has_participants_header)
+
+        if has_participants_header:
+            return False
+
+        if action_visible:
+            return True
+
+        return has_info_icon and (not has_participants_word)
+
+
+    def _dialog_action_icon_visible(self) -> tuple[bool, str, float, float]:
+        try:
+            state, send_score, mic_score = self._detect_dialog_action_state_with_pause(
+                self._config.dialog_send_scope,
+                pause_s=0.0,
+            )
+        except Exception:
+            return False, "unknown", -1.0, -1.0
+        best = max(send_score, mic_score)
+        visible = best >= 0.90
+        return visible, state, send_score, mic_score
 
     def _scope_has_participants_label(
         self,
@@ -1143,13 +1449,17 @@ class PersonalBroadcastSender:
         mic_raw = self._template_score_in_scope("microfon.png", scope)
         send_glyph = self._template_score_in_scope_glyph(self._config.dialog_send_image, scope)
         mic_glyph = self._template_score_in_scope_glyph("microfon.png", scope)
+        send_edge = self._template_score_in_scope_edges(self._config.dialog_send_image, scope)
+        mic_edge = self._template_score_in_scope_edges("microfon.png", scope)
         send_score = (0.35 * send_raw) + (0.65 * send_glyph)
         mic_score = (0.35 * mic_raw) + (0.65 * mic_glyph)
         eps = 0.008
+        edge_eps = 0.01
 
         log_and_print(
             f"[personal_broadcast] dialog score details raw(send={send_raw:.3f}, mic={mic_raw:.3f}) "
             f"glyph(send={send_glyph:.3f}, mic={mic_glyph:.3f}) "
+            f"edge(send={send_edge:.3f}, mic={mic_edge:.3f}) "
             f"final(send={send_score:.3f}, mic={mic_score:.3f})",
             "debug",
         )
@@ -1160,6 +1470,14 @@ class PersonalBroadcastSender:
             return "send", send_score, mic_score
         if mic_score >= 0 and mic_score > send_score + eps:
             return "microphone", send_score, mic_score
+
+        # Tie-breaker using edge match when scores are too close.
+        if send_edge >= 0 and mic_edge >= 0:
+            if send_edge > mic_edge + edge_eps:
+                return "send", send_score, mic_score
+            if mic_edge > send_edge + edge_eps:
+                return "microphone", send_score, mic_score
+
         return "unknown", send_score, mic_score
 
     def _detect_dialog_action_state_with_pause(
@@ -1195,6 +1513,21 @@ class PersonalBroadcastSender:
             log_and_print(f"[personal_broadcast] role marker in right column: '{row_text}' scan_id={sid}", "debug")
             return True
         return False
+
+
+    def _already_sent_recl1(self) -> bool:
+        try:
+            found = gd.find_image(
+                "recl1.png",
+                timeout=0.6,
+                confidence=0.9,
+                scope=(410, 200, 780, 700),
+                multiscale=True,
+                is_debug=_ui_debug(),
+            )
+            return bool(found)
+        except Exception:
+            return False
 
     def _insert_message_text(self, window) -> bool:
         text = self._config.message_text
@@ -1246,7 +1579,7 @@ class PersonalBroadcastSender:
                         f"send_score={send_score:.3f} mic_score={mic_score:.3f} attempt={attempt}/3",
                         "debug",
                     )
-                    if state == "send" or self._verify_input_text(window, x, y, text):
+                    if state == "send":
                         log_and_print(
                             f"[personal_broadcast] message accepted via keyboard typing attempt={attempt}/3",
                             "debug",
@@ -1263,7 +1596,7 @@ class PersonalBroadcastSender:
                         f"send_score={send_score:.3f} mic_score={mic_score:.3f} attempt={attempt}/3",
                         "debug",
                     )
-                    if state == "send" or self._verify_input_text(window, x, y, text):
+                    if state == "send":
                         log_and_print(
                             f"[personal_broadcast] message paste accepted via ctrl+v attempt={attempt}/3",
                             "debug",
@@ -1280,7 +1613,7 @@ class PersonalBroadcastSender:
                         f"send_score={send_score:.3f} mic_score={mic_score:.3f} attempt={attempt}/3",
                         "debug",
                     )
-                    if state == "send" or self._verify_input_text(window, x, y, text):
+                    if state == "send":
                         log_and_print(
                             f"[personal_broadcast] message paste accepted via shift+insert attempt={attempt}/3",
                             "debug",
@@ -1301,6 +1634,15 @@ class PersonalBroadcastSender:
                         f"[personal_broadcast] paste verification failed attempt={attempt}/3 "
                         f"(state={state}, send_score={send_score:.3f}, mic_score={mic_score:.3f})",
                         "warning",
+                    )
+                    self._save_dialog_action_snapshot(
+                        dialog_send_scope,
+                        reason=f"input_verify_failed_attempt{attempt}",
+                        state=state,
+                        send_score=send_score,
+                        mic_score=mic_score,
+                        scan_id=None,
+                        member_name=None,
                     )
                     continue
 
@@ -1377,10 +1719,9 @@ class PersonalBroadcastSender:
                     pyperclip.copy(text)
                     self._paste_ctrl_v()
                     gd.pause(0.12)
-                    if not self._verify_input_text(window, x, y, text):
-                        pyperclip.copy(text)
-                        self._paste_shift_insert()
-                        gd.pause(0.12)
+                    pyperclip.copy(text)
+                    self._paste_shift_insert()
+                    gd.pause(0.12)
                 finally:
                     if old_clip is not None:
                         try:
@@ -1398,7 +1739,7 @@ class PersonalBroadcastSender:
                 return True
             if state == "microphone":
                 return False
-            return self._verify_input_text(window, x, y, text)
+            return False
         except Exception as exc:
             log_and_print(f"[personal_broadcast] manual typing fallback failed: {exc}", "error")
             return False
@@ -1438,8 +1779,6 @@ class PersonalBroadcastSender:
         except Exception:
             pass
         ok = self._input_contains_text(text)
-        if not ok:
-            log_and_print("[personal_broadcast] input text verification failed", "warning")
         return ok
 
     @staticmethod
@@ -1538,6 +1877,7 @@ class PersonalBroadcastSender:
             if ch.isalpha() or ch in {"-", "'"}:
                 allowed.append(ch)
         return "".join(allowed).strip()
+
 
 
 
