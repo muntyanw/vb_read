@@ -619,27 +619,61 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
-    if not gd.click_image(
-        f"{name_viber_channel}\\last_mess.png",
-        scope=(880, 910, 1060, 1000),
-        confidence=0.7,
-        count_click=1,
-        multiscale=True,
+
+    image_name = f"{name_viber_channel}\\last_mess.png"
+    base_scope = (880, 910, 1060, 1000)
+
+    # 1) Strict pass to reduce false positive clicks on empty area.
+    pos = gd.find_image(
+        image_name,
+        timeout=1.2,
+        confidence=0.90,
+        scope=base_scope,
+        multiscale=False,
         is_debug=_ui_debug(),
-    ):
+    )
+
+    # 2) Fallback for scaled UI.
+    if not pos:
+        pos = gd.find_image(
+            image_name,
+            timeout=1.5,
+            confidence=0.86,
+            scope=base_scope,
+            multiscale=True,
+            is_debug=_ui_debug(),
+        )
+
+    if not pos:
         log_and_print("Not find icon LastMessage", "INFO")
         return False
 
-    # OLD (coordinate clicks) kept for rollback:
-    # gd.click(920, 960)
-    # gd.pause(0.2)
-    # gd.double_click(1060, 960)
-    # gd.pause(0.2)
-    
-    log_and_print("Click down to last messages", "INFO")
-    #scroll_with_mouse(window, count_scroll=2, direction="up")
-    return True
+    # 3) Confirmation pass around found point.
+    px, py = int(pos[0]), int(pos[1])
+    confirm_scope = (
+        max(base_scope[0], px - 70),
+        max(base_scope[1], py - 45),
+        min(base_scope[2], px + 70),
+        min(base_scope[3], py + 45),
+    )
+    pos_confirm = gd.find_image(
+        image_name,
+        timeout=0.6,
+        confidence=0.90,
+        scope=confirm_scope,
+        multiscale=False,
+        is_debug=_ui_debug(),
+    )
+    if not pos_confirm:
+        log_and_print(
+            f"Skip LastMessage click: unconfirmed match at ({px}, {py})",
+            "DEBUG",
+        )
+        return False
 
+    gd.click(int(pos_confirm[0]), int(pos_confirm[1]))
+    log_and_print("Click down to last messages", "INFO")
+    return True
 def moveToContactsAndScrollUp():
     log_and_print("[moveToContactsAndScrollUp] scroll up contacts")
     
