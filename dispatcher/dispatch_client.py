@@ -23,17 +23,10 @@ import cv2
 import numpy as np
 import win32con
 from pywinauto import keyboard
-
 pag.FAILSAFE = False
-
 ip_numbber = 0
-
 def _ui_debug() -> bool:
     return bool(read_setting("debug_methods_mode"))
-
-
-
-
 def _save_last_mess_debug(scope: tuple[int, int, int, int], channel_name: str, reason: str) -> str | None:
     try:
         left, top, right, bottom = [int(v) for v in scope]
@@ -51,8 +44,6 @@ def _save_last_mess_debug(scope: tuple[int, int, int, int], channel_name: str, r
     except Exception as exc:
         log_and_print(f"[last_mess] debug screenshot save failed: {exc}", "error")
         return None
-
-
 def _save_last_mess_annotated(
     scope: tuple[int, int, int, int],
     channel_name: str,
@@ -68,22 +59,18 @@ def _save_last_mess_annotated(
         height = max(1, bottom - top)
         snap = take_screenshot((left, top, width, height))
         bgr = cv2.cvtColor(snap, cv2.COLOR_RGB2BGR)
-
         rx, ry, rw, rh = [int(v) for v in recognized_rect]
         x1 = max(0, min(width - 1, rx))
         y1 = max(0, min(height - 1, ry))
         x2 = max(x1 + 1, min(width - 1, rx + rw))
         y2 = max(y1 + 1, min(height - 1, ry + rh))
         cv2.rectangle(bgr, (x1, y1), (x2, y2), (0, 255, 0), 2)
-
         cx, cy = int(click_pos[0]), int(click_pos[1])
         local_x = max(0, min(width - 1, cx - left))
         local_y = max(0, min(height - 1, cy - top))
         cv2.circle(bgr, (local_x, local_y), 4, (0, 0, 255), -1)
-
         label = f"tm={tm_score:.3f} color={color_score:.3f} tpl={template_name}"
         cv2.putText(bgr, label[:110], (6, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 255, 255), 1, cv2.LINE_AA)
-
         out_dir = Path(__file__).resolve().parents[1] / "temp_log"
         out_dir.mkdir(parents=True, exist_ok=True)
         ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
@@ -94,18 +81,13 @@ def _save_last_mess_annotated(
     except Exception as exc:
         log_and_print(f"[last_mess] annotated screenshot save failed: {exc}", "error")
         return None
-
-
 def _last_mess_template_paths(channel_name: str) -> list[Path]:
     images_dir = Path(__file__).resolve().parents[1] / "images"
     candidates: list[Path] = []
-
     channel_dir = images_dir / str(channel_name)
     if channel_dir.exists():
         candidates.extend(sorted(channel_dir.glob("last_mess*.png")))
-
     candidates.extend(sorted(images_dir.glob("last_mess*.png")))
-
     seen = set()
     uniq = []
     for p in candidates:
@@ -115,13 +97,10 @@ def _last_mess_template_paths(channel_name: str) -> list[Path]:
         seen.add(key)
         uniq.append(p)
     return uniq
-
-
 def _match_template_score(scr_bgr: np.ndarray, tpl_path: Path, scale: float) -> tuple[float, tuple[int, int], int, int] | None:
     tpl = cv2.imread(str(tpl_path), cv2.IMREAD_UNCHANGED)
     if tpl is None:
         return None
-
     if tpl.ndim == 3 and tpl.shape[2] == 4:
         tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_BGRA2BGR)
         alpha = tpl[:, :, 3]
@@ -132,19 +111,16 @@ def _match_template_score(scr_bgr: np.ndarray, tpl_path: Path, scale: float) -> 
     else:
         tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_GRAY2BGR)
         mask = None
-
     th0, tw0 = tpl_bgr.shape[:2]
     tw = max(1, int(round(tw0 * float(scale))))
     th = max(1, int(round(th0 * float(scale))))
     if tw > scr_bgr.shape[1] or th > scr_bgr.shape[0]:
         return None
-
     interp = cv2.INTER_AREA if scale < 1.0 else cv2.INTER_LINEAR
     tpl_s = cv2.resize(tpl_bgr, (tw, th), interpolation=interp)
     mask_s = None
     if mask is not None:
         mask_s = cv2.resize(mask, (tw, th), interpolation=cv2.INTER_NEAREST)
-
     if mask_s is not None:
         res = cv2.matchTemplate(scr_bgr, tpl_s, cv2.TM_CCORR_NORMED, mask=mask_s)
     else:
@@ -153,42 +129,31 @@ def _match_template_score(scr_bgr: np.ndarray, tpl_path: Path, scale: float) -> 
         img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
         tpl_gray = cv2.GaussianBlur(tpl_gray, (3, 3), 0)
         res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
-
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
     return float(max_val), max_loc, tw, th
-
-
 def _last_mess_color_score(roi_bgr: np.ndarray) -> tuple[float, bool]:
     if roi_bgr is None or roi_bgr.size == 0:
         return 0.0, False
     hsv = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2HSV)
-
     purple = cv2.inRange(hsv, (112, 35, 40), (168, 255, 255))
     light = cv2.inRange(hsv, (0, 0, 170), (179, 85, 255))
-
     total = float(max(1, roi_bgr.shape[0] * roi_bgr.shape[1]))
     purple_ratio = float(cv2.countNonZero(purple)) / total
     light_ratio = float(cv2.countNonZero(light)) / total
-
     purple_term = min(1.0, purple_ratio / 0.08)
     light_term = min(1.0, light_ratio / 0.02)
     score = 0.65 * purple_term + 0.35 * light_term
-
     is_valid = purple_ratio >= 0.04 and light_ratio >= 0.008
     return float(score), bool(is_valid)
-
-
 def _find_last_mess_match(scope: tuple[int, int, int, int], channel_name: str):
     left, top, right, bottom = [int(v) for v in scope]
     width = max(1, right - left)
     height = max(1, bottom - top)
     snap = take_screenshot((left, top, width, height))
     scr_bgr = cv2.cvtColor(snap, cv2.COLOR_RGB2BGR)
-
     templates = _last_mess_template_paths(channel_name)
     if not templates:
         return None
-
     scales = np.linspace(0.85, 1.20, 15)
     best = None
     best_any = None
@@ -220,31 +185,155 @@ def _find_last_mess_match(scope: tuple[int, int, int, int], channel_name: str):
             if cand["color_ok"]:
                 if best is None or cand["final_score"] > best["final_score"]:
                     best = cand
-
     return best if best is not None else best_any
+def _norm_resend_value(value: str) -> str:
+    return "".join(ch for ch in str(value or "").lower() if ch.isalnum())
+def _read_focused_field_text() -> str:
+    try:
+        pag.keyDown("ctrl")
+        gd.pause(0.05)
+        pag.press("a")
+        gd.pause(0.05)
+        pag.press("c")
+        gd.pause(0.05)
+        pag.keyUp("ctrl")
+        gd.pause(0.08)
+        return str(pyperclip.paste() or "")
+    except Exception:
+        return ""
+def _resend_value_matches(actual: str, expected: str) -> bool:
+    # For resend search we only need confirmation that something was inserted.
+    # Input can contain one or two phones and may be transformed by the UI.
+    a = _norm_resend_value(actual)
+    return len(a) >= 2
+def _save_resend_field_state(
+    phase: str,
+    attempt: int,
+    actual: str,
+    has_content: bool,
+    scope: tuple[int, int, int, int] = (320, 300, 980, 470),
+) -> str | None:
+    try:
+        left, top, right, bottom = [int(v) for v in scope]
+        width = max(1, right - left)
+        height = max(1, bottom - top)
+        snap = take_screenshot((left, top, width, height))
+        bgr = cv2.cvtColor(snap, cv2.COLOR_RGB2BGR)
+        preview = str(actual or "").replace("\n", " ").replace("\r", " ")
+        preview = " ".join(preview.split())
+        if len(preview) > 80:
+            preview = preview[:80] + "..."
+        label = f"phase={phase} attempt={attempt} has_content={has_content} len={len(str(actual or ''))}"
+        cv2.putText(bgr, label[:120], (8, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 255), 1, cv2.LINE_AA)
+        cv2.putText(bgr, f"actual='{preview}'"[:120], (8, 40), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (180, 255, 180), 1, cv2.LINE_AA)
+        out_dir = Path(__file__).resolve().parents[1] / "temp_log"
+        out_dir.mkdir(parents=True, exist_ok=True)
+        ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+        safe_phase = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(phase or "unknown"))
+        path = out_dir / f"resend_field_{safe_phase}_attempt{int(attempt)}_{ts}.png"
+        cv2.imwrite(str(path), bgr)
+        log_and_print(f"[resend] field snapshot: {path}", "DEBUG")
+        return str(path)
+    except Exception as exc:
+        log_and_print(f"[resend] field snapshot save failed: {exc}", "ERROR")
+        return None
+def _set_and_verify_resend_search_value(value: str) -> bool:
+    value = str(value or "").strip()
+    if not value:
+        return False
+
+    def _clear_field() -> None:
+        pag.keyDown("ctrl")
+        gd.pause(0.05)
+        pag.press("a")
+        gd.pause(0.05)
+        pag.keyUp("ctrl")
+        gd.pause(0.05)
+        pag.press("backspace")
+        gd.pause(0.12)
+
+    for attempt in range(1, 4):
+        # 1) Keyboard typing first (most stable for this field)
+        _clear_field()
+        typed = False
+        try:
+            typed = bool(gd.type_text_unicode(value, interval_s=0.004))
+        except Exception:
+            typed = False
+
+        if not typed:
+            for ch in value:
+                pag.typewrite(ch)
+                gd.pause(0.01)
+
+        gd.pause(0.30)
+        actual = _read_focused_field_text()
+        has_content = _resend_value_matches(actual, value)
+        _save_resend_field_state("after_typing", attempt, actual, has_content)
+        if has_content:
+            log_and_print(f"[resend] search value accepted via typing attempt={attempt}", "DEBUG")
+            return True
+
+        # 2) Clipboard paste via Ctrl+V
+        _clear_field()
+        pyperclip.copy(value)
+        gd.pause(0.08)
+        pag.keyDown("ctrl")
+        gd.pause(0.04)
+        pag.press("v")
+        gd.pause(0.04)
+        pag.keyUp("ctrl")
+        gd.pause(0.30)
+
+        actual = _read_focused_field_text()
+        has_content = _resend_value_matches(actual, value)
+        _save_resend_field_state("after_paste_ctrl_v", attempt, actual, has_content)
+        if has_content:
+            log_and_print(f"[resend] search value accepted via Ctrl+V attempt={attempt}", "DEBUG")
+            return True
+
+        # 3) Clipboard paste via Shift+Insert
+        _clear_field()
+        pyperclip.copy(value)
+        gd.pause(0.08)
+        pag.keyDown("shift")
+        gd.pause(0.04)
+        pag.press("insert")
+        gd.pause(0.04)
+        pag.keyUp("shift")
+        gd.pause(0.30)
+
+        actual = _read_focused_field_text()
+        has_content = _resend_value_matches(actual, value)
+        _save_resend_field_state("after_paste_shift_insert", attempt, actual, has_content)
+        if has_content:
+            log_and_print(f"[resend] search value accepted via Shift+Insert attempt={attempt}", "DEBUG")
+            return True
+
+        log_and_print(
+            f"[resend] all fill methods failed attempt={attempt}",
+            "WARNING",
+        )
+
+    log_and_print("[resend] cannot verify non-empty value in search field", "ERROR")
+    return False
 
 def _get_ips() -> list[str]:
     ips = read_setting("IPS") or []
     if not isinstance(ips, list):
         return []
     return [str(ip).strip() for ip in ips if str(ip).strip()]
-
-
 def get_dispatch_url():
     ips = _get_ips()
     if not ips:
         return "http://127.0.0.1:8888/api/v1/dispatch/analyze"
-
     global ip_numbber
     ip_numbber = ip_numbber % len(ips)
     return f"http://{ips[ip_numbber]}:8888/api/v1/dispatch/analyze"
-
-
 DISPATCH_API_KEY = os.getenv(
     "DISPATCH_API_KEY",
     "3e7e07d4f2a64f99a95cf8b18a1381f635ea2cde93cce94e4dcbfdd4c3af5d87",
 )
-
 # Global flag to prevent duplicate message handling.
 processed_messages = set()
 # Semaphore for sequential message processing.
@@ -252,45 +341,33 @@ processing_semaphore = asyncio.Semaphore(1)
 count_y_mess_empty = 0
 copied_message_counter = 0
 last_message_copy_monotonic = time.monotonic()
-
-
 class DispatchError(Exception):
     pass
-
-
 def mark_message_copied() -> None:
     global copied_message_counter, last_message_copy_monotonic
     copied_message_counter += 1
     last_message_copy_monotonic = time.monotonic()
     log_and_print(f"[copy_watchdog] copied_message_counter={copied_message_counter}", "info")
-
-
 def reset_copy_watchdog() -> None:
     global copied_message_counter, last_message_copy_monotonic
     copied_message_counter = 0
     last_message_copy_monotonic = time.monotonic()
     log_and_print("[copy_watchdog] reset on worker start", "info")
-
-
 # ---- Client-side models for server response ----
 class Action(BaseModel):
     type: str
     payload: Optional[Dict[str, Any]] = None
-
 class Decision(BaseModel):
     matches: Optional[bool] = None
     confidence: Optional[float] = None
     reason: Optional[str] = None
-
 class MatchedContact(BaseModel):
     order_id: int
     carrier_id: int
     viber_contact_name: Optional[str] = None
-
 class DispatchResult(BaseModel):
     # Ignore unexpected fields from backend.
     model_config = ConfigDict(extra='ignore')
-
     message_id: str
     # Convert null -> {} and keep a safe default via default_factory.
     extracted: Dict[str, Any] = Field(default_factory=dict)
@@ -298,28 +375,22 @@ class DispatchResult(BaseModel):
     actions: List[Action] = Field(default_factory=list)
     decision: Optional[Decision] = None
     matched_contacts: List[MatchedContact] = Field(default_factory=list)
-
     @field_validator("extracted", mode="before")
     @classmethod
     def _coerce_extracted(cls, v):
         return v or {}
-
     @field_validator("actions", mode="before")
     @classmethod
     def _coerce_actions(cls, v):
         return v or []
-
     @field_validator("matched_contacts", mode="before")
     @classmethod
     def _coerce_matched_contacts(cls, v):
         return v or []
-
 def _dispatch_base_url() -> str:
     # From ".../dispatch/analyze" to ".../dispatch".
     base = get_dispatch_url().rstrip("/")
     return base.rsplit("/", 1)[0]
-
-
 async def has_active_orders(
     window_days: int = 2,
     include_count: bool = False,
@@ -340,7 +411,6 @@ async def has_active_orders(
         "X-API-Key": DISPATCH_API_KEY,
         "X-Client": "viber-worker",
     }
-
     for attempt in range(retries + 1):
         try:
             async with httpx.AsyncClient(
@@ -362,11 +432,8 @@ async def has_active_orders(
             )
             if attempt < retries:
                 await asyncio.sleep(0.5 * (attempt + 1))
-
     log_and_print("[has_active_orders] giving up, returning (False, None)", "error")
     return False, None
-
-
 def _fallback_result(message_id: str) -> DispatchResult:
     """Fallback response to avoid returning None to callers."""
     return DispatchResult(
@@ -375,8 +442,6 @@ def _fallback_result(message_id: str) -> DispatchResult:
         actions=[Action(type="ignore", payload=None)],
         decision=Decision(matches=False, confidence=0.0, reason="Fallback"),
     )
-
-
 def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
     if a is None:
         return None
@@ -386,8 +451,6 @@ def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
         return a.type  # pydantic model
     except Exception:
         return None
-
-
 async def process_one_message_dispatcher(
     message_text: Optional[str], 
     file_path: Optional[str],
@@ -395,17 +458,14 @@ async def process_one_message_dispatcher(
     s
 ):
     log_and_print("!!! process_one_message_dispatcher !!!")
-
     uid_source = message_text or file_path or f"msg-{time.time()}"
     if uid_source:
         processed_messages.add(uid_source)
-
     # Process messages sequentially using semaphore.
     async with processing_semaphore:
         try:
             log_and_print(f"Обработка сообщения: {message_text}", "info")
             md5_hash = hashlib.md5(uid_source.encode()).hexdigest()
-
             return await send_for_analysis(
                 message_id=md5_hash,
                 text=message_text or "",
@@ -421,8 +481,6 @@ async def process_one_message_dispatcher(
             await asyncio.sleep(2)  # short pause before next attempt
             # IMPORTANT: always return non-None so upper flow does not crash.
             return _fallback_result(message_id=md5_hash)
-
-
 async def send_for_analysis(
     *,
     message_id: str,
@@ -446,19 +504,16 @@ async def send_for_analysis(
         "received_at": datetime.now(timezone.utc).isoformat(),
         "locale": locale,
     }
-
     headers = {
         "X-API-Key": DISPATCH_API_KEY,
         "Content-Type": "application/json",
         "X-Client": "viber-worker",
     }
-
     log_and_print(f"[dispatch] POST {get_dispatch_url()}")
     log_and_print(
         "[dispatch] headers: {{'X-API-Key': '***', 'Content-Type': 'application/json', 'X-Client': 'viber-worker'}}"
     )
     log_and_print(f"[dispatch] payload: {payload}")
-
     last_exc: Optional[Exception] = None
     for attempt in range(retries + 1):
         try:
@@ -475,12 +530,9 @@ async def send_for_analysis(
                     else (resp.text[:2000] + "...<truncated>")
                 )
                 log_and_print(f"[dispatch] body: {body_preview}")
-
                 if resp.status_code == 401:
                     raise DispatchError("Unauthorized: check X-API-Key")
-
                 resp.raise_for_status()
-
                 data = resp.json()
                 try:
                     result = DispatchResult(**data)
@@ -505,7 +557,6 @@ async def send_for_analysis(
                         decision=data.get("decision"),
                     )
                 return result
-
         except Exception as e:
             last_exc = e
             ips = _get_ips()
@@ -525,12 +576,10 @@ async def send_for_analysis(
                 # On final attempt return fallback instead of raising.
                 log_and_print("[dispatch] returning fallback result", "error")
                 return _fallback_result(message_id=message_id)
-
     # Theoretically unreachable.
     raise DispatchError(f"Dispatch failed: {last_exc}")
  
 def is_foto_message(scope):
-
     pos = gd.find_text_any(queries=["Копировать фото",],
                             lang="rus", 
                             count=2, 
@@ -543,9 +592,7 @@ def is_foto_message(scope):
         return True
     
     return False
-
 def is_link(scope):
-
     pos = gd.find_text_any(queries=["Копировать ссылку",],
                             lang="rus", 
                             count=2, 
@@ -558,7 +605,6 @@ def is_link(scope):
         return True
     
     return False
-
 def is_center_ok():
     
     if not gd.click_image(
@@ -575,7 +621,6 @@ def is_center_ok():
     log_and_print("[is_center_ok] Find center OK")
     
     return True
-
 def is_center_continue():
     
     if not gd.click_image(
@@ -591,7 +636,6 @@ def is_center_continue():
     
     log_and_print("[is_center_continue] Find center Continue")
     return True
-
 def press_esq(window):
     window.set_focus()
     
@@ -605,7 +649,6 @@ def press_esq(window):
     #     s.search_board_mess_x_start + s.x_offset_out_mess,
     #     s.search_board_mess_y_start + 10,
     # )
-
 def click_copy_text(tp, window, s, x, y, is_debug=None):
     #global count_y_mess_empty
     if is_debug is None:
@@ -681,37 +724,29 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
         #else:
         #    press_esq(window)
         #    return None
-
     log_and_print("[send_messages_from_y_mess] Повідомлення скопійовано в буфер обміну", "INFO")
     mark_message_copied()
     return pyperclip.paste()
-
 count_old_mess = 0
-
 async def send_messages_from_y_mess(window, viber_channel, s):
     window.set_focus()
     sending = 0
     was_new_mess = False
     global count_old_mess
-
     for x, y in s.y_mess:
         if y:
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
             window.set_focus()
-
             x = x + s.search_board_mess_x_start + 180
             y = y + s.search_board_mess_y_start
-
             xRight = x - 140
             yRight = y - 10
             gd.right_click(xRight, yRight)
             log_and_print(
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
-
             text = click_copy_text("text", window, s, x, y, is_debug=_ui_debug())
             
-
             if len(text) == 1:
                 continue
     
@@ -728,7 +763,6 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                     continue
                 else:
                     return "repeat"
-
                 
             if not text_includes_fast(text, s.old_text, 0.7):
                 was_new_mess = True
@@ -744,7 +778,6 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                 log_and_print(
                     f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
                 )
-
                 # Extract type of first action (if present).
                 action_type = None
                 viber_names = []
@@ -763,35 +796,25 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                             else:
                                 # Pydantic MatchedContact case
                                 name = getattr(mc, "viber_contact_name", None)
-
                             if name and name not in viber_names:
                                 viber_names.append(name)
-
                 result = True
                 if action_type != "ignore":
                     log_and_print("++++++++++++++++++++++++++++++++++++++++++++++", "INFO")
-
                     result = sendViberMessDispatherToCarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s
                     )
-
-
-
                     if not result:
                         press_esq(window)
-
                         gd.right_click(
                             s.search_board_mess_x_start + s.x_offset_out_mess,
                             s.search_board_mess_y_start + 10,
                         )
-
                         result = sendViberMessDispatherToCarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s
                     )
-
                 else:
                     log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "INFO")
-
                 if result:
                     save_current_text(text)
                     s.old_text = load_previous_text()
@@ -808,18 +831,14 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                 if sending >= 2:
                     # break
                     pass
-
     return was_new_mess
-
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
-
     base_scope = (880, 910, 1060, 1000)
     match = _find_last_mess_match(base_scope, name_viber_channel)
     if not match:
         log_and_print("Not find icon LastMessage", "INFO")
         return False
-
     click_pos = match["abs_center"]
     if _ui_debug():
         debug_after_path = _save_last_mess_annotated(
@@ -833,13 +852,11 @@ def clickLastMess(window, name_viber_channel):
         )
         if debug_after_path:
             log_and_print(f"[last_mess] after snapshot: {debug_after_path}", "DEBUG")
-
     log_and_print(
         f"[last_mess] match final={match['final_score']:.3f} tm={match['tm_score']:.3f} "
         f"color={match['color_score']:.3f} tpl={match['template']} pos={click_pos}",
         "DEBUG",
     )
-
     gd.click(int(click_pos[0]), int(click_pos[1]))
     log_and_print("Click down to last messages", "INFO")
     return True
@@ -848,7 +865,6 @@ def moveToContactsAndScrollUp():
     
     gd.human_move(140, 400)
     gd.scroll(3000)
-
 def click_viber_channel_image(name_viber_channel ):
     
     return gd.click_image(
@@ -873,14 +889,11 @@ def click_viber_channel_text(viber_channel):
             is_debug=_ui_debug(),
             count_click=2
     )
-
 def klickViberChannel(tp, window, clickLastMessBool, viber_channel):
-
     log_and_print(f"start click {viber_channel["name_viber_channel"]}", "DEBUG")
     press_esq(window)
     
     if tp == "image":
-
         pos = click_viber_channel_image(viber_channel["name_viber_channel"])
         
         if not pos:       
@@ -903,7 +916,6 @@ def klickViberChannel(tp, window, clickLastMessBool, viber_channel):
             if not pos:  
                 log_and_print(f"Not find image chat {viber_channel["name_viber_channel"]}", "INFO")
             
-
     log_and_print(f"Click name chat {viber_channel["name_viber_channel"]}")
     if clickLastMessBool:
         clickLastMess(window, viber_channel["name_viber_channel"])
@@ -911,7 +923,6 @@ def klickViberChannel(tp, window, clickLastMessBool, viber_channel):
     moveToContactsAndScrollUp()
     
     return True
-
 def findMessage(window, x, y, viber_channel, text, s):
     log_and_print(f"[findMessage] text = {text}")
     gd.right_click(x, y)
@@ -919,7 +930,6 @@ def findMessage(window, x, y, viber_channel, text, s):
     current_text = click_copy_text("text", window, s, x+60, y, is_debug=_ui_debug())
     
     log_and_print(f"[findMessage] current_text = {current_text}")
-
     if current_text and text_includes_fast(text, current_text, 0.7):
         log_and_print("[findMessage] succ message find")
         return x, y
@@ -931,37 +941,30 @@ def findMessage(window, x, y, viber_channel, text, s):
             window.set_focus()
             fill_y_mess(window, viber_channel, s)
             if len(s.y_mess) > 0:
-
                 for x, y in s.y_mess:
                     if y:
                         log_and_print(f"[findMessage] Меседж y = {y}")
                         window.set_focus()
-
                         x = x + s.search_board_mess_x_start + 180
                         y = y + s.search_board_mess_y_start
-
                         xRight = x - 160
                         yRight = y
                         gd.right_click(xRight, yRight)
                         log_and_print(
                             f"[findMessage] right_click xRight = {xRight}, yRight = {yRight}"
                         )
-
                         current_text = click_copy_text("text", window, s, x, y)
                         if current_text == "":
                             press_esq(window)
                             continue
-
                         if text_includes_fast(text, str(current_text), 0.7):
                             log_and_print("succ message find")
                             return x, y
                         else:
                             log_and_print("[findMessage] this not right text")
-
                 count_attempt_find += 1
                 if count_attempt_find > count_attempt_find_max:
                     return False
-
                 count_scroll_up = read_setting("count_scroll_up")
                 scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
             else:
@@ -970,26 +973,20 @@ def findMessage(window, x, y, viber_channel, text, s):
                 gd.pause(0.2)
                 pag.keyUp("esq")
                 gd.pause(0.2)
-
                 gd.right_click(
                     s.search_board_mess_x_start + s.x_offset_out_mess,
                     s.search_board_mess_y_start + 10,
                 )
-
 def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, text, s):
     is_debug = _ui_debug()
-
     resultFind = findMessage(window, x, y, viber_channel, text, s)
     if resultFind:
         x, y = resultFind
     else:
         return False
-
     xRight = x - 70
     yRight = y + 20
-
     gd.right_click(xRight, yRight)
-
     if not gd.click_text(
         ["Переслать"],
         count_attempt_find=2,
@@ -1002,9 +999,7 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
     ):
         log_and_print("Not find menu item Переслать")
         return False
-
     log_and_print("Click Переслать")
-
     for viber_name in viber_names:
         log_and_print(f"viber_name = {viber_name}")
         
@@ -1013,26 +1008,16 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
         pos = gd.find_image(
             "find.png", scope=(320, 320, 380, 380), multiscale=True, is_debug=is_debug
         )
-
         if not pos:
             log_and_print("Not find field find in resend")
             return False
     
         gd.click(pos[0] + 100, pos[1] - 10)
         log_and_print("Click field find")
-
-        pyperclip.copy(viber_name)
-        gd.pause(0.5)
-        pag.keyDown("ctrl")
-        gd.pause(0.3)
-        pag.press("v")
-        gd.pause(0.3)
-        pag.keyUp("ctrl")
-        gd.pause(1)
-        log_and_print("Click ctrl v")
-        gd.pause(1)
-        
-        
+        if not _set_and_verify_resend_search_value(viber_name):
+            log_and_print(f"[resend] search field fill failed for {viber_name}", "ERROR")
+            return "repeat"
+        gd.pause(0.4)
         if not gd.click_image(
             "select.png",
             scope=(580, 400, 940, 620),
@@ -1041,7 +1026,6 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
             multiscale=False,
             is_debug=_ui_debug(),
         ): 
-
         #if not gd.click_text(
         #    [first_name],
         #    count_attempt_find=2,
@@ -1054,10 +1038,8 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
         #):
             log_and_print(f"Not find NameViberCarrier  {viber_name}")
             return "repeat"
-
         log_and_print(f"click name chat {viber_name}")
         gd.pause(1)
-
     if not gd.click_image(
         "resend.png",
         scope=(460, 730, 640, 810),
@@ -1067,26 +1049,19 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
     ):
         log_and_print("Not find button resend")
         return "repeat"
-
     log_and_print("click button resend success")
-
     save_current_text(text)
     s.old_text = load_previous_text()
-
     klickViberChannel("image", window, True, viber_channel)
     return True
-
 def fill_y_mess(window, viber_channel, s):
     s.y_mess = []
     window.set_focus()
     log_and_print("Старт fill_y_mess")
-
     height = s.search_board_mess_y_end - s.search_board_mess_y_start
     width = s.search_board_mess_x_end - s.search_board_mess_x_start
     x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start
-
     log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
-
     heart_templates = []
     channel_name = viber_channel["name_viber_channel"]
     for idx in range(1, 8):
@@ -1096,11 +1071,9 @@ def fill_y_mess(window, viber_channel, s):
             log_and_print(f"[fill_y_mess] template not found, stop heart scan list: {file_path}", "debug")
             break
         heart_templates.append(file_path)
-
     if not heart_templates:
         log_and_print(f"[fill_y_mess] no heart templates found for channel={channel_name}", "error")
         return
-
     coordinates = gd.capture_and_find_image_boundary_coordinates(
         (x, y, 800, height),
         heart_templates,
@@ -1108,10 +1081,8 @@ def fill_y_mess(window, viber_channel, s):
         threshold=0.88,
     )
     window.set_focus()
-
     s.y_mess = [(coord[0], coord[1]) for coord in coordinates]
     log_and_print(f"s.y_mess = {s.y_mess}")
-
 def click_close_hitlite():
     log_and_print("Find hitlite", "INFO")
     if not gd.click_image(
@@ -1126,10 +1097,8 @@ def click_close_hitlite():
     ):
         log_and_print("Not find icon close", "INFO")
         return False
-
     log_and_print("Find success hitlite and click close", "INFO")
     return True
-
 def click_folder():
     log_and_print("Find button folder", "INFO")
     if not gd.click_image(
@@ -1142,10 +1111,8 @@ def click_folder():
     ):
         log_and_print("Not find button folder", "INFO")
         return False
-
     log_and_print("Find success button folder and click", "INFO")
     return True
-
 def click_close_image():
     log_and_print("Find hitlite", "INFO")
     if not gd.click_image(
@@ -1163,7 +1130,6 @@ def click_close_image():
     
     log_and_print("Find success image close and click close", "INFO")
     return True
-
 def click_exist_mess(window, viber_channel):
     log_and_print("Find exist mrssages", "INFO")
     
@@ -1188,7 +1154,6 @@ def click_exist_mess(window, viber_channel):
         
     log_and_print("Not find images exist messages", "INFO")
     return False
-
 def click_close_info():
     log_and_print("Find info", "INFO")
     if not gd.click_image(
@@ -1205,7 +1170,6 @@ def click_close_info():
         
     log_and_print("Find success image close info and click", "INFO")
     return True
-
 def click_open_info():
     log_and_print("Find info", "INFO")
     if not gd.click_image(
@@ -1231,7 +1195,6 @@ def click_open_info():
         
     log_and_print("Find success image open info and click", "INFO")
     return True
-
 def click_cancel_window_save_as():
     log_and_print("Find window_save_as", "INFO")
     if not gd.click_image(
@@ -1266,7 +1229,6 @@ def click_cancel_window_save_as():
         
     log_and_print("Find success window_save_as and click", "INFO")
     return True
-
 async def processViberMess(
     window, s, count_scroll_up, count_scroll_down, pause_cycle_read
 ):
@@ -1274,28 +1236,23 @@ async def processViberMess(
     empty_send_count = 0
     numberViberChannel = 0
     viber_channel = s.viber_channels[numberViberChannel]
-
     window_top_focus(window)
     
     is_center_continue()
     click_folder()
     click_close_info()
     click_cancel_window_save_as()
-
     if not klickViberChannel("image",window, True, viber_channel):
                 log_and_print(f"Not find chat {viber_channel["name_viber_channel"]}", "INFO")
                 return None
             
     log_and_print(f"click chat {viber_channel["name_viber_channel"]}", "INFO")
-
     gd.right_click(
         s.search_board_mess_x_start + s.x_offset_out_mess,
         s.search_board_mess_y_start + 10,
     )
-
     count_repeat = int(read_setting("count_repeat"))
     break_flag = False
-
     for i in range(count_repeat):
         while True:
             copy_stall_restart_seconds = int(read_setting("copy_stall_restart_seconds") or 3600)
@@ -1308,7 +1265,6 @@ async def processViberMess(
                     )
             # Keep group list pane in expected state at the beginning of each reader loop.
             click_folder()
-
             log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
             if empty_send_count > 4:
                 window_top_focus(window)
@@ -1321,7 +1277,6 @@ async def processViberMess(
                 scroll_with_mouse(
                                 window, count_scroll=random.randint(1, 3), direction="up"
                             )
-
             if empty_send_count > 3:
                 click_cancel_window_save_as()
                 scroll_with_mouse(
@@ -1349,9 +1304,7 @@ async def processViberMess(
                     empty_send_count = 0
                     
                 
-
             fill_y_mess(window, viber_channel, s)
-
             if len(s.y_mess) > 0:
                 was_send = await send_messages_from_y_mess(window, viber_channel, s)
                 log_and_print(f"was_send: {was_send}", "INFO")
@@ -1375,7 +1328,6 @@ async def processViberMess(
                 is_center_continue()
                 break_flag = True
                 break
-
             window_top_focus(window)
             
             #if not klickViberChannel("image", window, False, viber_channel):
@@ -1384,21 +1336,15 @@ async def processViberMess(
             
         if break_flag:
             break
-
         ctypes.windll.user32.LockWindowUpdate(0)
-
         log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
-
     window_top_focus(window)
-
     press_esq(window)
-
     log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
     
 def window_top_focus(window):
     
     hwnd = window.handle
-
     # Set "always on top" flag.
     win32gui.SetWindowPos(
         hwnd,
@@ -1414,7 +1360,5 @@ def window_left(window):
     keyboard.send_keys('{LWIN down}{LEFT}{LWIN up}')
     
     
-
     
     
-

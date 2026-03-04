@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import re
 from datetime import datetime
@@ -12,10 +12,12 @@ class PersonalBroadcastPositionRegistry:
     def __init__(self, filename: str):
         self.path = Path(filename)
         self._seen: set[tuple[int, int]] = set()
+        self._last_processed: tuple[int, int] = (1, 0)
         self._load()
 
     def _load(self) -> None:
         self._seen.clear()
+        self._last_processed = (1, 0)
         if not self.path.exists():
             return
         for line in self.path.read_text(encoding="utf-8-sig").splitlines():
@@ -23,6 +25,9 @@ class PersonalBroadcastPositionRegistry:
             if parsed is None:
                 continue
             self._seen.add(parsed)
+            # Keep exact last marker from file order (not max tuple),
+            # so resume continues from where previous run actually ended.
+            self._last_processed = parsed
 
     @staticmethod
     def _parse_line(line: str) -> tuple[int, int] | None:
@@ -49,7 +54,4 @@ class PersonalBroadcastPositionRegistry:
             fh.write(f"{ts} | scroll={key[0]} | position={key[1]} | viber={name}\n")
 
     def load_last_processed(self) -> tuple[int, int]:
-        if not self._seen:
-            return 1, 0
-        best = max(self._seen)
-        return best[0], best[1]
+        return int(self._last_processed[0]), int(self._last_processed[1])

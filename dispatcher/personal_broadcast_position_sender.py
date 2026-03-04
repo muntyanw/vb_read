@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import random
 
@@ -8,7 +8,6 @@ from dispatcher.personal_broadcast_sender import PersonalBroadcastSender
 from log import log_and_print
 from recognize_text import perform_ocr_with_positions, preprocess_image
 from utils import take_screenshot
-from vb_utils import scroll_with_mouse
 
 
 class _NoOpRegistry:
@@ -42,6 +41,10 @@ class PersonalBroadcastPositionSender(PersonalBroadcastSender):
 
     def _run_channel(self, window, s, channel_name: str) -> bool:
         had_candidates_total = False
+        # Reload registry from file at each channel run to avoid stale in-memory state
+        # after worker restarts/reloads.
+        self._position_registry = PersonalBroadcastPositionRegistry(self._config.position_processed_file)
+
         if not self._open_participants(window):
             return False
 
@@ -80,6 +83,7 @@ class PersonalBroadcastPositionSender(PersonalBroadcastSender):
             skip_registry = 0
             send_attempted = 0
             force_scroll_rescan = False
+            need_rescan = False
 
             for candidate in candidates:
                 scroll_no = int(candidate["scroll_no"])
@@ -133,7 +137,11 @@ class PersonalBroadcastPositionSender(PersonalBroadcastSender):
                         )
                         force_scroll_rescan = True
                         break
-                    continue
+                    # Re-open participants usually jumps to top; restore current scroll page
+                    # and force a fresh scan of this same step to avoid stale coordinates.
+                    self._restore_scroll_position(window, step)
+                    need_rescan = True
+                    break
 
             after_registry = raw_count - skip_registry
             log_and_print(
@@ -144,6 +152,10 @@ class PersonalBroadcastPositionSender(PersonalBroadcastSender):
 
             if sent_any:
                 log_and_print("[personal_broadcast] message sent, refresh members screenshot", "debug")
+                continue
+
+            if need_rescan:
+                log_and_print("[personal_broadcast] participants recovered; rescan current page", "debug")
                 continue
 
             if force_scroll_rescan:
@@ -196,23 +208,35 @@ class PersonalBroadcastPositionSender(PersonalBroadcastSender):
         cy = int(scope[1] + scope[3] // 2)
         window.set_focus()
         log_and_print(f"[personal_broadcast] position page-scroll at x={cx}, y={cy}", "debug")
+
+        # Ensure wheel goes to participants list: hover + focus click inside list.
         gd.human_move(cx, cy)
         gd.pause(0.05)
+        gd.click(cx, cy)
+        gd.pause(0.05)
 
-        row_h = max(1, int(self._config.position_row_height))
-        visible_rows = max(6, int(scope[3] // row_h))
-        # One page down ~= number of visible rows.
-        scroll_with_mouse(window, count_scroll=visible_rows, direction="down")
+        # Calibration mode: exactly one scroll call = one list page.
+        for _ in range(2):
+            gd.scroll(-410)
+            gd.pause(0.03)
+        gd.pause(0.03)
+
+        # Stop after first scroll so you can tune wheel amount quickly.
+        raise SystemExit("[personal_broadcast] calibration stop after one scroll")
 
     def _read_position_candidates(self, channel_name: str, step: int) -> tuple[list[dict], str]:
-        scope = self._config.members_scope
+        base_scope = self._config.members_scope
+        row_h = int(self._config.position_row_height)
+        # Capture two extra rows vertically to reduce missed bottom contacts.
+        extra_rows = 2
+        scope = (int(base_scope[0]), int(base_scope[1]), int(base_scope[2]), int(base_scope[3] + (extra_rows * row_h)))
         img = take_screenshot(scope)
         scan_id, _ = self._save_scan_snapshot(img, channel_name=channel_name, step=step + 1, scope=scope)
 
-        row_h = int(self._config.position_row_height)
         row_center_offset = int(self._config.position_row_center_offset)
         click_x = int(scope[0] + self._config.position_click_x_offset)
-        max_y = int(scope[1] + scope[3] - 12)
+        # Use full captured scope so last visible rows are also processed.
+        max_y = int(scope[1] + scope[3] - 1)
         min_safe_y = max(int(scope[1] + 120), 200)
 
         rows_count = max(1, int((scope[3] - row_center_offset) // row_h) + 1)

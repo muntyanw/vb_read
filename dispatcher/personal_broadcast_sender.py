@@ -1,6 +1,7 @@
-import random
+﻿import random
 import json
 import time
+import math
 from datetime import datetime
 from collections import defaultdict
 from difflib import SequenceMatcher
@@ -329,6 +330,7 @@ class PersonalBroadcastSender:
                 f"state={state} score_unselect={score_unselect:.3f} score_info={score_info:.3f}",
                 "debug",
             )
+            self._save_info_search_snapshot(state, score_unselect, score_info, attempt)
 
             should_click_info = state == "closed" and score_unselect >= self._INFO_CLICK_MIN_SCORE
             if should_click_info:
@@ -337,14 +339,19 @@ class PersonalBroadcastSender:
                     f"scope={self._config.open_info_scope} attempt={attempt}/3",
                     "debug",
                 )
-                gd.click_image(
+                info_scope = self._config.open_info_scope
+                clicked_info = self._click_image_with_optional_color_hint(
                     self._config.open_info_image,
-                    scope=self._config.open_info_scope,
-                    confidence=0.8,
-                    count_click=1,
-                    multiscale=True,
-                    is_debug=_ui_debug(),
+                    scope=info_scope,
+                    confidence=0.80,
+                    use_purple_hint=True,
+                    scan_id=f"info_attempt{attempt}",
+                    fallback_plain=False,
+                    fallback_confidence=0.72,
                 )
+                if not clicked_info:
+                    log_and_print("[personal_broadcast] info image not found for click", "warning")
+                    self._save_info_search_snapshot(state, score_unselect, score_info, attempt)
                 gd.pause(0.6)
             else:
                 log_and_print(
@@ -383,6 +390,65 @@ class PersonalBroadcastSender:
                 count_click=1,
             )
         )
+
+    def _save_info_search_snapshot(
+        self,
+        state: str,
+        score_unselect: float,
+        score_info: float,
+        attempt: int,
+        click_xy: tuple[int, int] | None = None,
+    ) -> str | None:
+        scope = self._config.open_info_scope
+        if scope is None:
+            return None
+        try:
+            left, top, right, bottom = [int(v) for v in scope]
+            width = max(1, right - left)
+            height = max(1, bottom - top)
+            snap_rgb = take_screenshot((left, top, width, height))
+            bgr = cv2.cvtColor(snap_rgb, cv2.COLOR_RGB2BGR)
+
+            label = (
+                f"state={state} unselect={score_unselect:.3f} "
+                f"info={score_info:.3f} attempt={attempt}"
+            )
+            cv2.putText(
+                bgr,
+                label[:120],
+                (6, 18),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.45,
+                (0, 255, 255),
+                1,
+                cv2.LINE_AA,
+            )
+            if click_xy is not None:
+                cx, cy = int(click_xy[0]), int(click_xy[1])
+                lx = max(0, min(width - 1, cx - left))
+                ly = max(0, min(height - 1, cy - top))
+                cv2.circle(bgr, (lx, ly), 6, (0, 0, 255), -1)
+                cv2.putText(
+                    bgr,
+                    f"click=({cx},{cy})",
+                    (6, 36),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.45,
+                    (0, 180, 255),
+                    1,
+                    cv2.LINE_AA,
+                )
+
+            out_dir = Path(__file__).resolve().parents[1] / "temp_log"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            path = out_dir / f"pb_info_state_attempt{int(attempt)}_{ts}.png"
+            cv2.imwrite(str(path), bgr)
+            log_and_print(f"[personal_broadcast] info snapshot: {path}", "debug")
+            return str(path)
+        except Exception as exc:
+            log_and_print(f"[personal_broadcast] info snapshot save failed: {exc}", "warning")
+            return None
 
     def _detect_info_icon_state(self) -> tuple[str, float, float]:
         """
@@ -426,6 +492,10 @@ class PersonalBroadcastSender:
             alpha = tpl[:, :, 3]
             _, mask = cv2.threshold(alpha, 0, 255, cv2.THRESH_BINARY)
             tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_BGRA2BGR)
+            # For info icons we must keep white background in matching; 
+            # alpha-only mask causes false positives on right black sidebar.
+            if "info" in str(image_name).lower():
+                mask = None
         elif tpl.ndim == 3:
             tpl_bgr = tpl
         else:
@@ -439,14 +509,249 @@ class PersonalBroadcastSender:
         if mask is not None:
             res = cv2.matchTemplate(snap_bgr, tpl_bgr, cv2.TM_CCORR_NORMED, mask=mask)
             _, max_val, _, _ = cv2.minMaxLoc(res)
-            return float(max_val)
+            max_val = float(max_val)
+            if math.isfinite(max_val):
+                return max_val
+            log_and_print(
+                f"[personal_broadcast] non-finite template score for {image_name} with alpha mask; fallback to gray matching",
+                "warning",
+            )
 
         img_gray = cv2.cvtColor(snap_bgr, cv2.COLOR_BGR2GRAY)
         tpl_gray = cv2.cvtColor(tpl_bgr, cv2.COLOR_BGR2GRAY)
         res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
         _, max_val, _, _ = cv2.minMaxLoc(res)
-        return float(max_val)
+        max_val = float(max_val)
+        if not math.isfinite(max_val):
+            return -1.0
+        return max_val
 
+
+    @staticmethod
+    def _purple_icon_color_score(roi_bgr) -> tuple[float, bool]:
+        if roi_bgr is None or roi_bgr.size == 0:
+            return 0.0, False
+        hsv = cv2.cvtColor(roi_bgr, cv2.COLOR_BGR2HSV)
+        purple = cv2.inRange(hsv, (112, 35, 40), (168, 255, 255))
+        light = cv2.inRange(hsv, (0, 0, 170), (179, 85, 255))
+        total = float(max(1, roi_bgr.shape[0] * roi_bgr.shape[1]))
+        purple_ratio = float(cv2.countNonZero(purple)) / total
+        light_ratio = float(cv2.countNonZero(light)) / total
+        purple_term = min(1.0, purple_ratio / 0.08)
+        light_term = min(1.0, light_ratio / 0.02)
+        score = 0.65 * purple_term + 0.35 * light_term
+        is_valid = purple_ratio >= 0.04 and light_ratio >= 0.008
+        return float(score), bool(is_valid)
+
+    def _find_template_match_in_scope(
+        self,
+        image_name: str,
+        scope: tuple[int, int, int, int],
+        *,
+        use_purple_hint: bool = False,
+        min_tm_score: float = 0.72,
+    ) -> dict | None:
+        path = self._resolve_template_path(image_name)
+        if path is None:
+            return None
+
+        left, top, right, bottom = [int(v) for v in scope]
+        width = max(1, right - left)
+        height = max(1, bottom - top)
+        snap_rgb = take_screenshot((left, top, width, height))
+        snap_bgr = cv2.cvtColor(snap_rgb, cv2.COLOR_RGB2BGR)
+
+        tpl = cv2.imread(str(path), cv2.IMREAD_UNCHANGED)
+        if tpl is None:
+            return None
+
+        if tpl.ndim == 3 and tpl.shape[2] == 4:
+            alpha = tpl[:, :, 3]
+            _, mask = cv2.threshold(alpha, 0, 255, cv2.THRESH_BINARY)
+            tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_BGRA2BGR)
+            # For info icons we must match with full patch (incl. white background).
+            if "info" in str(image_name).lower():
+                mask = None
+        elif tpl.ndim == 3:
+            tpl_bgr = tpl
+            mask = None
+        else:
+            tpl_bgr = cv2.cvtColor(tpl, cv2.COLOR_GRAY2BGR)
+            mask = None
+
+        ih, iw = snap_bgr.shape[:2]
+        th0, tw0 = tpl_bgr.shape[:2]
+        if th0 < 1 or tw0 < 1 or th0 > ih or tw0 > iw:
+            return None
+
+        best = None
+        scales = [0.92, 0.96, 1.00, 1.04, 1.08]
+        for sc in scales:
+            tw = max(1, int(round(tw0 * sc)))
+            th = max(1, int(round(th0 * sc)))
+            if tw > iw or th > ih:
+                continue
+            interp = cv2.INTER_AREA if sc < 1.0 else cv2.INTER_LINEAR
+            tpl_s = cv2.resize(tpl_bgr, (tw, th), interpolation=interp)
+            mask_s = None
+            if mask is not None:
+                mask_s = cv2.resize(mask, (tw, th), interpolation=cv2.INTER_NEAREST)
+
+            if mask_s is not None:
+                res = cv2.matchTemplate(snap_bgr, tpl_s, cv2.TM_CCORR_NORMED, mask=mask_s)
+            else:
+                img_gray = cv2.cvtColor(snap_bgr, cv2.COLOR_BGR2GRAY)
+                tpl_gray = cv2.cvtColor(tpl_s, cv2.COLOR_BGR2GRAY)
+                img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
+                tpl_gray = cv2.GaussianBlur(tpl_gray, (3, 3), 0)
+                res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+
+            _, max_val, _, max_loc = cv2.minMaxLoc(res)
+            tm_score = float(max_val)
+            if not math.isfinite(tm_score):
+                log_and_print(
+                    f"[personal_broadcast] non-finite tm score image={image_name} scale={sc:.2f}",
+                    "warning",
+                )
+                continue
+            if tm_score < float(min_tm_score):
+                continue
+
+            x, y = int(max_loc[0]), int(max_loc[1])
+            roi = snap_bgr[y:y + th, x:x + tw]
+            color_score, color_ok = self._purple_icon_color_score(roi)
+            final_score = tm_score
+            if use_purple_hint:
+                final_score = (0.78 * tm_score) + (0.22 * float(color_score))
+            if not math.isfinite(float(final_score)):
+                continue
+
+            cand = {
+                "x": x,
+                "y": y,
+                "w": int(tw),
+                "h": int(th),
+                "tm_score": tm_score,
+                "color_score": float(color_score),
+                "color_ok": bool(color_ok),
+                "final_score": float(final_score),
+                "abs_center": (int(left + x + (tw // 2)), int(top + y + (th // 2))),
+            }
+            if best is None or cand["final_score"] > best["final_score"]:
+                best = cand
+
+        return best
+
+    def _save_scope_click_snapshot(self, scope: tuple[int, int, int, int], click_xy: tuple[int, int], tag: str) -> str | None:
+        try:
+            left, top, right, bottom = [int(v) for v in scope]
+            width = max(1, right - left)
+            height = max(1, bottom - top)
+            snap_rgb = take_screenshot((left, top, width, height))
+            bgr = cv2.cvtColor(snap_rgb, cv2.COLOR_RGB2BGR)
+            cx, cy = int(click_xy[0]), int(click_xy[1])
+            lx = max(0, min(width - 1, cx - left))
+            ly = max(0, min(height - 1, cy - top))
+            cv2.circle(bgr, (lx, ly), 6, (0, 0, 255), -1)
+            cv2.putText(bgr, f"click=({cx},{cy})", (6, 18), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 180, 255), 1, cv2.LINE_AA)
+            out_dir = Path(__file__).resolve().parents[1] / "temp_log"
+            out_dir.mkdir(parents=True, exist_ok=True)
+            ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
+            safe_tag = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(tag or "scope_click"))
+            path = out_dir / f"{safe_tag}_{ts}.png"
+            cv2.imwrite(str(path), bgr)
+            log_and_print(f"[personal_broadcast] click snapshot: {path}", "debug")
+            return str(path)
+        except Exception as exc:
+            log_and_print(f"[personal_broadcast] click snapshot save failed: {exc}", "warning")
+            return None
+
+    def _click_image_with_optional_color_hint(
+        self,
+        image_name: str,
+        scope: tuple[int, int, int, int],
+        *,
+        confidence: float,
+        use_purple_hint: bool = False,
+        scan_id: str = "na",
+        fallback_plain: bool = True,
+        fallback_confidence: float = 0.75,
+    ) -> bool:
+        # Default path: existing click_image behavior.
+        if not use_purple_hint:
+            return bool(
+                gd.click_image(
+                    image_name,
+                    scope=scope,
+                    confidence=confidence,
+                    count_click=1,
+                    multiscale=False,
+                    is_debug=_ui_debug(),
+                )
+            )
+
+        # Enhanced path: template + purple color-weighted scoring (like last_mess logic).
+        m = self._find_template_match_in_scope(
+            image_name,
+            scope,
+            use_purple_hint=True,
+            min_tm_score=max(0.66, float(confidence) - 0.16),
+        )
+        if not m:
+            if fallback_plain:
+                pos = gd.find_image(
+                    image_name,
+                    timeout=8.0,
+                    confidence=float(fallback_confidence),
+                    scope=scope,
+                    is_debug=_ui_debug(),
+                    multiscale=True,
+                )
+                if pos:
+                    click_xy = (int(pos[0]), int(pos[1]))
+                    gd.click(click_xy[0], click_xy[1])
+                    if str(scan_id).startswith("info_attempt"):
+                        self._save_scope_click_snapshot(scope, click_xy, tag=f"pb_info_click_{scan_id}_fallback")
+                    return True
+                return False
+            return False
+
+        if float(m["final_score"]) < float(confidence):
+            log_and_print(
+                f"[personal_broadcast] color-hint match below confidence image={image_name} "
+                f"final={m['final_score']:.3f} tm={m['tm_score']:.3f} color={m['color_score']:.3f} "
+                f"scope={scope} scan_id={scan_id}",
+                "debug",
+            )
+            if fallback_plain:
+                pos = gd.find_image(
+                    image_name,
+                    timeout=8.0,
+                    confidence=float(fallback_confidence),
+                    scope=scope,
+                    is_debug=_ui_debug(),
+                    multiscale=True,
+                )
+                if pos:
+                    click_xy = (int(pos[0]), int(pos[1]))
+                    gd.click(click_xy[0], click_xy[1])
+                    if str(scan_id).startswith("info_attempt"):
+                        self._save_scope_click_snapshot(scope, click_xy, tag=f"pb_info_click_{scan_id}_fallback")
+                    return True
+                return False
+            return False
+
+        click_xy = (int(m["abs_center"][0]), int(m["abs_center"][1]))
+        gd.click(click_xy[0], click_xy[1])
+        log_and_print(
+            f"[personal_broadcast] color-hint click image={image_name} "
+            f"final={m['final_score']:.3f} tm={m['tm_score']:.3f} color={m['color_score']:.3f} "
+            f"scope={scope} scan_id={scan_id}",
+            "debug",
+        )
+        if str(scan_id).startswith("info_attempt"):
+            self._save_scope_click_snapshot(scope, click_xy, tag=f"pb_info_click_{scan_id}")
+        return True
 
     def _template_score_in_scope_edges(self, image_name: str, scope: tuple[int, int, int, int]) -> float:
         path = self._resolve_template_path(image_name)
@@ -1050,20 +1355,42 @@ class PersonalBroadcastSender:
         gd.pause(0.2)
 
         member_scope = self._config.members_scope
-        send_scope = (
-            member_scope[0] + member_scope[2] - 130,
-            max(member_scope[1], y - 30),
-            member_scope[0] + member_scope[2],
-            min(member_scope[1] + member_scope[3], y + 30),
-        )
+        # In position mode include extra two rows below configured scope,
+        # because members list is taller than base config on some layouts.
+        extra_bottom = 0
+        if str(getattr(self._config, "processing_mode", "")).lower() == "by_positions":
+            try:
+                extra_bottom = max(0, int(self._config.position_row_height) * 2)
+            except Exception:
+                extra_bottom = 100
 
-        if not gd.click_image(
+        panel_left = int(member_scope[0])
+        panel_top = int(member_scope[1])
+        panel_right = int(member_scope[0] + member_scope[2])
+        panel_bottom = int(member_scope[1] + member_scope[3] + extra_bottom)
+
+        # Search send icon in a small scope relative to selected row coordinates.
+        sx1 = max(panel_left, x + 70)
+        sx2 = min(panel_right, x + 290)
+        sy1 = max(panel_top, y - 34)
+        sy2 = min(panel_bottom, y + 34)
+
+        # Fallback safety: keep non-empty rectangle.
+        if sx2 <= sx1:
+            sx1 = max(panel_left, panel_right - 150)
+            sx2 = panel_right
+        if sy2 <= sy1:
+            sy1 = max(panel_top, y - 40)
+            sy2 = min(panel_bottom, y + 40)
+
+        send_scope = (sx1, sy1, sx2, sy2)
+
+        if not self._click_image_with_optional_color_hint(
             self._config.row_send_image,
             scope=send_scope,
             confidence=0.95,
-            count_click=1,
-            multiscale=False,
-            is_debug=_ui_debug(),
+            use_purple_hint=True,
+            scan_id=sid,
         ):
             log_and_print(f"[personal_broadcast] row send icon not found for {name} scan_id={sid}", "error")
             return "recover"

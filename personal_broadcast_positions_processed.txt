@@ -10,12 +10,8 @@
 2026-03-03 11:52:42 | scroll=1 | position=10 | viber=У тетяна Лазарчук 9 со Г
 2026-03-03 11:53:00 | scroll=1 | position=11 | viber=У со E
 2026-03-03 11:53:18 | scroll=1 | position=12 | viber=} Віталік Тишик © се У
-2026-03-03 11:53:33 | scroll=1 | position=13 | viber=5. Sania Ф со Е
-2026-03-03 11:53:47 | scroll=1 | position=14 | viber=5 Олександр Колесник 9 со
-2026-03-03 11:54:07 | scroll=2 | position=1 | viber=з Олександр 9 со г
-2026-03-03 11:54:13 | scroll=2 | position=2 | viber=) Перевізники 19 646 й ©.
-2026-03-03 11:54:14 | scroll=2 | position=3 | viber=) Перевізники 19 646 й ©.
-2026-03-03 11:54:14 | scroll=2 | position=4 | viber=) Перевізники 19 646 й ©.
-2026-03-03 11:54:15 | scroll=2 | position=5 | viber=) Перевізники 19 646 й ©.
-2026-03-03 11:54:16 | scroll=2 | position=6 | viber=) Перевізники 19 646 й ©.
-2026-03-03 11:54:26 | scroll=2 | position=7 | viber=р У се fa
+2026-03-04 18:36:07 | scroll=1 | position=13 | viber=Sania Ф со Е
+2026-03-04 18:39:18 | scroll=1 | position=14 | viber=5 Олександр Колесник 9 со2026-03-04 19:04:36 | scroll=1 | position=15 | viber=) Неизвестно © Q0 E
+2026-03-04 19:04:52 | scroll=1 | position=16 | viber=ae E
+
+2026-03-04 20:06:23 | scroll=1 | position=17 | viber=і Максим 9 се FE

@@ -415,7 +415,6 @@ def _detect_chrome() -> Path:
 
 def scroll(amount: int = 100) -> None:
         pag.scroll(amount) 
-        time.sleep(0.01) 
 
 
 # Optional DirectX backend for crisp, DPI-accurate capture on Windows
