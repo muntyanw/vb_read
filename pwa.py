@@ -14,6 +14,7 @@ from dispatcher.periodic_broadcast_sender import PeriodicBroadcastSender
 from dispatcher.personal_broadcast_config import load_personal_broadcast_config
 from dispatcher.personal_broadcast_sender import PersonalBroadcastSender
 from dispatcher.personal_broadcast_position_sender import PersonalBroadcastPositionSender
+from dispatcher.personal_broadcast_scroll_names_sender import PersonalBroadcastScrollNamesSender
 from log import set_debug_mode, log_and_print
 import asyncio
 import logging
@@ -230,6 +231,8 @@ async def main():
     personal_config = load_personal_broadcast_config()
     if personal_config.processing_mode == "by_positions":
         personal_sender = PersonalBroadcastPositionSender(personal_config)
+    elif personal_config.processing_mode == "by_scroll_names":
+        personal_sender = PersonalBroadcastScrollNamesSender(personal_config)
     else:
         personal_sender = PersonalBroadcastSender(personal_config)
 
@@ -266,10 +269,12 @@ async def main():
                 refresh_context_from_settings(s)
                 periodic_sender.update_config(load_periodic_broadcast_config())
                 new_personal_config = load_personal_broadcast_config()
-                is_position_sender = isinstance(personal_sender, PersonalBroadcastPositionSender)
-                if (new_personal_config.processing_mode == "by_positions") != is_position_sender:
+                current_mode = getattr(getattr(personal_sender, "_config", None), "processing_mode", "by_names")
+                if new_personal_config.processing_mode != current_mode:
                     if new_personal_config.processing_mode == "by_positions":
                         personal_sender = PersonalBroadcastPositionSender(new_personal_config)
+                    elif new_personal_config.processing_mode == "by_scroll_names":
+                        personal_sender = PersonalBroadcastScrollNamesSender(new_personal_config)
                     else:
                         personal_sender = PersonalBroadcastSender(new_personal_config)
                     log_and_print(

@@ -159,9 +159,15 @@ class PersonalBroadcastPositionSender(PersonalBroadcastSender):
                 continue
 
             if force_scroll_rescan:
-                log_and_print("[personal_broadcast] force scroll after participants reopen failure", "debug")
-            else:
-                log_and_print("[personal_broadcast] no candidate sent, scroll down", "debug")
+                log_and_print(
+                    "[personal_broadcast] participants reopen failed; stay on current scroll and rescan",
+                    "debug",
+                )
+                gd.pause(1.0)
+                continue
+
+            log_and_print("[personal_broadcast] no candidate sent, scroll down", "debug")
+            self._handle_same_one_before_scroll(window)
             self._scroll_members_down(window)
             gd.pause(1.5)
             step += 1
@@ -177,6 +183,30 @@ class PersonalBroadcastPositionSender(PersonalBroadcastSender):
             return self._send_to_member(window, s, candidate, channel_name, scan_id=scan_id)
         finally:
             self._registry = original_registry
+
+    def _restore_scroll_position(self, window, steps: int) -> None:
+        """Fast restore for by_positions: one focus click, then pure wheel scrolling."""
+        if steps <= 0:
+            return
+
+        steps = int(steps)
+        scope = self._config.members_scope
+        cx = int(scope[0] + scope[2] // 2)
+        cy = int(scope[1] + scope[3] // 2)
+
+        log_and_print(f"[personal_broadcast] restore scroll position steps={steps}", "debug")
+        self._handle_same_one_before_scroll(window)
+        window.set_focus()
+        gd.human_move(cx, cy)
+        gd.pause(0.03)
+        gd.click(cx, cy)
+
+        for _ in range(steps):
+            log_and_print(f"[personal_broadcast] position page-scroll at x={cx}, y={cy}", "debug")
+            amount = -abs(int(self._config.position_scroll_amount))
+            gd.scroll(amount)
+            gd.scroll(amount)
+            gd.pause(0.06)
 
     def _read_current_viber_name(self) -> str:
         # Best-effort OCR for header in private dialog; not used for matching.
@@ -216,13 +246,14 @@ class PersonalBroadcastPositionSender(PersonalBroadcastSender):
         gd.pause(0.05)
 
         # Calibration mode: exactly one scroll call = one list page.
+        amount = -abs(int(self._config.position_scroll_amount))
         for _ in range(2):
-            gd.scroll(-410)
+            gd.scroll(amount)
             gd.pause(0.03)
         gd.pause(0.03)
 
         # Stop after first scroll so you can tune wheel amount quickly.
-        raise SystemExit("[personal_broadcast] calibration stop after one scroll")
+        #raise SystemExit("[personal_broadcast] calibration stop after one scroll")
 
     def _read_position_candidates(self, channel_name: str, step: int) -> tuple[list[dict], str]:
         base_scope = self._config.members_scope

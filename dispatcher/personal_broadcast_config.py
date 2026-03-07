@@ -1,4 +1,4 @@
-from dataclasses import dataclass
+﻿from dataclasses import dataclass
 
 from utils import read_setting
 
@@ -10,6 +10,7 @@ class PersonalBroadcastConfig:
     max_pause_seconds: float
     gender_filter: str
     sent_names_file: str
+    exceptions_file: str
     participants_texts: list[str]
     role_keywords: list[str]
     members_scope: tuple[int, int, int, int]
@@ -28,7 +29,10 @@ class PersonalBroadcastConfig:
     position_row_height: int
     position_row_center_offset: int
     position_click_x_offset: int
+    position_scroll_amount: int
     position_processed_file: str
+    scroll_names_processed_file: str
+    scroll_names_scroll_file: str
     target_channel: dict
 
     @property
@@ -43,6 +47,7 @@ def _as_tuple4(value, default):
         except Exception:
             return default
     return default
+
 
 def _as_optional_tuple4(value):
     if value is None:
@@ -76,9 +81,11 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
     gender_filter = str(read_setting("personal_broadcast_gender_filter") or "all").strip().lower()
     sent_names_file = str(read_setting("personal_broadcast_sent_names_file") or "personal_broadcast_sent_names.txt")
 
-    participants_texts = read_setting("personal_broadcast_participants_texts") or ["Учасники", "Участники"]
+    exceptions_file = str(read_setting("personal_broadcast_exceptions_file") or "personal_broadcast_exceptions.txt")
+
+    participants_texts = read_setting("personal_broadcast_participants_texts") or ["Участники", "Учасники"]
     if not isinstance(participants_texts, list):
-        participants_texts = ["Учасники", "Участники"]
+        participants_texts = ["Участники", "Учасники"]
     participants_texts = [str(x) for x in participants_texts if str(x).strip()]
 
     role_keywords = read_setting("personal_broadcast_role_keywords") or []
@@ -120,7 +127,7 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         line_top_tolerance = 14
 
     processing_mode = str(read_setting("personal_broadcast_processing_mode") or "by_names").strip().lower()
-    if processing_mode not in {"by_names", "by_positions"}:
+    if processing_mode not in {"by_names", "by_positions", "by_scroll_names"}:
         processing_mode = "by_names"
 
     try:
@@ -143,9 +150,24 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         position_click_x_offset = 80
     position_click_x_offset = max(20, min(position_click_x_offset, 220))
 
+    try:
+        position_scroll_amount = int(read_setting("personal_broadcast_position_scroll_amount") or 410)
+    except Exception:
+        position_scroll_amount = 410
+    position_scroll_amount = max(50, min(abs(position_scroll_amount), 5000))
+
     position_processed_file = str(
         read_setting("personal_broadcast_position_processed_file")
         or "personal_broadcast_positions_processed.txt"
+    )
+
+    scroll_names_processed_file = str(
+        read_setting("personal_broadcast_scroll_names_processed_file")
+        or "personal_broadcast_scroll_names_processed.txt"
+    )
+    scroll_names_scroll_file = str(
+        read_setting("personal_broadcast_scroll_names_scroll_file")
+        or "personal_broadcast_scroll_state.txt"
     )
 
     target_channel = read_setting("personal_broadcast_channel")
@@ -170,6 +192,7 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         max_pause_seconds=max_pause_seconds,
         gender_filter=gender_filter,
         sent_names_file=sent_names_file,
+        exceptions_file=exceptions_file,
         participants_texts=participants_texts,
         role_keywords=role_keywords,
         members_scope=members_scope,
@@ -188,6 +211,9 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         position_row_height=position_row_height,
         position_row_center_offset=position_row_center_offset,
         position_click_x_offset=position_click_x_offset,
+        position_scroll_amount=position_scroll_amount,
         position_processed_file=position_processed_file,
+        scroll_names_processed_file=scroll_names_processed_file,
+        scroll_names_scroll_file=scroll_names_scroll_file,
         target_channel=target_channel,
     )

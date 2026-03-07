@@ -2,6 +2,8 @@
 import json
 import time
 import math
+import re
+import unicodedata
 from datetime import datetime
 from collections import defaultdict
 from difflib import SequenceMatcher
@@ -74,15 +76,24 @@ class PersonalBroadcastSender:
         self._config = config
         self._registry = PersonalBroadcastRegistry(config.sent_names_file)
         self._channel_index = 0
+        self._exceptions_cache: set[str] = set()
+        self._exceptions_cache_mtime: float | None = None
+        self._exceptions_cache_file: str | None = None
         log_and_print("[personal_broadcast] initialized", "info")
 
     def update_config(self, config: PersonalBroadcastConfig) -> None:
         sent_file_changed = self._config.sent_names_file != config.sent_names_file
+        exceptions_file_changed = self._config.exceptions_file != config.exceptions_file
         self._config = config
         log_and_print("[personal_broadcast] config updated", "debug")
         if sent_file_changed:
             self._registry = PersonalBroadcastRegistry(config.sent_names_file)
             log_and_print(f"[personal_broadcast] registry file changed: {config.sent_names_file}", "debug")
+        if exceptions_file_changed:
+            self._exceptions_cache.clear()
+            self._exceptions_cache_mtime = None
+            self._exceptions_cache_file = None
+            log_and_print(f"[personal_broadcast] exceptions file changed: {config.exceptions_file}", "debug")
 
     def run_once(self, window, s) -> None:
         if not self._config.enabled:
@@ -148,6 +159,90 @@ class PersonalBroadcastSender:
             return raw
         return "en"
 
+    def _load_exceptions(self) -> set[str]:
+        file_path = str(self._config.exceptions_file or "").strip()
+        if not file_path:
+            return set()
+
+        p = Path(file_path)
+        try:
+            mtime = p.stat().st_mtime
+        except Exception:
+            self._exceptions_cache = set()
+            self._exceptions_cache_mtime = None
+            self._exceptions_cache_file = file_path
+            return self._exceptions_cache
+
+        if (
+            self._exceptions_cache_file == file_path
+            and self._exceptions_cache_mtime == mtime
+        ):
+            return self._exceptions_cache
+
+        try:
+            raw = p.read_text(encoding="utf-8", errors="ignore")
+        except Exception:
+            raw = ""
+
+        tokens: list[str] = []
+        for part in raw.replace("\n", ",").replace(";", ",").split(","):
+            n = part.strip().lower()
+            if n:
+                tokens.append(n)
+
+        self._exceptions_cache = set(tokens)
+        self._exceptions_cache_mtime = mtime
+        self._exceptions_cache_file = file_path
+        return self._exceptions_cache
+
+    def _is_in_exceptions(self, name: str) -> bool:
+        n_raw = str(name or "").strip()
+        if not n_raw:
+            return False
+
+        n_norm = self._normalize_name(n_raw).lower()
+        if not n_norm:
+            return False
+
+        n_key = self._exception_norm_key(n_raw)
+        n_tokens = self._exception_tokens(n_raw)
+
+        best_ratio = 0.0
+        best_exc = ""
+        for exc in self._load_exceptions():
+            exc_raw = str(exc or "").strip()
+            if not exc_raw:
+                continue
+
+            e_norm = self._normalize_name(exc_raw).lower()
+            if not e_norm:
+                continue
+
+            if n_norm == e_norm:
+                return True
+
+            e_key = self._exception_norm_key(exc_raw)
+            if n_key and e_key and n_key == e_key:
+                return True
+
+            ratio = SequenceMatcher(None, n_key or n_norm, e_key or e_norm).ratio()
+            if ratio > best_ratio:
+                best_ratio = ratio
+                best_exc = e_key or e_norm
+            if ratio >= 0.78:
+                return True
+
+            e_tokens = self._exception_tokens(exc_raw)
+            if self._exception_tokens_match(n_tokens, e_tokens):
+                return True
+
+        if best_ratio >= 0.62:
+            log_and_print(
+                f"[personal_broadcast] exceptions near-match name='{n_key or n_norm}' best='{best_exc}' ratio={best_ratio:.2f}",
+                "debug",
+            )
+        return False
+
     def _set_startup_layout(self) -> None:
         target = self._target_input_layout()
         try:
@@ -168,10 +263,10 @@ class PersonalBroadcastSender:
             if not self._ensure_participants_list(window):
                 return
             candidates, scan_id = self._read_candidates_from_scope(channel_name=channel_name, step=step + 1)
-            if candidates:
+            if candidates and step == 0:
                 first_candidate = min(candidates, key=lambda c: (c["y"], c["x"]))
                 top_y = int(first_candidate["y"])
-                # Skip the whole first visible row (header/self row can produce 2+ OCR tokens).
+                # Skip the whole first visible row only on the first scroll page.
                 top_row_window = 14
                 filtered = [c for c in candidates if abs(int(c["y"]) - top_y) > top_row_window]
                 skipped_top = len(candidates) - len(filtered)
@@ -284,6 +379,7 @@ class PersonalBroadcastSender:
                 log_and_print("[personal_broadcast] force scroll after participants reopen failure", "debug")
             else:
                 log_and_print("[personal_broadcast] no candidate sent, scroll down", "debug")
+            self._handle_same_one_before_scroll(window)
             self._scroll_members_down(window)
             gd.pause(1.5)
             step += 1
@@ -293,9 +389,74 @@ class PersonalBroadcastSender:
         return had_candidates_total
 
 
+    def _handle_same_one_before_scroll(self, window) -> None:
+        """If same_one banner exists, click it and wait until it disappears."""
+        try:
+            scope = self._config.members_scope
+            left = int(scope[0])
+            right = int(scope[0] + scope[2])
+
+            # Exclude top header area (where "??????????" causes false positives).
+            top = int(scope[1] + min(220, max(120, int(scope[3] * 0.28))))
+            bottom = int(scope[1] + max(top - int(scope[1]) + 40, int(scope[3] * 0.72)))
+            same_scope = (left, top, right, bottom)
+        except Exception:
+            same_scope = None
+
+        while True:
+            try:
+                found = gd.find_image(
+                    "same_one.png",
+                    timeout=0.4,
+                    confidence=0.8,
+                    scope=same_scope,
+                    multiscale=True,
+                    is_debug=_ui_debug(),
+                )
+            except Exception:
+                found = None
+
+            if not found:
+                return
+
+            # Guard against false positives on right-side purple action buttons.
+            try:
+                fx, fy = int(found[0]), int(found[1])
+            except Exception:
+                return
+
+            if same_scope is not None:
+                sl, st, sr, sb = [int(v) for v in same_scope]
+                sw = max(1, sr - sl)
+                # "same_one" pill is usually in the central area; rightmost area is often send/chat button.
+                allowed_left = int(sl + sw * 0.20)
+                allowed_right = int(sl + sw * 0.72)
+                if fx < allowed_left or fx > allowed_right:
+                    log_and_print(
+                        f"[personal_broadcast] ignore same_one false-positive at x={fx}, y={fy}; "
+                        f"allowed_x=[{allowed_left},{allowed_right}] scope={same_scope}",
+                        "debug",
+                    )
+                    return
+
+            log_and_print(
+                f"[personal_broadcast] same_one detected before scroll, click and wait 60s scope={same_scope}",
+                "warning",
+            )
+            try:
+                window.set_focus()
+            except Exception:
+                pass
+            try:
+                gd.click(fx, fy)
+            except Exception:
+                pass
+            gd.pause(60.0)
+
     def _restore_scroll_position(self, window, steps: int) -> None:
         if steps <= 0:
             return
+        self._handle_same_one_before_scroll(window)
         log_and_print(f"[personal_broadcast] restore scroll position steps={steps}", "debug")
         for i in range(int(steps)):
             # Heavy UIA wheel fallback is needed only for the first jump.
@@ -399,6 +560,8 @@ class PersonalBroadcastSender:
         attempt: int,
         click_xy: tuple[int, int] | None = None,
     ) -> str | None:
+        if not _ui_debug():
+            return None
         scope = self._config.open_info_scope
         if scope is None:
             return None
@@ -710,7 +873,7 @@ class PersonalBroadcastSender:
                 if pos:
                     click_xy = (int(pos[0]), int(pos[1]))
                     gd.click(click_xy[0], click_xy[1])
-                    if str(scan_id).startswith("info_attempt"):
+                    if _ui_debug() and str(scan_id).startswith("info_attempt"):
                         self._save_scope_click_snapshot(scope, click_xy, tag=f"pb_info_click_{scan_id}_fallback")
                     return True
                 return False
@@ -735,7 +898,7 @@ class PersonalBroadcastSender:
                 if pos:
                     click_xy = (int(pos[0]), int(pos[1]))
                     gd.click(click_xy[0], click_xy[1])
-                    if str(scan_id).startswith("info_attempt"):
+                    if _ui_debug() and str(scan_id).startswith("info_attempt"):
                         self._save_scope_click_snapshot(scope, click_xy, tag=f"pb_info_click_{scan_id}_fallback")
                     return True
                 return False
@@ -749,7 +912,7 @@ class PersonalBroadcastSender:
             f"scope={scope} scan_id={scan_id}",
             "debug",
         )
-        if str(scan_id).startswith("info_attempt"):
+        if _ui_debug() and str(scan_id).startswith("info_attempt"):
             self._save_scope_click_snapshot(scope, click_xy, tag=f"pb_info_click_{scan_id}")
         return True
 
@@ -967,11 +1130,21 @@ class PersonalBroadcastSender:
             log_and_print(f"[personal_broadcast] dialog snapshot save failed reason={reason}: {e}", "error")
 
 
-    def _dedupe_candidates_by_position(self, candidates: list[dict], max_dx: int = 18, max_dy: int = 12) -> list[dict]:
+    def _dedupe_candidates_by_position(self, candidates: list[dict], max_dx: int = 70, max_dy: int = 16) -> list[dict]:
         if not candidates:
             return []
+
+        def _quality(name: str) -> float:
+            text = str(name or "")
+            cyr = sum(1 for ch in text if (0x0400 <= ord(ch.lower()) <= 0x04FF) or (ch.lower() in {"?", "?", "?", "?"}))
+            lat = sum(1 for ch in text if "a" <= ch.lower() <= "z")
+            q = min(len(text), 24) * 1.2
+            q += min(cyr, 12) * 1.8
+            if lat > 0 and cyr == 0:
+                q -= 3.0
+            return q
+
         kept = []
-        # sort top-to-bottom then left-to-right
         for c in sorted(candidates, key=lambda x: (int(x.get("y", 0)), int(x.get("x", 0)))):
             cx = int(c.get("x", 0))
             cy = int(c.get("y", 0))
@@ -979,14 +1152,16 @@ class PersonalBroadcastSender:
             for i, k in enumerate(kept):
                 kx = int(k.get("x", 0))
                 ky = int(k.get("y", 0))
-                if abs(cx - kx) <= max_dx and abs(cy - ky) <= max_dy:
+                if abs(cy - ky) <= max_dy and abs(cx - kx) <= max_dx:
                     found_index = i
                     break
             if found_index is None:
                 kept.append(c)
                 continue
-            # pick the longer name when positions overlap
-            if len(str(c.get("name", ""))) > len(str(kept[found_index].get("name", ""))):
+
+            cur_q = _quality(c.get("name", ""))
+            prev_q = _quality(kept[found_index].get("name", ""))
+            if cur_q > prev_q:
                 kept[found_index] = c
         return kept
 
@@ -1025,25 +1200,45 @@ class PersonalBroadcastSender:
             # quick preview for debug mode without stopping the loop
             showImage(img, 0, title=f"[personal_broadcast] OCR raw scope={scope}")
             showImage(processed, 0, title=f"[personal_broadcast] OCR processed scope={scope}")
-        words = perform_ocr_with_positions(processed, min_conf=35, lang="ukr+eng+rus")
-        raw_words = perform_ocr_with_positions(img, min_conf=35, lang="ukr+eng+rus")
-        words_up = self._ocr_words_with_scale(processed_up, scale=2.0, min_conf=38, lang="ukr+eng+rus")
-        raw_words_up = self._ocr_words_with_scale(img_up, scale=2.0, min_conf=38, lang="ukr+eng+rus")
-        if raw_words or words_up or raw_words_up:
-            seen = {(w["text"], int(w["left"]), int(w["top"])) for w in words}
-            added = 0
-            for seq in (raw_words, words_up, raw_words_up):
-                for w in seq:
-                    key = (w["text"], int(w["left"]), int(w["top"]))
-                    if key in seen:
-                        continue
-                    words.append(w)
-                    seen.add(key)
-                    added += 1
+        langs = self._ocr_lang_variants()
+        seq_processed = []
+        seq_raw = []
+        seq_up_processed = []
+        seq_up_raw = []
+
+        for lang in langs:
+            seq_processed.append(perform_ocr_with_positions(processed, min_conf=35, lang=lang))
+            seq_raw.append(perform_ocr_with_positions(img, min_conf=35, lang=lang))
+            seq_up_processed.append(self._ocr_words_with_scale(processed_up, scale=2.0, min_conf=38, lang=lang))
+            seq_up_raw.append(self._ocr_words_with_scale(img_up, scale=2.0, min_conf=38, lang=lang))
+
+        words = []
+        seen = set()
+
+        def _merge_words(seq):
+            added_local = 0
+            for w in seq:
+                key = (str(w.get("text", "")), int(w.get("left", 0)), int(w.get("top", 0)))
+                if key in seen:
+                    continue
+                seen.add(key)
+                words.append(w)
+                added_local += 1
+            return added_local
+
+        added_total = 0
+        for pack in (seq_processed, seq_raw, seq_up_processed, seq_up_raw):
+            for seq in pack:
+                added_total += _merge_words(seq)
+
+        if added_total > 0:
+            total_raw = sum(len(x) for x in seq_raw)
+            total_up = sum(len(x) for x in seq_up_processed) + sum(len(x) for x in seq_up_raw)
+            total_proc = sum(len(x) for x in seq_processed)
             log_and_print(
-                f"[personal_broadcast] OCR merged raw+processed+upscaled: raw={len(raw_words)} "
-                f"up={len(words_up)+len(raw_words_up)} "
-                f"added={added}, total={len(words)} scan_id={scan_id}",
+                f"[personal_broadcast] OCR merged 3lang raw+processed+upscaled: "
+                f"proc={total_proc} raw={total_raw} up={total_up} "
+                f"unique={len(words)} scan_id={scan_id}",
                 "debug",
             )
         if not words:
@@ -1076,8 +1271,7 @@ class PersonalBroadcastSender:
                 log_and_print(f"[personal_broadcast] role detected, skip line='{line_text}' scan_id={scan_id}", "debug")
                 continue
 
-            name_parts = []
-            token_boxes = []
+            token_candidates = []
             for w in line_words:
                 token_raw = str(w.get("text", "")).strip()
                 if not token_raw:
@@ -1085,14 +1279,92 @@ class PersonalBroadcastSender:
                 token_norm = self._normalize_name(token_raw)
                 if not self._is_member_name_token(token_norm):
                     continue
-                name_parts.append(token_raw)
-                token_boxes.append(w)
+                token_candidates.append(
+                    {
+                        "raw": token_raw,
+                        "norm": token_norm,
+                        "left": int(w.get("left", 0)),
+                        "top": int(w.get("top", 0)),
+                        "width": int(w.get("width", 0)),
+                        "height": int(w.get("height", 0)),
+                        "conf": float(w.get("conf", 0.0)),
+                        "word": w,
+                    }
+                )
 
-            if not name_parts:
+            if not token_candidates:
                 skip_stats["bad_token"] += 1
                 continue
 
-            raw_name = " ".join(name_parts).strip()
+            # Group tokens by close X positions and pick one best token per visual slot.
+            bins = []
+            for t in sorted(token_candidates, key=lambda x: (x["left"], -x["conf"])):
+                placed = False
+                for b in bins:
+                    if abs(int(t["left"]) - int(b["x"])) <= 18:
+                        b["items"].append(t)
+                        # keep running center close to observed values
+                        b["x"] = int(round((float(b["x"]) + float(t["left"])) / 2.0))
+                        placed = True
+                        break
+                if not placed:
+                    bins.append({"x": int(t["left"]), "items": [t]})
+
+            selected = []
+            for b in bins:
+                best = None
+                best_score = -1e9
+                for t in b["items"]:
+                    norm = str(t["norm"])
+                    has_cyr = any((0x0400 <= ord(ch.lower()) <= 0x04FF) or (ch.lower() in {"?", "?", "?", "?"}) for ch in norm)
+                    has_lat = any("a" <= ch.lower() <= "z" for ch in norm)
+                    score = float(t["conf"])
+                    score += min(len(norm), 14) * 1.4
+                    if has_cyr:
+                        score += 10.0
+                    if has_lat and not has_cyr:
+                        score -= 3.0
+                    raw = str(t["raw"])
+                    if raw and raw[0].isupper():
+                        score += 2.0
+                    if score > best_score:
+                        best_score = score
+                        best = t
+                if best is not None:
+                    selected.append(best)
+
+            if not selected:
+                skip_stats["bad_token"] += 1
+                continue
+
+            selected.sort(key=lambda x: x["left"])
+
+            # Drop repeated/near-duplicate neighbor tokens caused by OCR variants.
+            compact = []
+            for t in selected:
+                n = str(t["norm"]).lower()
+                if not compact:
+                    compact.append(t)
+                    continue
+                prev = compact[-1]
+                pn = str(prev["norm"]).lower()
+                if n == pn:
+                    if float(t["conf"]) > float(prev["conf"]):
+                        compact[-1] = t
+                    continue
+                if n in pn or pn in n:
+                    short = min(len(n), len(pn))
+                    long = max(len(n), len(pn))
+                    if short >= 3 and (short / float(long)) >= 0.65:
+                        if float(t["conf"]) > float(prev["conf"]):
+                            compact[-1] = t
+                        continue
+                compact.append(t)
+
+            # Most people have 1-2 tokens in display name; cap to avoid long glued garbage.
+            compact = compact[:3]
+            token_boxes = [t["word"] for t in compact]
+            raw_name = " ".join(str(t["raw"]).strip() for t in compact).strip()
             name = self._normalize_name(raw_name)
             if len(name) < 2:
                 skip_stats["short_name"] += 1
@@ -1137,6 +1409,8 @@ class PersonalBroadcastSender:
             center_y = scope[1] + local_center_y
             candidates.append({"name": name, "x": center_x, "y": center_y})
 
+        candidates = self._dedupe_candidates_by_position(candidates)
+
         unique = {}
         for c in candidates:
             key = PersonalBroadcastRegistry._norm_key(c["name"]) or c["name"].lower()
@@ -1164,6 +1438,23 @@ class PersonalBroadcastSender:
             else:
                 log_and_print(f"[personal_broadcast] no candidates: OCR words are empty after filtering scan_id={scan_id}", "debug")
         return result, scan_id
+
+    @staticmethod
+    def _ocr_lang_variants() -> list[str]:
+        # Experiment mode: keep OCR language stable to reduce per-scan variance.
+        variants = [
+            "ukr+eng+rus",
+            # "ukr+rus+eng",
+            # "rus+ukr+eng",
+        ]
+        seen = set()
+        out = []
+        for v in variants:
+            if v in seen:
+                continue
+            seen.add(v)
+            out.append(v)
+        return out
 
     @staticmethod
     def _ocr_words_with_scale(image, scale: float, min_conf: int, lang: str) -> list[dict]:
@@ -1342,6 +1633,10 @@ class PersonalBroadcastSender:
         x = candidate["x"]
         y = candidate["y"]
         sid = scan_id or "na"
+
+        if self._is_in_exceptions(name):
+            log_and_print(f"[personal_broadcast] skip by exceptions file: {name} scan_id={sid}", "debug")
+            return "skip"
 
         if self._has_role_in_member_row(y, scan_id=sid):
             log_and_print(f"[personal_broadcast] skip role account before send: {name} scan_id={sid}", "debug")
@@ -1668,7 +1963,6 @@ class PersonalBroadcastSender:
             log_and_print(f"[personal_broadcast] precheck scroll up failed: {exc}", "debug")
 
     def _is_private_chat_context(self) -> bool:
-        self._scroll_info_panel_up_for_private_check()
         has_info_icon = False
         try:
             has_info_icon = bool(
@@ -1855,6 +2149,7 @@ class PersonalBroadcastSender:
             return bool(found)
         except Exception:
             return False
+
 
     def _insert_message_text(self, window) -> bool:
         text = self._config.message_text
@@ -2196,6 +2491,98 @@ class PersonalBroadcastSender:
         # Heuristic for ukr/rus/eng OCR names:
         # female names often end with: а/я (cyrillic) or a (latin).
         return n[-1] in {"\u0430", "\u044f", "a"}  # а, я, a
+
+    @staticmethod
+    def _exception_norm_key(value: str) -> str:
+        t = unicodedata.normalize("NFKC", str(value or "").lower())
+        # Cyrillic/Latin confusables for OCR text
+        table = str.maketrans({
+            "?": "a", "?": "e", "?": "o", "?": "p", "?": "c", "?": "y", "?": "x",
+            "?": "k", "?": "m", "?": "t", "?": "b", "?": "i", "?": "i", "?": "i", "?": "e",
+            "?": "", "?": "",
+        })
+        t = t.translate(table)
+        t = "".join(ch for ch in t if ch.isalpha())
+        # collapse repeated chars and repeated whole-string chunks
+        t = re.sub(r"(.)\1{2,}", r"\1\1", t)
+        for k in range(1, max(1, len(t) // 2 + 1)):
+            if len(t) % k == 0:
+                unit = t[:k]
+                if unit * (len(t) // k) == t:
+                    t = unit
+                    break
+        return t
+
+    @classmethod
+    def _exception_tokens(cls, value: str) -> list[str]:
+        text = str(value or "")
+        if not text:
+            return []
+
+        # split by separators + lower->UPPER transitions + script transitions
+        out = []
+        cur = []
+
+        def script(ch: str) -> str:
+            o = ord(ch)
+            if (0x0400 <= o <= 0x04FF) or ch in "??????????":
+                return "cyr"
+            if "a" <= ch.lower() <= "z":
+                return "lat"
+            return "other"
+
+        prev = ""
+        for ch in text:
+            if not ch.isalpha():
+                if cur:
+                    out.append("".join(cur))
+                    cur = []
+                prev = ""
+                continue
+            if cur:
+                if prev.islower() and ch.isupper():
+                    out.append("".join(cur))
+                    cur = []
+                elif script(prev) != script(ch):
+                    out.append("".join(cur))
+                    cur = []
+            cur.append(ch)
+            prev = ch
+        if cur:
+            out.append("".join(cur))
+
+        norm_tokens = []
+        for tok in out:
+            k = cls._exception_norm_key(tok)
+            if len(k) >= 3:
+                norm_tokens.append(k)
+
+        # drop consecutive duplicates
+        dedup = []
+        for tok in norm_tokens:
+            if dedup and dedup[-1] == tok:
+                continue
+            dedup.append(tok)
+        return dedup
+
+    @staticmethod
+    def _exception_tokens_match(candidate_tokens: list[str], exception_tokens: list[str]) -> bool:
+        if not candidate_tokens or not exception_tokens:
+            return False
+
+        def token_ok(c: str, e: str) -> bool:
+            if c == e:
+                return True
+            if c in e or e in c:
+                short = min(len(c), len(e))
+                long = max(len(c), len(e))
+                return short >= 3 and (short / float(long)) >= 0.55
+            return SequenceMatcher(None, c, e).ratio() >= 0.72
+
+        for e in exception_tokens:
+            if not any(token_ok(c, e) for c in candidate_tokens):
+                return False
+        return True
 
     @staticmethod
     def _normalize_name(name: str) -> str:
