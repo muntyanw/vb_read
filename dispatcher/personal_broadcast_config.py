@@ -33,6 +33,7 @@ class PersonalBroadcastConfig:
     position_processed_file: str
     scroll_names_processed_file: str
     scroll_names_scroll_file: str
+    scroll_names_prev_count: int
     target_channel: dict
 
     @property
@@ -170,6 +171,12 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         or "personal_broadcast_scroll_state.txt"
     )
 
+    try:
+        scroll_names_prev_count = int(read_setting("personal_broadcast_scroll_names_prev_count") or 2)
+    except Exception:
+        scroll_names_prev_count = 2
+    scroll_names_prev_count = max(0, min(scroll_names_prev_count, 10))  # limit to 0-10
+
     target_channel = read_setting("personal_broadcast_channel")
     if not isinstance(target_channel, dict):
         target_channel = {
@@ -215,5 +222,6 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         position_processed_file=position_processed_file,
         scroll_names_processed_file=scroll_names_processed_file,
         scroll_names_scroll_file=scroll_names_scroll_file,
+        scroll_names_prev_count=scroll_names_prev_count,
         target_channel=target_channel,
     )

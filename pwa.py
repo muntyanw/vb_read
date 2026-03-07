@@ -15,6 +15,8 @@ from dispatcher.personal_broadcast_config import load_personal_broadcast_config
 from dispatcher.personal_broadcast_sender import PersonalBroadcastSender
 from dispatcher.personal_broadcast_position_sender import PersonalBroadcastPositionSender
 from dispatcher.personal_broadcast_scroll_names_sender import PersonalBroadcastScrollNamesSender
+from dispatcher.server_dispatcher_config import load_server_dispatcher_config
+from dispatcher.server_dispatcher_sender import ServerDispatcherSender
 from log import set_debug_mode, log_and_print
 import asyncio
 import logging
@@ -228,6 +230,7 @@ async def main():
 
     gd.ensure_layout()
     periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
+    server_sender = ServerDispatcherSender(load_server_dispatcher_config())
     personal_config = load_personal_broadcast_config()
     if personal_config.processing_mode == "by_positions":
         personal_sender = PersonalBroadcastPositionSender(personal_config)
@@ -248,7 +251,7 @@ async def main():
 
 
     async def run_worker():
-        nonlocal runtime_settings, last_settings_reload_at, periodic_sender, personal_sender
+        nonlocal runtime_settings, last_settings_reload_at, periodic_sender, server_sender, personal_sender
         s = await init()
         reset_copy_watchdog()
 
@@ -268,6 +271,7 @@ async def main():
                 set_debug_mode(runtime_settings["debug_logs_mode"])
                 refresh_context_from_settings(s)
                 periodic_sender.update_config(load_periodic_broadcast_config())
+                server_sender.update_config(load_server_dispatcher_config())
                 new_personal_config = load_personal_broadcast_config()
                 current_mode = getattr(getattr(personal_sender, "_config", None), "processing_mode", "by_names")
                 if new_personal_config.processing_mode != current_mode:
@@ -294,6 +298,7 @@ async def main():
                 await asyncio.sleep(0.2)
             else:
                 periodic_sender.send_if_due(window, s)
+                server_sender.send_if_due(window, s)
                 await processViberMess(
                     window,
                     s,
@@ -306,7 +311,7 @@ async def main():
         try:
             await run_worker()
         except Exception as e:
-            print(f"[pwa] error: {e}, restarting worker")
+            log_and_print(f"[pwa] error: {e}, restarting worker", "error")
 
         if stop_requested():
             break

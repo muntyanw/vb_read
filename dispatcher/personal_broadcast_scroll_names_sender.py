@@ -21,11 +21,15 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
         super().__init__(config)
         self._scroll_state = PersonalBroadcastScrollNamesState(config.scroll_names_scroll_file)
         self._registry = PersonalBroadcastRegistry(config.scroll_names_processed_file)
-        self._prev_registry = PersonalBroadcastRegistry(str(self._prev_processed_path()))
+        self._prev_registries = []
+        for i in range(1, config.scroll_names_prev_count + 1):
+            path = self._prev_processed_path(i)
+            self._prev_registries.append(PersonalBroadcastRegistry(str(path)))
 
     def update_config(self, config) -> None:
         names_file_changed = self._config.scroll_names_processed_file != config.scroll_names_processed_file
         scroll_file_changed = self._config.scroll_names_scroll_file != config.scroll_names_scroll_file
+        sent_file_changed = self._config.sent_names_file != config.sent_names_file
         super().update_config(config)
 
         if names_file_changed:
@@ -56,25 +60,42 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
             log_and_print(f"[personal_broadcast] cannot clear scroll-names file: {exc}", "error")
         self._registry = PersonalBroadcastRegistry(self._config.scroll_names_processed_file)
 
-    def _prev_processed_path(self) -> Path:
+    def _prev_processed_path(self, index: int) -> Path:
         base = Path(self._config.scroll_names_processed_file)
-        return base.with_name(base.stem + "_prev" + base.suffix)
+        return base.with_name(base.stem + f"_prev{index}" + base.suffix)
 
     def _reload_registries(self) -> None:
         self._registry = PersonalBroadcastRegistry(self._config.scroll_names_processed_file)
-        self._prev_registry = PersonalBroadcastRegistry(str(self._prev_processed_path()))
+        self._prev_registries = []
+        for i in range(1, self._config.scroll_names_prev_count + 1):
+            path = self._prev_processed_path(i)
+            self._prev_registries.append(PersonalBroadcastRegistry(str(path)))
 
     def _rotate_scroll_processed_names(self) -> None:
         cur = Path(self._config.scroll_names_processed_file)
-        prev = self._prev_processed_path()
+        prev_count = self._config.scroll_names_prev_count
+        # Shift previous files
+        for i in range(prev_count, 1, -1):
+            src = self._prev_processed_path(i - 1)
+            dst = self._prev_processed_path(i)
+            try:
+                if src.exists():
+                    dst.parent.mkdir(parents=True, exist_ok=True)
+                    shutil.copyfile(src, dst)
+                else:
+                    dst.write_text("", encoding="utf-8")
+            except Exception as exc:
+                log_and_print(f"[personal_broadcast] cannot rotate prev {i-1} to {i}: {exc}", "error")
+        # Copy current to prev1
+        prev1 = self._prev_processed_path(1)
         try:
             if cur.exists() and cur.stat().st_size > 0:
-                prev.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(cur, prev)
+                prev1.parent.mkdir(parents=True, exist_ok=True)
+                shutil.copyfile(cur, prev1)
             else:
-                prev.write_text("", encoding="utf-8")
+                prev1.write_text("", encoding="utf-8")
         except Exception as exc:
-            log_and_print(f"[personal_broadcast] cannot rotate scroll-names memory: {exc}", "error")
+            log_and_print(f"[personal_broadcast] cannot rotate to prev1: {exc}", "error")
 
         try:
             cur.write_text("", encoding="utf-8")
@@ -204,9 +225,9 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
                     skip_registry += 1
                     log_and_print(f"[personal_broadcast] skip already sent (current scroll): {name} scan_id={scan_id}", "debug")
                     continue
-                if self._prev_registry.has(name):
+                if any(reg.has(name) for reg in self._prev_registries):
                     skip_registry += 1
-                    log_and_print(f"[personal_broadcast] skip already sent (prev scroll): {name} scan_id={scan_id}", "debug")
+                    log_and_print(f"[personal_broadcast] skip already sent (prev scrolls): {name} scan_id={scan_id}", "debug")
                     continue
                 if name in blocked_candidates_on_step:
                     skip_registry += 1
