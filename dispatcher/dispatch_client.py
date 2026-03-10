@@ -121,15 +121,24 @@ def _match_template_score(scr_bgr: np.ndarray, tpl_path: Path, scale: float) -> 
     mask_s = None
     if mask is not None:
         mask_s = cv2.resize(mask, (tw, th), interpolation=cv2.INTER_NEAREST)
-    if mask_s is not None:
-        res = cv2.matchTemplate(scr_bgr, tpl_s, cv2.TM_CCORR_NORMED, mask=mask_s)
-    else:
-        img_gray = cv2.cvtColor(scr_bgr, cv2.COLOR_BGR2GRAY)
-        tpl_gray = cv2.cvtColor(tpl_s, cv2.COLOR_BGR2GRAY)
-        img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
-        tpl_gray = cv2.GaussianBlur(tpl_gray, (3, 3), 0)
-        res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+    try:
+        if mask_s is not None:
+            res = cv2.matchTemplate(scr_bgr, tpl_s, cv2.TM_CCORR_NORMED, mask=mask_s)
+        else:
+            img_gray = cv2.cvtColor(scr_bgr, cv2.COLOR_BGR2GRAY)
+            tpl_gray = cv2.cvtColor(tpl_s, cv2.COLOR_BGR2GRAY)
+            img_gray = cv2.GaussianBlur(img_gray, (3, 3), 0)
+            tpl_gray = cv2.GaussianBlur(tpl_gray, (3, 3), 0)
+            res = cv2.matchTemplate(img_gray, tpl_gray, cv2.TM_CCOEFF_NORMED)
+    except Exception:
+        return None
+    if res is None or res.size == 0:
+        return None
+    if not np.isfinite(res).any():
+        return None
     _, max_val, _, max_loc = cv2.minMaxLoc(res)
+    if not np.isfinite(max_val):
+        return None
     return float(max_val), max_loc, tw, th
 def _last_mess_color_score(roi_bgr: np.ndarray) -> tuple[float, bool]:
     if roi_bgr is None or roi_bgr.size == 0:
@@ -151,65 +160,95 @@ def _find_last_mess_match(scope: tuple[int, int, int, int], channel_name: str):
     height = max(1, bottom - top)
     snap = take_screenshot((left, top, width, height))
     scr_bgr = cv2.cvtColor(snap, cv2.COLOR_RGB2BGR)
-    templates = _last_mess_template_paths(channel_name)
-    if not templates:
+
+    gray = cv2.cvtColor(scr_bgr, cv2.COLOR_BGR2GRAY)
+    gray = cv2.GaussianBlur(gray, (5, 5), 1.2)
+
+    min_r = max(12, int(min(width, height) * 0.10))
+    max_r = max(min_r + 2, int(min(width, height) * 0.45))
+
+    circles = cv2.HoughCircles(
+        gray,
+        cv2.HOUGH_GRADIENT,
+        dp=1.2,
+        minDist=18,
+        param1=120,
+        param2=24,
+        minRadius=min_r,
+        maxRadius=max_r,
+    )
+    if circles is None:
         return None
-    scales = np.linspace(0.85, 1.20, 15)
-    best = None
-    best_any = None
-    best_raw = None
-    attempts_total = 0
-    attempts_tm_ok = 0
-    for tpl in templates:
-        for sc in scales:
-            m = _match_template_score(scr_bgr, tpl, float(sc))
-            if m is None:
-                continue
-            attempts_total += 1
-            tm_score, (x, y), tw, th = m
-            roi = scr_bgr[y:y + th, x:x + tw]
-            color_score, color_ok = _last_mess_color_score(roi)
-            cand_base = {
-                "tm_score": float(tm_score),
+
+    hsv = cv2.cvtColor(scr_bgr, cv2.COLOR_BGR2HSV)
+    cands = []
+
+    for c in np.round(circles[0]).astype(int):
+        cx, cy, r = int(c[0]), int(c[1]), int(c[2])
+        x1, y1 = cx - r, cy - r
+        x2, y2 = cx + r, cy + r
+        if x1 < 0 or y1 < 0 or x2 >= width or y2 >= height:
+            continue
+
+        roi_hsv = hsv[y1:y2 + 1, x1:x2 + 1]
+        rh, rw = roi_hsv.shape[:2]
+        yy, xx = np.ogrid[:rh, :rw]
+        circle_mask = ((xx - r) ** 2 + (yy - r) ** 2) <= (r * r)
+        if int(circle_mask.sum()) < 40:
+            continue
+
+        # White circular button body.
+        light_mask = (
+            (roi_hsv[:, :, 1] <= 70)
+            & (roi_hsv[:, :, 2] >= 145)
+            & circle_mask
+        )
+        light_ratio = float(np.count_nonzero(light_mask)) / float(max(1, np.count_nonzero(circle_mask)))
+
+        # Purple arrow glyph.
+        purple_mask = (
+            (roi_hsv[:, :, 0] >= 108)
+            & (roi_hsv[:, :, 0] <= 172)
+            & (roi_hsv[:, :, 1] >= 40)
+            & (roi_hsv[:, :, 2] >= 45)
+            & circle_mask
+        )
+        purple_count = int(np.count_nonzero(purple_mask))
+        purple_ratio = float(purple_count) / float(max(1, np.count_nonzero(circle_mask)))
+
+        if light_ratio < 0.42 or purple_ratio < 0.004:
+            continue
+
+
+        shape_score = 0.55 * min(1.0, light_ratio / 0.75) + 0.45 * min(1.0, purple_ratio / 0.06)
+        color_score = min(1.0, purple_ratio / 0.06)
+        final_score = 0.70 * float(shape_score) + 0.30 * float(color_score)
+
+        cands.append(
+            {
+                "tm_score": float(shape_score),
                 "color_score": float(color_score),
-                "color_ok": bool(color_ok),
-                "x": int(x),
-                "y": int(y),
-                "w": int(tw),
-                "h": int(th),
-                "template": tpl.name,
-                "scale": float(sc),
-                "abs_center": (int(left + x + tw // 2), int(top + y + th // 2)),
+                "final_score": float(final_score),
+                "color_ok": True,
+                "clickable": True,
+                "reason": "ok",
+                "x": int(x1),
+                "y": int(y1),
+                "w": int(2 * r),
+                "h": int(2 * r),
+                "template": "circle_arrow",
+                "scale": 1.0,
+                "scan_attempts_total": int(len(circles[0])),
+                "scan_attempts_tm_ok": int(len(cands) + 1),
+                "abs_center": (int(left + cx), int(top + cy)),
             }
-            if best_raw is None or cand_base["tm_score"] > best_raw["tm_score"]:
-                best_raw = dict(cand_base)
-                best_raw["final_score"] = 0.78 * float(cand_base["tm_score"]) + 0.22 * float(cand_base["color_score"])
-                best_raw["clickable"] = False
-                best_raw["reason"] = "tm_below_threshold"
-            if tm_score < 0.72:
-                continue
-            attempts_tm_ok += 1
-            cand = dict(cand_base)
-            cand["final_score"] = 0.78 * float(cand["tm_score"]) + 0.22 * float(cand["color_score"])
-            cand["clickable"] = True
-            cand["reason"] = "ok"
-            if best_any is None or cand["final_score"] > best_any["final_score"]:
-                best_any = cand
-            if cand["color_ok"]:
-                if best is None or cand["final_score"] > best["final_score"]:
-                    best = cand
-    chosen = best if best is not None else best_any
-    if chosen is not None:
-        chosen["scan_attempts_total"] = int(attempts_total)
-        chosen["scan_attempts_tm_ok"] = int(attempts_tm_ok)
-        if not chosen.get("color_ok", False):
-            chosen["reason"] = "color_not_valid_fallback"
-        return chosen
-    if best_raw is not None:
-        best_raw["scan_attempts_total"] = int(attempts_total)
-        best_raw["scan_attempts_tm_ok"] = int(attempts_tm_ok)
-        return best_raw
-    return None
+        )
+
+    if not cands:
+        return None
+
+    cands.sort(key=lambda z: z["final_score"], reverse=True)
+    return cands[0]
 def _norm_resend_value(value: str) -> str:
     return "".join(ch for ch in str(value or "").lower() if ch.isalnum())
 def _read_focused_field_text() -> str:
@@ -871,12 +910,29 @@ async def send_messages_from_y_mess(window, viber_channel, s):
     return was_new_mess
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
-    base_scope = (880, 910, 1120, 1000)
+    base_scope = (740, 910, 1120, 1000)
+    debug_before_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_scope")
+    if debug_before_path:
+        log_and_print(f"[last_mess] search snapshot: {debug_before_path}", "DEBUG")
     match = _find_last_mess_match(base_scope, name_viber_channel)
     if not match:
         log_and_print("Not find icon LastMessage", "INFO")
+        debug_after_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_no_candidate")
+        if debug_after_path:
+            log_and_print(f"[last_mess] no-candidate snapshot: {debug_after_path}", "DEBUG")
         return False
     click_pos = match["abs_center"]
+    debug_after_path = _save_last_mess_annotated(
+        base_scope,
+        name_viber_channel,
+        (int(match["x"]), int(match["y"]), int(match["w"]), int(match["h"])),
+        (int(click_pos[0]), int(click_pos[1])),
+        float(match["tm_score"]),
+        float(match["color_score"]),
+        str(match["template"]),
+    )
+    if debug_after_path:
+        log_and_print(f"[last_mess] after snapshot: {debug_after_path}", "DEBUG")
     log_and_print(
         f"[last_mess] match final={match['final_score']:.3f} tm={match['tm_score']:.3f} "
         f"color={match['color_score']:.3f} tpl={match['template']} "
@@ -1389,10 +1445,7 @@ def window_left(window):
     hwnd = window.handle
     win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
     keyboard.send_keys('{LWIN down}{LEFT}{LWIN up}')
-    
-    
-    
-    
+
 
 
 
