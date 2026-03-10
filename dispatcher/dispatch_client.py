@@ -822,8 +822,21 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                                 name = getattr(mc, "viber_contact_name", None)
                             if name and name not in viber_names:
                                 viber_names.append(name)
+                fallback_response = (
+                    isinstance(resp, DispatchResult)
+                    and resp.decision is not None
+                    and str(resp.decision.reason or "").strip().lower() == "fallback"
+                )
+                log_and_print(
+                    f"[send_messages_from_y_mess] action_type={action_type} matched_contacts={len(viber_names)} fallback={fallback_response}",
+                    "DEBUG",
+                )
+                if fallback_response:
+                    log_and_print("[send_messages_from_y_mess] dispatch fallback: keep message for retry", "WARNING")
+                    continue
+
                 result = True
-                if action_type != "ignore":
+                if action_type and action_type != "ignore":
                     log_and_print("++++++++++++++++++++++++++++++++++++++++++++++", "INFO")
                     result = sendViberMessDispatherToCarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s
@@ -859,28 +872,11 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
     base_scope = (880, 910, 1120, 1000)
-    debug_before_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_scope")
-    if debug_before_path:
-        log_and_print(f"[last_mess] search snapshot: {debug_before_path}", "DEBUG")
     match = _find_last_mess_match(base_scope, name_viber_channel)
     if not match:
         log_and_print("Not find icon LastMessage", "INFO")
-        debug_after_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_no_candidate")
-        if debug_after_path:
-            log_and_print(f"[last_mess] no-candidate snapshot: {debug_after_path}", "DEBUG")
         return False
     click_pos = match["abs_center"]
-    debug_after_path = _save_last_mess_annotated(
-        base_scope,
-        name_viber_channel,
-        (int(match["x"]), int(match["y"]), int(match["w"]), int(match["h"])),
-        (int(click_pos[0]), int(click_pos[1])),
-        float(match["tm_score"]),
-        float(match["color_score"]),
-        str(match["template"]),
-    )
-    if debug_after_path:
-        log_and_print(f"[last_mess] after snapshot: {debug_after_path}", "DEBUG")
     log_and_print(
         f"[last_mess] match final={match['final_score']:.3f} tm={match['tm_score']:.3f} "
         f"color={match['color_score']:.3f} tpl={match['template']} "
@@ -1397,5 +1393,8 @@ def window_left(window):
     
     
     
+
+
+
 
 
