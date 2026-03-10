@@ -157,35 +157,59 @@ def _find_last_mess_match(scope: tuple[int, int, int, int], channel_name: str):
     scales = np.linspace(0.85, 1.20, 15)
     best = None
     best_any = None
+    best_raw = None
+    attempts_total = 0
+    attempts_tm_ok = 0
     for tpl in templates:
         for sc in scales:
             m = _match_template_score(scr_bgr, tpl, float(sc))
             if m is None:
                 continue
+            attempts_total += 1
             tm_score, (x, y), tw, th = m
-            if tm_score < 0.72:
-                continue
             roi = scr_bgr[y:y + th, x:x + tw]
             color_score, color_ok = _last_mess_color_score(roi)
-            final_score = 0.78 * float(tm_score) + 0.22 * float(color_score)
-            cand = {
+            cand_base = {
                 "tm_score": float(tm_score),
                 "color_score": float(color_score),
-                "final_score": float(final_score),
                 "color_ok": bool(color_ok),
                 "x": int(x),
                 "y": int(y),
                 "w": int(tw),
                 "h": int(th),
                 "template": tpl.name,
+                "scale": float(sc),
                 "abs_center": (int(left + x + tw // 2), int(top + y + th // 2)),
             }
+            if best_raw is None or cand_base["tm_score"] > best_raw["tm_score"]:
+                best_raw = dict(cand_base)
+                best_raw["final_score"] = 0.78 * float(cand_base["tm_score"]) + 0.22 * float(cand_base["color_score"])
+                best_raw["clickable"] = False
+                best_raw["reason"] = "tm_below_threshold"
+            if tm_score < 0.72:
+                continue
+            attempts_tm_ok += 1
+            cand = dict(cand_base)
+            cand["final_score"] = 0.78 * float(cand["tm_score"]) + 0.22 * float(cand["color_score"])
+            cand["clickable"] = True
+            cand["reason"] = "ok"
             if best_any is None or cand["final_score"] > best_any["final_score"]:
                 best_any = cand
             if cand["color_ok"]:
                 if best is None or cand["final_score"] > best["final_score"]:
                     best = cand
-    return best if best is not None else best_any
+    chosen = best if best is not None else best_any
+    if chosen is not None:
+        chosen["scan_attempts_total"] = int(attempts_total)
+        chosen["scan_attempts_tm_ok"] = int(attempts_tm_ok)
+        if not chosen.get("color_ok", False):
+            chosen["reason"] = "color_not_valid_fallback"
+        return chosen
+    if best_raw is not None:
+        best_raw["scan_attempts_total"] = int(attempts_total)
+        best_raw["scan_attempts_tm_ok"] = int(attempts_tm_ok)
+        return best_raw
+    return None
 def _norm_resend_value(value: str) -> str:
     return "".join(ch for ch in str(value or "").lower() if ch.isalnum())
 def _read_focused_field_text() -> str:
@@ -834,29 +858,40 @@ async def send_messages_from_y_mess(window, viber_channel, s):
     return was_new_mess
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
-    base_scope = (880, 910, 1060, 1000)
+    base_scope = (880, 910, 1120, 1000)
+    debug_before_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_scope")
+    if debug_before_path:
+        log_and_print(f"[last_mess] search snapshot: {debug_before_path}", "DEBUG")
     match = _find_last_mess_match(base_scope, name_viber_channel)
     if not match:
         log_and_print("Not find icon LastMessage", "INFO")
+        debug_after_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_no_candidate")
+        if debug_after_path:
+            log_and_print(f"[last_mess] no-candidate snapshot: {debug_after_path}", "DEBUG")
         return False
     click_pos = match["abs_center"]
-    if _ui_debug():
-        debug_after_path = _save_last_mess_annotated(
-            base_scope,
-            name_viber_channel,
-            (int(match["x"]), int(match["y"]), int(match["w"]), int(match["h"])),
-            (int(click_pos[0]), int(click_pos[1])),
-            float(match["tm_score"]),
-            float(match["color_score"]),
-            str(match["template"]),
-        )
-        if debug_after_path:
-            log_and_print(f"[last_mess] after snapshot: {debug_after_path}", "DEBUG")
+    debug_after_path = _save_last_mess_annotated(
+        base_scope,
+        name_viber_channel,
+        (int(match["x"]), int(match["y"]), int(match["w"]), int(match["h"])),
+        (int(click_pos[0]), int(click_pos[1])),
+        float(match["tm_score"]),
+        float(match["color_score"]),
+        str(match["template"]),
+    )
+    if debug_after_path:
+        log_and_print(f"[last_mess] after snapshot: {debug_after_path}", "DEBUG")
     log_and_print(
         f"[last_mess] match final={match['final_score']:.3f} tm={match['tm_score']:.3f} "
-        f"color={match['color_score']:.3f} tpl={match['template']} pos={click_pos}",
+        f"color={match['color_score']:.3f} tpl={match['template']} "
+        f"scale={match.get('scale', 0.0):.3f} "
+        f"tm_ok={match.get('scan_attempts_tm_ok', 0)}/{match.get('scan_attempts_total', 0)} "
+        f"reason={match.get('reason', 'n/a')} pos={click_pos}",
         "DEBUG",
     )
+    if not bool(match.get("clickable", True)):
+        log_and_print("Not find icon LastMessage (best candidate below tm threshold)", "INFO")
+        return False
     gd.click(int(click_pos[0]), int(click_pos[1]))
     log_and_print("Click down to last messages", "INFO")
     return True
@@ -1362,3 +1397,5 @@ def window_left(window):
     
     
     
+
+

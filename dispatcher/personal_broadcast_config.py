@@ -33,7 +33,8 @@ class PersonalBroadcastConfig:
     position_processed_file: str
     scroll_names_processed_file: str
     scroll_names_scroll_file: str
-    scroll_names_prev_count: int
+    scroll_names_history_file: str
+    scroll_names_reset_every: int
     target_channel: dict
 
     @property
@@ -171,11 +172,16 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         or "personal_broadcast_scroll_state.txt"
     )
 
+    scroll_names_history_file = str(
+        read_setting("personal_broadcast_scroll_names_history_file")
+        or "personal_broadcast_scroll_names_history.txt"
+    )
+
     try:
-        scroll_names_prev_count = int(read_setting("personal_broadcast_scroll_names_prev_count") or 2)
+        scroll_names_reset_every = int(read_setting("personal_broadcast_scroll_names_reset_every") or 1)
     except Exception:
-        scroll_names_prev_count = 2
-    scroll_names_prev_count = max(0, min(scroll_names_prev_count, 10))  # limit to 0-10
+        scroll_names_reset_every = 1
+    scroll_names_reset_every = max(1, min(scroll_names_reset_every, 1000))
 
     target_channel = read_setting("personal_broadcast_channel")
     if not isinstance(target_channel, dict):
@@ -222,6 +228,7 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         position_processed_file=position_processed_file,
         scroll_names_processed_file=scroll_names_processed_file,
         scroll_names_scroll_file=scroll_names_scroll_file,
-        scroll_names_prev_count=scroll_names_prev_count,
+        scroll_names_history_file=scroll_names_history_file,
+        scroll_names_reset_every=scroll_names_reset_every,
         target_channel=target_channel,
     )

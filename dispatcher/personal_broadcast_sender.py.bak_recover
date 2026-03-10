@@ -1,4 +1,4 @@
-п»їimport random
+import random
 import json
 import time
 import math
@@ -30,11 +30,11 @@ def _ui_debug() -> bool:
 
 class PersonalBroadcastSender:
     _NON_MEMBER_WORDS = {
-        "\u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0438",  # СѓС‡Р°СЃС‚РЅРёРєРё
-        "\u0443\u0447\u0430\u0441\u043d\u0438\u043a\u0438",      # СѓС‡Р°СЃРЅРёРєРё
+        "\u0443\u0447\u0430\u0441\u0442\u043d\u0438\u043a\u0438",  # участники
+        "\u0443\u0447\u0430\u0441\u043d\u0438\u043a\u0438",      # учасники
         "\u0443\u0447\u0430\u043a\u043d\u0438\u043a\u0438",
         "participants",
-        "\u0432\u044b",  # РІС‹
+        "\u0432\u044b",  # вы
         "you",
         "\u0437\u0430\u043f\u0440\u043e\u0441\u0438\u0442\u0438",
         "\u0437\u0430\u043f\u0440\u043e\u0441",
@@ -47,11 +47,11 @@ class PersonalBroadcastSender:
         "admin",
         "administrator",
         "superadmin",
-        "\u0430\u0434\u043c\u0438\u043d",          # Р°РґРјРёРЅ
-        "\u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440",  # Р°РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ
-        "\u0430\u0434\u043c\u0456\u043d\u0456\u0441\u0442\u0440\u0430\u0442\u043e\u0440",  # Р°РґРјС–РЅС–СЃС‚СЂР°С‚РѕСЂ
-        "\u0441\u0443\u043f\u0435\u0440\u0430\u0434\u043c\u0438\u043d",  # СЃСѓРїРµСЂР°РґРјРёРЅ
-        "\u0441\u0443\u043f\u0435\u0440\u0430\u0434\u043c\u0456\u043d",  # СЃСѓРїРµСЂР°РґРјС–РЅ
+        "\u0430\u0434\u043c\u0438\u043d",          # админ
+        "\u0430\u0434\u043c\u0438\u043d\u0438\u0441\u0442\u0440\u0430\u0442\u043e\u0440",  # администратор
+        "\u0430\u0434\u043c\u0456\u043d\u0456\u0441\u0442\u0440\u0430\u0442\u043e\u0440",  # адміністратор
+        "\u0441\u0443\u043f\u0435\u0440\u0430\u0434\u043c\u0438\u043d",  # суперадмин
+        "\u0441\u0443\u043f\u0435\u0440\u0430\u0434\u043c\u0456\u043d",  # суперадмін
     }
     _ROLE_MARKERS = (
         "admin",
@@ -1496,7 +1496,7 @@ class PersonalBroadcastSender:
             if not cls._is_member_name_token(normalized):
                 continue
             conf = float(w.get("conf", 0.0))
-            has_cyr = any("Р°" <= ch.lower() <= "СЏ" or ch.lower() in {"С–", "С—", "С”", "Т‘"} for ch in normalized)
+            has_cyr = any("а" <= ch.lower() <= "я" or ch.lower() in {"і", "ї", "є", "ґ"} for ch in normalized)
             has_lat = any("a" <= ch.lower() <= "z" for ch in normalized)
             score = conf
             score += min(len(normalized), 14) * 1.5
@@ -1522,10 +1522,10 @@ class PersonalBroadcastSender:
             return False
         if low.startswith(
             (
-                "\u0443\u0447\u0430\u0441\u043d",  # СѓС‡Р°СЃРЅ
-                "\u0443\u0447\u0430\u0441\u0442\u043d",  # СѓС‡Р°СЃС‚РЅ
+                "\u0443\u0447\u0430\u0441\u043d",  # учасн
+                "\u0443\u0447\u0430\u0441\u0442\u043d",  # участн
                 "\u0443\u0447\u0430\u043a\u043d",
-                "\u0437\u0430\u043f\u0440\u043e\u0441",  # Р·Р°РїСЂРѕСЃ
+                "\u0437\u0430\u043f\u0440\u043e\u0441",  # запрос
                 "\u0437\u0430\u043f\u0430",
             )
         ):
@@ -1542,17 +1542,17 @@ class PersonalBroadcastSender:
         if not low:
             return False
         non_person_parts = (
-            "РїРµСЂРµРІРµР·",
-            "РїРµСЂРµС—Р·Рґ",
-            "РїРѕС—Р·Рґ",
-            "РµРІСЂРѕРї",
-            "С”РІСЂ",
+            "перевез",
+            "переїзд",
+            "поїзд",
+            "европ",
+            "євр",
             "bus",
             "travel",
             "group",
-            "РєР°РЅР°Р»",
-            "С‡Р°С‚",
-            "РІС‹",
+            "канал",
+            "чат",
+            "вы",
             "you",
         )
         return any(p in low for p in non_person_parts)
@@ -1566,11 +1566,11 @@ class PersonalBroadcastSender:
             "admin",
             "dmin",
             "superadmin",
-            "Р°РґРјРёРЅ",
-            "РґРјРёРЅ",
-            "РјРёРЅРёСЃС‚СЂР°С‚РѕСЂ",
-            "РґРјРёРЅРёСЃС‚СЂР°С‚РѕСЂ",
-            "СЃСѓРїРµСЂР°РґРјРёРЅ",
+            "админ",
+            "дмин",
+            "министратор",
+            "дминистратор",
+            "суперадмин",
         )
         return any(p in low for p in role_parts)
     @classmethod
@@ -1930,23 +1930,23 @@ class PersonalBroadcastSender:
         norm = " ".join(norm.split())
 
         no_messages_markers = [
-            "РѕС€РёР±РєР°",
-            "СѓС‡Р°СЃРЅРёРє",
-            "СѓС‡Р°СЃС‚РЅРёРє",
-            "Р»РёС‡РЅ",
-            "РїРѕРІС–РґРѕРјР»",
-            "СЃРѕРѕР±С‰РµРЅ",
-            "РЅРµ РјРѕР¶Рµ",
-            "РЅРµ РјРѕР¶РµС‚",
+            "ошибка",
+            "учасник",
+            "участник",
+            "личн",
+            "повідомл",
+            "сообщен",
+            "не може",
+            "не может",
         ]
         network_markers = [
-            "РЅРµС‚ СЃРµС‚Рё",
-            "РїС–РґРєР»СЋС‡",
-            "РїРѕРґРєР»СЋС‡",
-            "СЃРµСЂРІРёСЃ",
+            "нет сети",
+            "підключ",
+            "подключ",
+            "сервис",
             "viber",
-            "РїРѕРІС‚РѕСЂРёС‚Рµ РїРѕРїС‹С‚РєСѓ",
-            "РїРѕРІС‚РѕСЂС–С‚СЊ СЃРїСЂРѕР±Сѓ",
+            "повторите попытку",
+            "повторіть спробу",
         ]
 
         no_messages_hits = 0
@@ -2065,7 +2065,7 @@ class PersonalBroadcastSender:
         all_words = words + raw_words
 
         labels = [str(x).strip().lower() for x in (self._config.participants_texts or []) if str(x).strip()]
-        labels += ["СѓС‡Р°СЃРЅРёРєРё", "СѓС‡Р°СЃС‚РЅРёРєРё", "participants"]
+        labels += ["учасники", "участники", "participants"]
         labels_norm = ["".join(ch for ch in label if ch.isalnum()) for label in labels if label]
 
         for w in all_words:
@@ -2083,7 +2083,7 @@ class PersonalBroadcastSender:
                     if SequenceMatcher(None, token, norm_label).ratio() >= 0.90:
                         return True
             else:
-                if token.startswith("СѓС‡Р°СЃ") or token.startswith("СѓС‡Р°СЃС‚") or token.startswith("participant"):
+                if token.startswith("учас") or token.startswith("участ") or token.startswith("participant"):
                     return True
                 for norm_label in labels_norm:
                     if norm_label and (norm_label in token or token in norm_label):
@@ -2522,8 +2522,8 @@ class PersonalBroadcastSender:
         if not n:
             return False
         # Heuristic for ukr/rus/eng OCR names:
-        # female names often end with: Р°/СЏ (cyrillic) or a (latin).
-        return n[-1] in {"\u0430", "\u044f", "a"}  # Р°, СЏ, a
+        # female names often end with: а/я (cyrillic) or a (latin).
+        return n[-1] in {"\u0430", "\u044f", "a"}  # а, я, a
 
     @staticmethod
     def _exception_norm_key(value: str) -> str:

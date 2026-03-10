@@ -21,10 +21,7 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
         super().__init__(config)
         self._scroll_state = PersonalBroadcastScrollNamesState(config.scroll_names_scroll_file)
         self._registry = PersonalBroadcastRegistry(config.scroll_names_processed_file)
-        self._prev_registries = []
-        for i in range(1, config.scroll_names_prev_count + 1):
-            path = self._prev_processed_path(i)
-            self._prev_registries.append(PersonalBroadcastRegistry(str(path)))
+        self._history_path = Path(config.scroll_names_history_file)
 
     def update_config(self, config) -> None:
         names_file_changed = self._config.scroll_names_processed_file != config.scroll_names_processed_file
@@ -60,49 +57,38 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
             log_and_print(f"[personal_broadcast] cannot clear scroll-names file: {exc}", "error")
         self._registry = PersonalBroadcastRegistry(self._config.scroll_names_processed_file)
 
-    def _prev_processed_path(self, index: int) -> Path:
-        base = Path(self._config.scroll_names_processed_file)
-        return base.with_name(base.stem + f"_prev{index}" + base.suffix)
-
     def _reload_registries(self) -> None:
         self._registry = PersonalBroadcastRegistry(self._config.scroll_names_processed_file)
-        self._prev_registries = []
-        for i in range(1, self._config.scroll_names_prev_count + 1):
-            path = self._prev_processed_path(i)
-            self._prev_registries.append(PersonalBroadcastRegistry(str(path)))
+        self._history_path = Path(self._config.scroll_names_history_file)
 
-    def _rotate_scroll_processed_names(self) -> None:
-        cur = Path(self._config.scroll_names_processed_file)
-        prev_count = self._config.scroll_names_prev_count
-        # Shift previous files
-        for i in range(prev_count, 1, -1):
-            src = self._prev_processed_path(i - 1)
-            dst = self._prev_processed_path(i)
-            try:
-                if src.exists():
-                    dst.parent.mkdir(parents=True, exist_ok=True)
-                    shutil.copyfile(src, dst)
-                else:
-                    dst.write_text("", encoding="utf-8")
-            except Exception as exc:
-                log_and_print(f"[personal_broadcast] cannot rotate prev {i-1} to {i}: {exc}", "error")
-        # Copy current to prev1
-        prev1 = self._prev_processed_path(1)
+    def _append_history_name(self, name: str) -> None:
+        raw = str(name or "").strip()
+        if not raw:
+            return
+        ts = __import__("datetime").datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         try:
-            if cur.exists() and cur.stat().st_size > 0:
-                prev1.parent.mkdir(parents=True, exist_ok=True)
-                shutil.copyfile(cur, prev1)
-            else:
-                prev1.write_text("", encoding="utf-8")
+            self._history_path.parent.mkdir(parents=True, exist_ok=True)
+            with self._history_path.open("a", encoding="utf-8") as fh:
+                fh.write(f"{ts} | {raw}\n")
         except Exception as exc:
-            log_and_print(f"[personal_broadcast] cannot rotate to prev1: {exc}", "error")
+            log_and_print(f"[personal_broadcast] cannot append history file: {exc}", "error")
 
+    def _clear_current_processed_names(self) -> None:
+        path = Path(self._config.scroll_names_processed_file)
         try:
-            cur.write_text("", encoding="utf-8")
+            path.write_text("", encoding="utf-8")
         except Exception as exc:
             log_and_print(f"[personal_broadcast] cannot clear scroll-names file: {exc}", "error")
-
         self._reload_registries()
+
+    def _maybe_clear_current_processed_after_scroll_advance(self, new_scroll_no: int) -> None:
+        keep_for = max(1, int(self._config.scroll_names_reset_every))
+        # Clear once per configured number of scroll pages.
+        if keep_for == 1:
+            self._clear_current_processed_names()
+            return
+        if new_scroll_no > 1 and ((new_scroll_no - 1) % keep_for == 0):
+            self._clear_current_processed_names()
 
     def _ensure_participants_panel(self, window) -> bool:
         """Ensure we are in participants list before page scroll / scan progression."""
@@ -223,11 +209,17 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
                 name = candidate["name"]
                 if self._registry.has(name):
                     skip_registry += 1
-                    log_and_print(f"[personal_broadcast] skip already sent (current scroll): {name} scan_id={scan_id}", "debug")
-                    continue
-                if any(reg.has(name) for reg in self._prev_registries):
-                    skip_registry += 1
-                    log_and_print(f"[personal_broadcast] skip already sent (prev scrolls): {name} scan_id={scan_id}", "debug")
+                    sim = self._registry.find_similar(name, min_ratio=0.70, max_len_diff=24)
+                    if sim:
+                        log_and_print(
+                            f"[personal_broadcast] skip already sent (current scroll): {name} ~ {sim[0]} ({sim[1]:.2f}) scan_id={scan_id}",
+                            "debug",
+                        )
+                    else:
+                        log_and_print(
+                            f"[personal_broadcast] skip already sent (current scroll): {name} (exact/normalized match) scan_id={scan_id}",
+                            "debug",
+                        )
                     continue
                 if name in blocked_candidates_on_step:
                     skip_registry += 1
@@ -262,6 +254,7 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
                         processed_positions_on_step.append((int(candidate.get("x", 0)), int(candidate.get("y", 0))))
                     except Exception:
                         pass
+                    self._append_history_name(name)
                     sent_any = True
                     pause = random.uniform(0, max(self._config.max_pause_seconds, 0.0))
                     if pause > 0:
@@ -283,6 +276,7 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
                     )
                     # Avoid re-entering the same contact after recover in this and next scans.
                     self._registry.add(name)
+                    self._append_history_name(name)
                     blocked_candidates_on_step.add(name)
                     if not self._open_participants(window):
                         log_and_print(
@@ -335,10 +329,12 @@ class PersonalBroadcastScrollNamesSender(PersonalBroadcastSender):
 
             # Move to next page only after participants panel is confirmed.
             step += 1
-            self._scroll_state.save_scroll_no(step + 1)
-            self._rotate_scroll_processed_names()
+            new_scroll_no = step + 1
+            self._scroll_state.save_scroll_no(new_scroll_no)
+            self._maybe_clear_current_processed_after_scroll_advance(new_scroll_no)
             log_and_print(
-                f"[personal_broadcast] scroll-names moved to scroll={step + 1}; processed names rotated (current->prev)",
+                f"[personal_broadcast] scroll-names moved to scroll={new_scroll_no}; "
+                f"reset_every={self._config.scroll_names_reset_every}",
                 "debug",
             )
 
