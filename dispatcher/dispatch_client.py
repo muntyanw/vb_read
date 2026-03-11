@@ -300,7 +300,7 @@ def _save_resend_field_state(
     except Exception as exc:
         log_and_print(f"[resend] field snapshot save failed: {exc}", "ERROR")
         return None
-def _set_and_verify_resend_search_value(value: str) -> bool:
+def _set_and_verify_resend_search_value(value: str, clear_before_input: bool = True) -> bool:
     value = str(value or "").strip()
     if not value:
         return False
@@ -317,7 +317,8 @@ def _set_and_verify_resend_search_value(value: str) -> bool:
 
     for attempt in range(1, 4):
         # 1) Keyboard typing first (most stable for this field)
-        _clear_field()
+        if clear_before_input:
+            _clear_field()
         typed = False
         try:
             typed = bool(gd.type_text_unicode(value, interval_s=0.004))
@@ -338,7 +339,8 @@ def _set_and_verify_resend_search_value(value: str) -> bool:
             return True
 
         # 2) Clipboard paste via Ctrl+V
-        _clear_field()
+        if clear_before_input:
+            _clear_field()
         pyperclip.copy(value)
         gd.pause(0.08)
         pag.keyDown("ctrl")
@@ -356,7 +358,8 @@ def _set_and_verify_resend_search_value(value: str) -> bool:
             return True
 
         # 3) Clipboard paste via Shift+Insert
-        _clear_field()
+        if clear_before_input:
+            _clear_field()
         pyperclip.copy(value)
         gd.pause(0.08)
         pag.keyDown("shift")
@@ -1087,7 +1090,7 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
         log_and_print("Not find menu item Переслать")
         return False
     log_and_print("Click Переслать")
-    for viber_name in viber_names:
+    for idx, viber_name in enumerate(viber_names):
         log_and_print(f"viber_name = {viber_name}")
         
         first_name = viber_name.split()[0]
@@ -1101,7 +1104,8 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
     
         gd.click(pos[0] + 100, pos[1] - 10)
         log_and_print("Click field find")
-        if not _set_and_verify_resend_search_value(viber_name):
+        clear_before_input = (idx == 0)
+        if not _set_and_verify_resend_search_value(viber_name, clear_before_input=clear_before_input):
             log_and_print(f"[resend] search field fill failed for {viber_name}", "ERROR")
             return "repeat"
         gd.pause(0.4)
@@ -1445,6 +1449,8 @@ def window_left(window):
     hwnd = window.handle
     win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
     keyboard.send_keys('{LWIN down}{LEFT}{LWIN up}')
+
+
 
 
 
