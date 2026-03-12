@@ -914,28 +914,31 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
     base_scope = (740, 910, 1120, 1000)
-    debug_before_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_scope")
-    if debug_before_path:
-        log_and_print(f"[last_mess] search snapshot: {debug_before_path}", "DEBUG")
+    if _ui_debug():
+        debug_before_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_scope")
+        if debug_before_path:
+            log_and_print(f"[last_mess] search snapshot: {debug_before_path}", "DEBUG")
     match = _find_last_mess_match(base_scope, name_viber_channel)
     if not match:
         log_and_print("Not find icon LastMessage", "INFO")
-        debug_after_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_no_candidate")
-        if debug_after_path:
-            log_and_print(f"[last_mess] no-candidate snapshot: {debug_after_path}", "DEBUG")
+        if _ui_debug():
+            debug_after_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_no_candidate")
+            if debug_after_path:
+                log_and_print(f"[last_mess] no-candidate snapshot: {debug_after_path}", "DEBUG")
         return False
     click_pos = match["abs_center"]
-    debug_after_path = _save_last_mess_annotated(
-        base_scope,
-        name_viber_channel,
-        (int(match["x"]), int(match["y"]), int(match["w"]), int(match["h"])),
-        (int(click_pos[0]), int(click_pos[1])),
-        float(match["tm_score"]),
-        float(match["color_score"]),
-        str(match["template"]),
-    )
-    if debug_after_path:
-        log_and_print(f"[last_mess] after snapshot: {debug_after_path}", "DEBUG")
+    if _ui_debug():
+        debug_after_path = _save_last_mess_annotated(
+            base_scope,
+            name_viber_channel,
+            (int(match["x"]), int(match["y"]), int(match["w"]), int(match["h"])),
+            (int(click_pos[0]), int(click_pos[1])),
+            float(match["tm_score"]),
+            float(match["color_score"]),
+            str(match["template"]),
+        )
+        if debug_after_path:
+            log_and_print(f"[last_mess] after snapshot: {debug_after_path}", "DEBUG")
     log_and_print(
         f"[last_mess] match final={match['final_score']:.3f} tm={match['tm_score']:.3f} "
         f"color={match['color_score']:.3f} tpl={match['template']} "
@@ -1449,6 +1452,8 @@ def window_left(window):
     hwnd = window.handle
     win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
     keyboard.send_keys('{LWIN down}{LEFT}{LWIN up}')
+
+
 
 
 
