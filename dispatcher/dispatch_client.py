@@ -457,6 +457,46 @@ def _dispatch_base_url() -> str:
     # From ".../dispatch/analyze" to ".../dispatch".
     base = get_dispatch_url().rstrip("/")
     return base.rsplit("/", 1)[0]
+
+def _dispatch_job_url(job_id: str) -> str:
+    return _dispatch_base_url() + f"/jobs/{job_id}"
+
+
+async def _poll_dispatch_job_result(
+    client: httpx.AsyncClient,
+    job_id: str,
+    headers: Dict[str, str],
+    timeout_s: float,
+) -> Dict[str, Any]:
+    poll_interval_s = float(read_setting("dispatch_job_poll_interval_s") or 1.5)
+    max_wait_s = float(read_setting("dispatch_job_max_wait_s") or max(30.0, timeout_s * 4.0))
+    deadline = time.monotonic() + max_wait_s
+    url = _dispatch_job_url(job_id)
+
+    while time.monotonic() < deadline:
+        resp = await client.get(url, headers=headers)
+        if resp.status_code == 401:
+            raise DispatchError("Unauthorized: check X-API-Key")
+        resp.raise_for_status()
+
+        job_data = resp.json() or {}
+        status = str(job_data.get("status") or "").strip().lower()
+        log_and_print(f"[dispatch] job {job_id} status={status}", "debug")
+
+        if status in {"done", "completed", "success", "succeeded"}:
+            result_payload = job_data.get("result_payload")
+            if not isinstance(result_payload, dict):
+                raise DispatchError(f"Dispatch job done but result_payload is missing/invalid for job_id={job_id}")
+            return result_payload
+
+        if status in {"failed", "error", "cancelled", "canceled"}:
+            err_text = str(job_data.get("error") or job_data.get("message") or "Unknown job error")
+            raise DispatchError(f"Dispatch job failed job_id={job_id}: {err_text}")
+
+        await asyncio.sleep(max(0.5, poll_interval_s))
+
+    raise DispatchError(f"Dispatch job timeout job_id={job_id} wait_s={max_wait_s}")
+
 async def has_active_orders(
     window_days: int = 2,
     include_count: bool = False,
@@ -558,9 +598,9 @@ async def send_for_analysis(
     timeout_s: float = 15.0,
     retries: int = 2,
 ) -> DispatchResult:
-    
+
     global ip_numbber
-    
+
     payload = {
         "message_id": message_id,
         "chat_id": chat_id,
@@ -580,32 +620,41 @@ async def send_for_analysis(
         "[dispatch] headers: {{'X-API-Key': '***', 'Content-Type': 'application/json', 'X-Client': 'viber-worker'}}"
     )
     log_and_print(f"[dispatch] payload: {payload}")
+
     last_exc: Optional[Exception] = None
     for attempt in range(retries + 1):
         try:
-            async with httpx.AsyncClient(
-                timeout=timeout_s, follow_redirects=True
-            ) as client:
+            async with httpx.AsyncClient(timeout=timeout_s, follow_redirects=True) as client:
                 log_and_print(f"[dispatch] post to {get_dispatch_url()}", "debug")
                 resp = await client.post(get_dispatch_url(), json=payload, headers=headers)
                 log_and_print(f"[dispatch] status={resp.status_code}", "debug")
-                # Always log response body; helps when contracts diverge.
+
                 body_preview = (
                     resp.text
                     if len(resp.text) < 2000
                     else (resp.text[:2000] + "...<truncated>")
                 )
                 log_and_print(f"[dispatch] body: {body_preview}")
+
                 if resp.status_code == 401:
                     raise DispatchError("Unauthorized: check X-API-Key")
+
                 resp.raise_for_status()
-                data = resp.json()
+                data = resp.json() or {}
+
+                # New async flow: analyze enqueues a job and returns 202 + job_id.
+                if resp.status_code == 202:
+                    job_id = str(data.get("job_id") or "").strip()
+                    job_status = str(data.get("status") or "").strip().lower()
+                    if not job_id:
+                        raise DispatchError("Dispatch enqueue response missing job_id")
+                    log_and_print(f"[dispatch] processing job_id={job_id} status={job_status}", "info")
+                    data = await _poll_dispatch_job_result(client, job_id, headers, timeout_s)
+
                 try:
                     result = DispatchResult(**data)
                 except ValidationError as ve:
-                    # Log and try soft-normalizing actions when it's a list of dicts.
                     log_and_print(f"[dispatch] ValidationError: {ve}", "error")
-                    # Fallback attempt to build the result manually.
                     actions_raw = data.get("actions") or []
                     actions: List[Action] = []
                     for a in actions_raw:
@@ -635,16 +684,15 @@ async def send_for_analysis(
                 log_and_print(f"[dispatch] change ip to {ips[ip_numbber]}", "INFO")
             else:
                 log_and_print("[dispatch] IPS is empty in settings.json", "ERROR")
-            
+
             if attempt < retries:
-                await asyncio.sleep(0.7 * (attempt + 1))  # lightweight backoff
+                await asyncio.sleep(0.7 * (attempt + 1))
             else:
-                # On final attempt return fallback instead of raising.
                 log_and_print("[dispatch] returning fallback result", "error")
                 return _fallback_result(message_id=message_id)
-    # Theoretically unreachable.
+
     raise DispatchError(f"Dispatch failed: {last_exc}")
- 
+
 def is_foto_message(scope):
     pos = gd.find_text_any(queries=["Копировать фото",],
                             lang="rus", 
