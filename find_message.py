@@ -2,12 +2,14 @@ import os
 from log import log_and_print
 import re
 from utils import read_setting
+from project_config import external_or_resource_path, writable_app_path
 
 def load_previous_text(file_name='previous_text.txt'):
+    file_path = external_or_resource_path(file_name)
     log_and_print(f"Загрузка предыдущего текста из файла {file_name}")
-    if os.path.exists(file_name):
+    if os.path.exists(file_path):
         try:
-            with open(file_name, 'r', encoding='utf-8') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 text = f.read()
             log_and_print("[load_previous_text] Предыдущий текст успешно загружен")
             return text
@@ -24,12 +26,13 @@ def remove_service_symbols_and_spaces(text):
     return cleaned_text
 
 def save_current_text(text, file_name='previous_text.txt', max_chars=read_setting("max_chars_member")):
+    file_path = writable_app_path(file_name)
     log_and_print(f"Adding current text to file {file_name} with a limit of {max_chars} characters.")
 
     try:
         # Read existing content if the file exists
         try:
-            with open(file_name, 'r', encoding='utf-8') as f:
+            with open(file_path, 'r', encoding='utf-8') as f:
                 existing_content = f.read().strip()
         except FileNotFoundError:
             existing_content = ""
@@ -42,7 +45,7 @@ def save_current_text(text, file_name='previous_text.txt', max_chars=read_settin
             combined_text = combined_text[-max_chars:]
 
         # Write the single-line text back to the file
-        with open(file_name, 'w', encoding='utf-8') as f:
+        with open(file_path, 'w', encoding='utf-8') as f:
             f.write(combined_text)
     except Exception as e:
         log_and_print(f"Error saving text to file: {e}")

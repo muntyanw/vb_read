@@ -2,11 +2,13 @@ from log import log_and_print
 import json
 import sys
 import tkinter as tk
+from project_config import external_or_resource_path, writable_app_path
 
 def read_region_from_json(json_file='region.json'):
+    json_path = external_or_resource_path(json_file)
     log_and_print(f"Чтение области экрана из файла {json_file}")
     try:
-        with open(json_file, 'r') as f:
+        with open(json_path, 'r') as f:
             data = json.load(f)
         left = data['left']
         top = data['top']
@@ -19,10 +21,11 @@ def read_region_from_json(json_file='region.json'):
         sys.exit(1)
 
 def save_region_to_json(left, top, width, height, json_file='region.json'):
+    json_path = writable_app_path(json_file)
     log_and_print(f"Сохранение области экрана в файл {json_file}")
     try:
         data = {'left': left, 'top': top, 'width': width, 'height': height}
-        with open(json_file, 'w') as f:
+        with open(json_path, 'w') as f:
             json.dump(data, f)
         log_and_print(f"Новая область сохранена в файл {json_file}")
     except Exception as e:
