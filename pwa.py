@@ -1,4 +1,4 @@
-from find_message import (
+﻿from find_message import (
     load_previous_text,
 )
 from utils import read_setting
@@ -230,7 +230,6 @@ async def main():
 
     gd.ensure_layout()
     periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
-    server_sender = ServerDispatcherSender(load_server_dispatcher_config())
     personal_config = load_personal_broadcast_config()
     if personal_config.processing_mode == "by_positions":
         personal_sender = PersonalBroadcastPositionSender(personal_config)
@@ -238,6 +237,7 @@ async def main():
         personal_sender = PersonalBroadcastScrollNamesSender(personal_config)
     else:
         personal_sender = PersonalBroadcastSender(personal_config)
+    server_sender = ServerDispatcherSender(load_server_dispatcher_config(), personal_sender=personal_sender)
 
     def stop_requested():
         if STOP_FILE.exists():
@@ -287,6 +287,7 @@ async def main():
                     )
                 else:
                     personal_sender.update_config(new_personal_config)
+                server_sender.set_personal_sender(personal_sender)
                 log_and_print(
                     f"[pwa] settings reloaded; mode={runtime_settings['work_mode']}",
                     "debug",
@@ -328,3 +329,6 @@ if __name__ == "__main__":
         traceback.print_exc()
     finally:
         input("\nPress Enter to close...")
+
+
+

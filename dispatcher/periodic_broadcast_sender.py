@@ -1,13 +1,11 @@
-import time
+﻿import time
 
-import pyautogui as pag
-import pyperclip
 
-from core import gui_driver as gd
 from log import log_and_print
 from dispatcher.dispatch_client import klickViberChannel, window_top_focus
 from dispatcher.message_send_logger import log_sent_message
 from dispatcher.periodic_broadcast_config import PeriodicBroadcastConfig
+from dispatcher.chat_message_sender import send_text_to_active_chat
 
 
 class PeriodicBroadcastSender:
@@ -76,15 +74,7 @@ class PeriodicBroadcastSender:
         input_x = s.search_board_mess_x_start + 240
         input_y = s.search_board_mess_y_end + 12
 
-        window.set_focus()
-        gd.click(input_x, input_y)
-        gd.pause(0.2)
-
-        pyperclip.copy(text)
-        pag.hotkey("ctrl", "v")
-        gd.pause(0.2)
-        pag.press("enter")
-        gd.pause(0.5)
+        send_text_to_active_chat(window, (input_x, input_y), text)
 
         text_preview = text if len(text) <= 80 else text[:80] + "..."
         log_and_print(
@@ -92,3 +82,6 @@ class PeriodicBroadcastSender:
             "info",
         )
         log_sent_message(channel_name=channel_name, text=text, source="periodic")
+
+
+
