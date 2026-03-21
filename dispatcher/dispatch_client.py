@@ -23,6 +23,7 @@ import cv2
 import numpy as np
 import win32con
 from pywinauto import keyboard
+from project_config import TEMPLATE_DIR
 pag.FAILSAFE = False
 ip_numbber = 0
 def _ui_debug() -> bool:
@@ -1031,35 +1032,36 @@ def click_viber_channel_text(viber_channel):
             count_click=2
     )
 def klickViberChannel(tp, window, clickLastMessBool, viber_channel):
-    log_and_print(f"start click {viber_channel["name_viber_channel"]}", "DEBUG")
+    channel_name = viber_channel["name_viber_channel"]
+    log_and_print(f"start click {channel_name}", "DEBUG")
     press_esq(window)
     
     if tp == "image":
-        pos = click_viber_channel_image(viber_channel["name_viber_channel"])
+        pos = click_viber_channel_image(channel_name)
         
         if not pos:       
-            log_and_print(f"Not find image chat {viber_channel["name_viber_channel"]}", "INFO")
+            log_and_print(f"Not find image chat {channel_name}", "INFO")
                 
             pos = click_viber_channel_text(viber_channel)
             
             if not pos:  
-                log_and_print(f"Not find text name chat {viber_channel["name_viber_channel"]}", "INFO")
+                log_and_print(f"Not find text name chat {channel_name}", "INFO")
             
         
     else:
         pos = click_viber_channel_text(viber_channel)
         
         if not pos:       
-            log_and_print(f"Not find text name chat {viber_channel["name_viber_channel"]}", "INFO")
+            log_and_print(f"Not find text name chat {channel_name}", "INFO")
                 
-            pos = click_viber_channel_image(viber_channel["name_viber_channel"])
+            pos = click_viber_channel_image(channel_name)
             
             if not pos:  
-                log_and_print(f"Not find image chat {viber_channel["name_viber_channel"]}", "INFO")
+                log_and_print(f"Not find image chat {channel_name}", "INFO")
             
-    log_and_print(f"Click name chat {viber_channel["name_viber_channel"]}")
+    log_and_print(f"Click name chat {channel_name}")
     if clickLastMessBool:
-        clickLastMess(window, viber_channel["name_viber_channel"])
+        clickLastMess(window, channel_name)
         
     moveToContactsAndScrollUp()
     
@@ -1208,7 +1210,7 @@ def fill_y_mess(window, viber_channel, s):
     channel_name = viber_channel["name_viber_channel"]
     for idx in range(1, 8):
         file_name = "heart.png" if idx == 1 else f"heart{idx}.png"
-        file_path = f"images\\{channel_name}\\{file_name}"
+        file_path = str(TEMPLATE_DIR / channel_name / file_name)
         if not os.path.exists(file_path):
             log_and_print(f"[fill_y_mess] template not found, stop heart scan list: {file_path}", "debug")
             break
@@ -1385,10 +1387,10 @@ async def processViberMess(
     click_close_info()
     click_cancel_window_save_as()
     if not klickViberChannel("image",window, True, viber_channel):
-                log_and_print(f"Not find chat {viber_channel["name_viber_channel"]}", "INFO")
+                log_and_print(f"Not find chat {viber_channel['name_viber_channel']}", "INFO")
                 return None
             
-    log_and_print(f"click chat {viber_channel["name_viber_channel"]}", "INFO")
+    log_and_print(f"click chat {viber_channel['name_viber_channel']}", "INFO")
     gd.right_click(
         s.search_board_mess_x_start + s.x_offset_out_mess,
         s.search_board_mess_y_start + 10,
@@ -1438,7 +1440,7 @@ async def processViberMess(
                     viber_channel = s.viber_channels[numberViberChannel]
                 
                     if klickViberChannel("image", window, True, viber_channel):
-                        log_and_print(f"Not find chat {viber_channel["name_viber_channel"]}", "INFO")
+                        log_and_print(f"Not find chat {viber_channel['name_viber_channel']}", "INFO")
                         
                         empty_send_count = 0
                 

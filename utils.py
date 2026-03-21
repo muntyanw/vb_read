@@ -7,6 +7,8 @@ import numpy as np
 import pyautogui
 from typing import Union
 import ctypes
+from pathlib import Path
+from project_config import external_or_resource_path, writable_app_path
 
 os.environ["QT_LOGGING_RULES"] = "qt.qpa.windows.debug=false"
 
@@ -15,6 +17,13 @@ import time
 import win32api, win32con, win32gui
 
 ImageLike = Union[str, np.ndarray]
+
+
+def _resolve_read_path(file_path: str | Path) -> Path:
+    path = Path(file_path)
+    if path.is_absolute():
+        return path
+    return external_or_resource_path(str(path))
 
 
 def _read_json_utf8(file_path):
@@ -60,8 +69,7 @@ def preprocess_image(image_np):
 
 
 def read_setting(field_path) -> str | int | float | bool | list[str] | dict | None:
-
-    file_path = "settings.json"
+    file_path = _resolve_read_path("settings.json")
     try:
         # Open and load the JSON file
         settings = _read_json_utf8(file_path)
@@ -84,11 +92,12 @@ def write_setting(field_path, new_value):
     :param field_path: Dot-separated path to the field (e.g., "capture_and_recognize.lang").
     :param new_value: The new value to set for the specified field.
     """
-    file_path = "settings.json"
+    file_path = writable_app_path("settings.json")
+    source_path = file_path if file_path.exists() else _resolve_read_path("settings.json")
 
     try:
         # Open and load the JSON file
-        settings = _read_json_utf8(file_path)
+        settings = _read_json_utf8(source_path)
 
         # Navigate to the desired field and set the new value
         keys = field_path.split('.')
@@ -107,16 +116,17 @@ def write_setting(field_path, new_value):
         log_and_print(f"[write_setting] Error writing field '{field_path}' to '{file_path}': {e}")
 
 def load_json(file_path):
-    log_and_print(f"Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… РёР· JSON С„Р°Р№Р»Р° {file_path}.", 'info')
+    resolved_path = _resolve_read_path(file_path)
+    log_and_print(f"Р—Р°РіСЂСѓР·РєР° РґР°РЅРЅС‹С… РёР· JSON С„Р°Р№Р»Р° {resolved_path}.", 'info')
     try:
-        data = _read_json_utf8(file_path)
-        log_and_print(f"Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹ РёР· {file_path}.", 'info')
+        data = _read_json_utf8(resolved_path)
+        log_and_print(f"Р”Р°РЅРЅС‹Рµ СѓСЃРїРµС€РЅРѕ Р·Р°РіСЂСѓР¶РµРЅС‹ РёР· {resolved_path}.", 'info')
         return data
     except FileNotFoundError:
-        log_and_print(f"Р¤Р°Р№Р» {file_path} РЅРµ РЅР°Р№РґРµРЅ.", 'error')
+        log_and_print(f"Р¤Р°Р№Р» {resolved_path} РЅРµ РЅР°Р№РґРµРЅ.", 'error')
         return None
     except json.JSONDecodeError:
-        log_and_print(f"РћС€РёР±РєР° РґРµРєРѕРґРёСЂРѕРІР°РЅРёСЏ JSON РІ С„Р°Р№Р»Рµ {file_path}.", 'error')
+        log_and_print(f"РћС€РёР±РєР° РґРµРєРѕРґРёСЂРѕРІР°РЅРёСЏ JSON РІ С„Р°Р№Р»Рµ {resolved_path}.", 'error')
         return None
 
 def get_latest_file(download_folder):

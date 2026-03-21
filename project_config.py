@@ -1,6 +1,7 @@
 # project_config.py
 from __future__ import annotations
 
+import os
 import sys
 import yaml
 from pathlib import Path
@@ -21,10 +22,45 @@ def resource_path(filename: str) -> Path:
     # обычный путь при запуске из .py
     return Path(__file__).resolve().parent / filename
 
+
+def app_dir() -> Path:
+    if getattr(sys, "frozen", False):
+        return Path(sys.executable).resolve().parent
+    return Path(__file__).resolve().parent
+
+
+def external_or_resource_path(filename: str) -> Path:
+    external_path = app_dir() / filename
+    if external_path.exists():
+        return external_path
+    return resource_path(filename)
+
+
+def writable_app_path(filename: str) -> Path:
+    target = app_dir() / filename
+    try:
+        target.parent.mkdir(parents=True, exist_ok=True)
+        if target.exists() or os.access(str(target.parent), os.W_OK):
+            return target
+    except OSError:
+        pass
+
+    fallback_dir = Path.home() / ".vb_read"
+    fallback_dir.mkdir(parents=True, exist_ok=True)
+    return fallback_dir / filename
+
+
+def _resolve_config_path(value: str, default: str) -> Path:
+    raw_value = value or default
+    path = Path(raw_value).expanduser()
+    if not path.is_absolute():
+        path = _SETTINGS_PATH.parent / path
+    return path.resolve()
+
 # -------------------------------------------------------------------
 # 1) Определяем путь до settings.yaml (корень проекта)
 # -------------------------------------------------------------------
-_SETTINGS_PATH = resource_path("settings.yaml")
+_SETTINGS_PATH = external_or_resource_path("settings.yaml")
 
 # -------------------------------------------------------------------
 # 2) Загружаем YAML-данные при импорте (одно чтение)
@@ -39,14 +75,18 @@ except FileNotFoundError:
 # 3) “Высвобождаем” из _RAW_SETTINGS нужные переменные в виде констант
 # -------------------------------------------------------------------
 # Пример: пути к каталогам
-USERS_DIR: Path = Path(_RAW_SETTINGS.get("users_dir", "users_cfg")).expanduser().resolve()
-KEYS_DIR:  Path = Path(_RAW_SETTINGS.get("keys_dir", "keys")).expanduser().resolve()
+USERS_DIR: Path = _resolve_config_path(_RAW_SETTINGS.get("users_dir", "users_cfg"), "users_cfg")
+KEYS_DIR: Path = _resolve_config_path(_RAW_SETTINGS.get("keys_dir", "keys"), "keys")
 
 # Путь до шаблона профиля Chrome
-CHROME_TEMPLATE: Path = Path(_RAW_SETTINGS.get("chrome_template", "chrome_template/profile")) \
-                            .expanduser().resolve()
-CHROME_TEMPLATES: Path = Path(_RAW_SETTINGS.get("chrome_templates", "chrome_template/profiles")) \
-                            .expanduser().resolve()
+CHROME_TEMPLATE: Path = _resolve_config_path(
+    _RAW_SETTINGS.get("chrome_template", "chrome_template/profile"),
+    "chrome_template/profile",
+)
+CHROME_TEMPLATES: Path = _resolve_config_path(
+    _RAW_SETTINGS.get("chrome_templates", "chrome_template/profiles"),
+    "chrome_template/profiles",
+)
 
 # Флаг: сохраняем ли профили между запусками
 KEEP_PROFILES: bool = bool(_RAW_SETTINGS.get("keep_profiles", False))
@@ -61,10 +101,13 @@ MONITOR_INDEX: int = int(_RAW_SETTINGS.get("monitor_index", 1))
 MON_X: int = int(_RAW_SETTINGS.get("mon_x", 1920))
 
 
-TEMPLATE_DIR: Path = Path(_RAW_SETTINGS.get("ui_images", "")).expanduser().resolve()
+TEMPLATE_DIR: Path = _resolve_config_path(_RAW_SETTINGS.get("ui_images", "images"), "images")
 
 # Настройки HTML-логгера
-HTML_LOG_DIR: Path = Path(_RAW_SETTINGS.get("html_log_dir", "data/html_log")).expanduser().resolve()
+HTML_LOG_DIR: Path = _resolve_config_path(
+    _RAW_SETTINGS.get("html_log_dir", "data/html_log"),
+    "data/html_log",
+)
 
 # Уровень логирования (строка, например "DEBUG", "INFO")
 LOG_LEVEL: str = str(_RAW_SETTINGS.get("log_level", "INFO")).upper()
