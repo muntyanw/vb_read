@@ -996,7 +996,6 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
     return pyperclip.paste()
 count_old_mess = 0
 async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
-    window.set_focus()
     def _run_poll_hook():
         if poll_hook is not None:
             try:
@@ -1011,7 +1010,6 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
         _run_poll_hook()
         if y:
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
-            window.set_focus()
             x = x + s.search_board_mess_x_start + 180
             y = y + s.search_board_mess_y_start
             xRight = x - 140
@@ -1022,16 +1020,9 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
             text = click_copy_text("text", window, s, x, y, is_debug=_ui_debug())
-            if len(text) == 1:
-                continue
-
-            if text == "is_foto":
-                log_and_print("[send_messages_from_y_mess] \u0424\u043e\u0442\u043e \u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f", "debug")
-                continue
-
             if text is None:
                 log_and_print(
-                    "[send_messages_from_y_mess] \u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0441\u043a\u043e\u043f\u0456\u044e\u0432\u0430\u0442\u0438 \u043c\u0435\u0441\u0435\u0434\u0436, \u0431\u0443\u0444\u0435\u0440 \u043e\u0431\u043c\u0456\u043d\u0443 \u043f\u0443\u0441\u0442\u0438\u0439",
+                    "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий",
                     "debug",
                 )
 
@@ -1040,12 +1031,28 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                 else:
                     return "repeat"
 
+            if text == "is_foto":
+                log_and_print("[send_messages_from_y_mess] Фото повідомлення", "debug")
+                continue
+
+            if not isinstance(text, str):
+                log_and_print(
+                    f"[send_messages_from_y_mess] skip non-text clipboard type={type(text).__name__}",
+                    "debug",
+                )
+                continue
+
+            if len(text) == 1:
+                continue
+
+            msg_id = hashlib.md5(text.encode("utf-8", errors="ignore")).hexdigest()
+
             if not _is_same_processed_message(text, s.old_text):
                 was_new_mess = True
                 count_old_mess = 0
                 log_and_print(
-                    "[send_messages_from_y_mess] \u0412\u0456\u0434\u043f\u0440\u0430\u0432\u043a\u0430 \u0442\u0430 \u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043d\u043d\u044f \u043d\u043e\u0432\u043e\u0433\u043e \u0441\u043f\u043e\u0432\u0456\u0449\u0435\u043d\u043d\u044f \u0434\u043b\u044f \u0430\u043d\u0430\u043b\u0456\u0437\u0443",
-                    "debug",
+                    f"[dispatch_status] message_id={msg_id} status=processing",
+                    "info",
                 )
                 _run_poll_hook()
                 resp = await process_one_message_dispatcher(
@@ -1056,26 +1063,22 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                 log_and_print(
                     f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
                 )
-                # Extract type of first action (if present).
                 action_type = None
                 viber_names = []
-                
+
                 if isinstance(resp, DispatchResult) and resp.actions:
                     first_action = resp.actions[0]
                     action_type = _safe_action_type(first_action)
-                    
-                    # 2) Extract carrier names if backend returned matched_contacts.
+
                     if hasattr(resp, "matched_contacts") and getattr(resp, "matched_contacts", None):
-                        # resp.matched_contacts may contain objects or dicts.
                         for mc in resp.matched_contacts or []:
-                            # dict case
                             if isinstance(mc, dict):
                                 name = mc.get("viber_contact_name")
                             else:
-                                # Pydantic MatchedContact case
                                 name = getattr(mc, "viber_contact_name", None)
                             if name and name not in viber_names:
                                 viber_names.append(name)
+
                 fallback_response = (
                     isinstance(resp, DispatchResult)
                     and resp.decision is not None
@@ -1083,15 +1086,17 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                 )
                 log_and_print(
                     f"[send_messages_from_y_mess] action_type={action_type} matched_contacts={len(viber_names)} fallback={fallback_response}",
-                    "DEBUG",
+                    "debug",
                 )
                 if fallback_response:
-                    log_and_print("[send_messages_from_y_mess] dispatch fallback: keep message for retry", "WARNING")
+                    log_and_print(
+                        f"[dispatch_status] message_id={msg_id} status=fallback ????????????????????????????????????",
+                        "info",
+                    )
                     continue
 
                 result = True
                 if action_type and action_type != "ignore":
-                    log_and_print("++++++++++++++++++++++++++++++++++++++++++++++", "debug")
                     result = sendViberMessDispatherToCarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s, poll_hook=poll_hook
                     )
@@ -1102,10 +1107,25 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                             s.search_board_mess_y_start + 10,
                         )
                         result = sendViberMessDispatherToCarrier(
-                        viber_names, window, xRight, yRight, viber_channel, text, s, poll_hook=poll_hook
-                    )
+                            viber_names, window, xRight, yRight, viber_channel, text, s, poll_hook=poll_hook
+                        )
+
+                    if result:
+                        log_and_print(
+                            f"[dispatch_status] message_id={msg_id} status=sent recipients={len(viber_names)} ++++++++++++++++++++++++++++++",
+                            "info",
+                        )
+                    else:
+                        log_and_print(
+                            f"[dispatch_status] message_id={msg_id} status=send_failed recipients={len(viber_names)}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                            "info",
+                        )
                 else:
-                    log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "debug")
+                    log_and_print(
+                        f"[dispatch_status] message_id={msg_id} status=ignore xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        "info",
+                    )
+
                 if result:
                     save_current_text(text)
                     s.old_text = load_previous_text()
@@ -1117,10 +1137,9 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                     return was_new_mess
                 sending += 1
                 log_and_print(
-                    "[send_messages_from_y_mess] ------------------------------------- Сповіщення вже було відправлено", "INFO"
+                    "[send_messages_from_y_mess] ------------------------------------- Сповіщення вже було відправлено", "info"
                 )
                 if sending >= 2:
-                    # break
                     pass
     return was_new_mess
 def clickLastMess(window, name_viber_channel):
@@ -1721,6 +1740,10 @@ def window_left(window):
     hwnd = window.handle
     win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
     keyboard.send_keys('{LWIN down}{LEFT}{LWIN up}')
+
+
+
+
 
 
 
