@@ -27,29 +27,31 @@ def remove_service_symbols_and_spaces(text):
 
 def save_current_text(text, file_name='previous_text.txt', max_chars=read_setting("max_chars_member")):
     file_path = writable_app_path(file_name)
-    log_and_print(f"Adding current text to file {file_name} with a limit of {max_chars} characters.")
+    log_and_print(f"Saving current text to history file {file_name} (max {max_chars} chars)")
 
     try:
-        # Read existing content if the file exists
+        current = str(text or "").strip()
+        if not current:
+            return
+
+        try:
+            max_chars = int(max_chars)
+        except Exception:
+            max_chars = 20000
+
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 existing_content = f.read().strip()
         except FileNotFoundError:
             existing_content = ""
 
-        # Combine the existing and new cleaned text
-        combined_text = existing_content + text
+        sep = "\n\n===MSG===\n\n"
+        combined_text = f"{existing_content}{sep}{current}" if existing_content else current
 
-        # If the combined text exceeds the max_chars limit, truncate it to the last max_chars
-        if len(combined_text) > max_chars:
+        if max_chars > 0 and len(combined_text) > max_chars:
             combined_text = combined_text[-max_chars:]
 
-        # Write the single-line text back to the file
         with open(file_path, 'w', encoding='utf-8') as f:
             f.write(combined_text)
     except Exception as e:
-        log_and_print(f"Error saving text to file: {e}")
-
-        log_and_print(f"Текст успешно добавлен. Последние {max_chars} строк сохранены. Добавлено: {text}")
-    except Exception as e:
-        log_and_print(f"Ошибка при сохранении текста в файл {file_name}: {e}")
+        log_and_print(f"Error saving text to file {file_name}: {e}", "error")

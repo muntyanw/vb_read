@@ -667,6 +667,41 @@ def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
         return a.type  # pydantic model
     except Exception:
         return None
+
+
+def _normalize_message_for_dedupe(text: str) -> str:
+    t = str(text or "").replace("\r", "\n")
+    lines = [" ".join(line.split()) for line in t.split("\n")]
+    lines = [line for line in lines if line]
+    return "\n".join(lines).strip().lower()
+
+
+def _split_processed_history(previous_text: str) -> list[str]:
+    raw = str(previous_text or "").replace("\r", "\n")
+    sep = "\n\n===MSG===\n\n"
+    if sep in raw:
+        chunks = raw.split(sep)
+    else:
+        # Legacy history format fallback.
+        chunks = raw.split("\n\n")
+
+    normalized: list[str] = []
+    for chunk in chunks:
+        msg = _normalize_message_for_dedupe(chunk)
+        if msg:
+            normalized.append(msg)
+    return normalized
+
+
+def _is_same_processed_message(current_text: str, previous_text: str) -> bool:
+    cur = _normalize_message_for_dedupe(current_text)
+    if not cur:
+        return False
+
+    for old_msg in _split_processed_history(previous_text):
+        if old_msg == cur:
+            return True
+    return False
 async def process_one_message_dispatcher(
     message_text: Optional[str], 
     file_path: Optional[str],
@@ -1005,7 +1040,7 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                 else:
                     return "repeat"
 
-            if not text_includes_fast(text, s.old_text, 0.7):
+            if not _is_same_processed_message(text, s.old_text):
                 was_new_mess = True
                 count_old_mess = 0
                 log_and_print(

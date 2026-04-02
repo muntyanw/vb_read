@@ -50,26 +50,33 @@ class ServerDispatcherSender:
         if not ips:
             log_and_print(f"[server_dispatcher] ack fail id={message_id}: no IPS configured", "info")
             return False
-        ip = ips[0]
-        url = f"http://{ip}:8888/api/dispatcher/notifications/ack"
+
         payload = {"id": message_id, "ack_token": str(ack_token or "").strip()}
-        try:
-            response = requests.post(url, json=payload, timeout=30)
-            response.raise_for_status()
-            log_and_print(f"[server_dispatcher] ack success id={message_id}", "info")
-            return True
-        except requests.RequestException as exc:
-            body = None
+        failures: list[str] = []
+
+        for ip in ips:
+            url = f"http://{ip}:8888/api/dispatcher/notifications/ack"
             try:
-                body = response.text  # type: ignore[name-defined]
-            except Exception:
+                response = requests.post(url, json=payload, timeout=30)
+                response.raise_for_status()
+                log_and_print(f"[server_dispatcher] ack success id={message_id} ip={ip}", "info")
+                return True
+            except requests.RequestException as exc:
                 body = None
-            extra = f" body={body}" if body else ""
-            log_and_print(f"[server_dispatcher] ack fail id={message_id}: {exc}{extra}", "info")
-            return False
-        except Exception as exc:
-            log_and_print(f"[server_dispatcher] ack fail id={message_id}: {exc}", "info")
-            return False
+                try:
+                    body = response.text  # type: ignore[name-defined]
+                except Exception:
+                    body = None
+                extra = f" body={body}" if body else ""
+                failures.append(f"{ip}: {exc}{extra}")
+            except Exception as exc:
+                failures.append(f"{ip}: {exc}")
+
+        log_and_print(
+            f"[server_dispatcher] ack fail id={message_id}: all IPs failed; details={failures}",
+            "info",
+        )
+        return False
 
     def update_config(self, config: ServerDispatcherConfig, is_startup: bool = False) -> None:
         if config == self._config and self._next_poll_at != float("inf"):
@@ -113,26 +120,36 @@ class ServerDispatcherSender:
         if not ips:
             log_and_print("[server_dispatcher] no IPS configured", "error")
             return
-        ip = ips[0]
-        url = f"http://{ip}:8888/api/dispatcher/notifications/poll"
+
         params = {"limit": self._config.poll_limit}
         if self._config.user_id:
             params["user_id"] = self._config.user_id
 
-        try:
-            response = requests.get(url, params=params, timeout=30)
-            response.raise_for_status()
-            data = response.json()
-        except requests.RequestException as e:
-            log_and_print(f"[server_dispatcher] HTTP error: {e}", "error")
-            self._handle_backoff()
-            return
-        except Exception as e:
-            log_and_print(f"[server_dispatcher] JSON parse error: {e}", "error")
+        data = None
+        failures: list[str] = []
+        used_ip = None
+
+        for ip in ips:
+            url = f"http://{ip}:8888/api/dispatcher/notifications/poll"
+            try:
+                response = requests.get(url, params=params, timeout=30)
+                response.raise_for_status()
+                data = response.json()
+                used_ip = ip
+                break
+            except requests.RequestException as e:
+                failures.append(f"{ip}: {e}")
+            except Exception as e:
+                failures.append(f"{ip}: {e}")
+
+        if data is None:
+            log_and_print(f"[server_dispatcher] HTTP error: all IPs failed; details={failures}", "error")
             self._handle_backoff()
             return
 
         self._backoff_delay = 5.0
+        if used_ip is not None:
+            log_and_print(f"[server_dispatcher] poll success via ip={used_ip}", "debug")
 
         server_time = data.get("server_time")
         has_messages = data.get("has_messages", False)
