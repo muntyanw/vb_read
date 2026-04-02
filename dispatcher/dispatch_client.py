@@ -1,4 +1,4 @@
-﻿# viber_worker/dispatch_client.py
+# viber_worker/dispatch_client.py
 import os
 import json
 from typing import Optional, Dict, Any, List, Union
@@ -551,6 +551,8 @@ class DispatchResult(BaseModel):
     actions: List[Action] = Field(default_factory=list)
     decision: Optional[Decision] = None
     matched_contacts: List[MatchedContact] = Field(default_factory=list)
+    transport_status: Optional[str] = None
+    dispatch_meta: Dict[str, Any] = Field(default_factory=dict)
     @field_validator("extracted", mode="before")
     @classmethod
     def _coerce_extracted(cls, v):
@@ -563,6 +565,10 @@ class DispatchResult(BaseModel):
     @classmethod
     def _coerce_matched_contacts(cls, v):
         return v or []
+    @field_validator("dispatch_meta", mode="before")
+    @classmethod
+    def _coerce_dispatch_meta(cls, v):
+        return v or {}
 def _dispatch_base_url() -> str:
     # From ".../dispatch/analyze" to ".../dispatch".
     base = get_dispatch_url().rstrip("/")
@@ -577,11 +583,21 @@ async def _poll_dispatch_job_result(
     job_id: str,
     headers: Dict[str, str],
     timeout_s: float,
+    *,
+    message_id: str,
+    poll_url: str,
+    dispatch_meta: Dict[str, Any],
+    initial_status: str = "",
 ) -> Dict[str, Any]:
     poll_interval_s = float(read_setting("dispatch_job_poll_interval_s") or 1.5)
     max_wait_s = float(read_setting("dispatch_job_max_wait_s") or max(30.0, timeout_s * 4.0))
     deadline = time.monotonic() + max_wait_s
-    url = _dispatch_job_url(job_id)
+    url = poll_url
+    if initial_status:
+        log_and_print(
+            f"[dispatch_trace] message_id={message_id} job_id={job_id} event=job_enqueued initial_status={initial_status}",
+            "debug",
+        )
 
     while time.monotonic() < deadline:
         resp = await client.get(url, headers=headers)
@@ -589,9 +605,17 @@ async def _poll_dispatch_job_result(
             raise DispatchError("Unauthorized: check X-API-Key")
         resp.raise_for_status()
 
+        body_preview = resp.text if len(resp.text) < 2000 else (resp.text[:2000] + "...<truncated>")
         job_data = resp.json() or {}
         status = str(job_data.get("status") or "").strip().lower()
-        log_and_print(f"[dispatch] job {job_id} status={status}", "debug")
+        dispatch_meta["job_id"] = job_id
+        dispatch_meta["poll_url"] = url
+        dispatch_meta["poll_http_status"] = resp.status_code
+        dispatch_meta["poll_body"] = body_preview
+        log_and_print(
+            f"[dispatch_trace] message_id={message_id} job_id={job_id} event=poll_result url={url} http_status={resp.status_code} body={body_preview}",
+            "debug",
+        )
 
         if status in {"done", "completed", "success", "succeeded"}:
             result_payload = job_data.get("result_payload")
@@ -650,13 +674,15 @@ async def has_active_orders(
                 await asyncio.sleep(0.5 * (attempt + 1))
     log_and_print("[has_active_orders] giving up, returning (False, None)", "error")
     return False, None
-def _fallback_result(message_id: str) -> DispatchResult:
+def _fallback_result(message_id: str, reason: str = "send_failed", dispatch_meta: Optional[Dict[str, Any]] = None) -> DispatchResult:
     """Fallback response to avoid returning None to callers."""
     return DispatchResult(
         message_id=message_id,
         extracted={},
-        actions=[Action(type="ignore", payload=None)],
-        decision=Decision(matches=False, confidence=0.0, reason="Fallback"),
+        actions=[],
+        decision=Decision(matches=False, confidence=0.0, reason=reason),
+        transport_status=reason,
+        dispatch_meta=dispatch_meta or {},
     )
 def _safe_action_type(a: Union[Action, Dict[str, Any], None]) -> Optional[str]:
     if a is None:
@@ -715,7 +741,7 @@ async def process_one_message_dispatcher(
     # Process messages sequentially using semaphore.
     async with processing_semaphore:
         try:
-            log_and_print(f"\u041e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f: {message_text}", "debug")
+            log_and_print(f"Обработка сообщения: {message_text}", "debug")
             md5_hash = hashlib.md5(uid_source.encode()).hexdigest()
             return await send_for_analysis(
                 message_id=md5_hash,
@@ -760,99 +786,164 @@ async def send_for_analysis(
         "Content-Type": "application/json",
         "X-Client": "viber-worker",
     }
-    log_and_print(f"[dispatch] POST {get_dispatch_url()}")
     log_and_print(
-        "[dispatch] headers: {{'X-API-Key': '***', 'Content-Type': 'application/json', 'X-Client': 'viber-worker'}}"
+        "[dispatch] headers: {{'X-API-Key': '***', 'Content-Type': 'application/json', 'X-Client': 'viber-worker'}}",
+        "debug",
     )
-    log_and_print(f"[dispatch] payload: {payload}")
+    log_and_print(f"[dispatch] payload message_id={message_id} chat_id={chat_id} sender={sender}", "debug")
 
     last_exc: Optional[Exception] = None
+    last_meta: Dict[str, Any] = {}
     for attempt in range(retries + 1):
+        ips = _get_ips()
+        current_ip = ips[ip_numbber % len(ips)] if ips else "127.0.0.1"
+        url = f"http://{current_ip}:8888/api/v1/dispatch/analyze"
+        dispatch_meta: Dict[str, Any] = {
+            "message_id": message_id,
+            "attempt": attempt + 1,
+            "url": url,
+            "ip": current_ip,
+            "request_ts": datetime.now(timezone.utc).isoformat(),
+        }
+        last_meta = dispatch_meta
         try:
             async with httpx.AsyncClient(timeout=timeout_s, follow_redirects=True) as client:
-                log_and_print(f"[dispatch] post to {get_dispatch_url()}", "debug")
-                resp = await client.post(get_dispatch_url(), json=payload, headers=headers)
-                log_and_print(f"[dispatch] status={resp.status_code}", "debug")
-
-                body_preview = (
-                    resp.text
-                    if len(resp.text) < 2000
-                    else (resp.text[:2000] + "...<truncated>")
+                log_and_print(
+                    f"[dispatch_trace] message_id={message_id} attempt={attempt+1}/{retries+1} ip={current_ip} url={url} event=post_start",
+                    "debug",
                 )
-                log_and_print(f"[dispatch] body: {body_preview}")
+                resp = await client.post(url, json=payload, headers=headers)
+                body_preview = resp.text if len(resp.text) < 2000 else (resp.text[:2000] + "...<truncated>")
+                dispatch_meta["post_http_status"] = resp.status_code
+                dispatch_meta["post_body"] = body_preview
+                log_and_print(
+                    f"[dispatch_trace] message_id={message_id} attempt={attempt+1}/{retries+1} ip={current_ip} url={url} "
+                    f"event=post_result http_status={resp.status_code} body={body_preview}",
+                    "debug",
+                )
 
                 if resp.status_code == 401:
                     raise DispatchError("Unauthorized: check X-API-Key")
 
                 data = resp.json() or {}
+                transport_status: Optional[str] = None
 
-                if resp.status_code == 409:
+                if resp.status_code == 202:
+                    job_id = str(data.get("job_id") or "").strip()
+                    enqueue_status = str(data.get("status") or "").strip().lower()
+                    if not job_id:
+                        raise DispatchError("Dispatch enqueue response missing job_id")
+                    dispatch_meta["job_id"] = job_id
+                    transport_status = "accepted"
+                    log_and_print(
+                        f"[dispatch_status] message_id={message_id} status=accepted ip={current_ip} job_id={job_id}",
+                        "info",
+                    )
+                    data = await _poll_dispatch_job_result(
+                        client,
+                        job_id,
+                        headers,
+                        timeout_s,
+                        message_id=message_id,
+                        poll_url=_dispatch_job_url(job_id),
+                        dispatch_meta=dispatch_meta,
+                        initial_status=enqueue_status,
+                    )
+                elif resp.status_code == 409:
                     detail = data.get("detail") if isinstance(data, dict) else None
-                    if isinstance(detail, dict) and str(detail.get("code") or "").strip().lower() == "already_processed":
-                        job_id = str(detail.get("job_id") or "").strip()
-                        job_status = str(detail.get("status") or "").strip().lower()
-                        if not job_id:
-                            raise DispatchError("Dispatch already_processed response missing job_id")
+                    if not isinstance(detail, dict):
+                        resp.raise_for_status()
+                    detail_code = str(detail.get("code") or "").strip().lower()
+                    job_id = str(detail.get("job_id") or "").strip()
+                    detail_status = str(detail.get("status") or "").strip().lower()
+                    if detail_code in {"already_processed", "already_processing"}:
+                        transport_status = detail_code
+                        dispatch_meta["job_id"] = job_id
                         log_and_print(
-                            f"[dispatch] already_processed message_id={message_id} job_id={job_id} status={job_status}",
+                            f"[dispatch_status] message_id={message_id} status={detail_code} ip={current_ip} job_id={job_id}",
                             "info",
                         )
-                        data = await _poll_dispatch_job_result(client, job_id, headers, timeout_s)
+                        if job_id:
+                            data = await _poll_dispatch_job_result(
+                                client,
+                                job_id,
+                                headers,
+                                timeout_s,
+                                message_id=message_id,
+                                poll_url=_dispatch_job_url(job_id),
+                                dispatch_meta=dispatch_meta,
+                                initial_status=detail_status,
+                            )
+                        else:
+                            return _fallback_result(
+                                message_id=message_id,
+                                reason="send_failed",
+                                dispatch_meta=dispatch_meta,
+                            )
                     else:
                         resp.raise_for_status()
                 else:
                     resp.raise_for_status()
-
-                # New async flow: analyze enqueues a job and returns 202 + job_id.
-                if resp.status_code == 202:
-                    job_id = str(data.get("job_id") or "").strip()
-                    job_status = str(data.get("status") or "").strip().lower()
-                    if not job_id:
-                        raise DispatchError("Dispatch enqueue response missing job_id")
-                    log_and_print(f"[dispatch] processing job_id={job_id} status={job_status}", "debug")
-                    data = await _poll_dispatch_job_result(client, job_id, headers, timeout_s)
+                    transport_status = f"http_{resp.status_code}"
 
                 try:
                     result = DispatchResult(**data)
                 except ValidationError as ve:
-                    log_and_print(f"[dispatch] ValidationError: {ve}", "error")
+                    log_and_print(f"[dispatch] ValidationError message_id={message_id}: {ve}", "error")
                     actions_raw = data.get("actions") or []
                     actions: List[Action] = []
                     for a in actions_raw:
                         if isinstance(a, dict):
-                            actions.append(
-                                Action(
-                                    type=a.get("type", "ignore"),
-                                    payload=a.get("payload"),
-                                )
-                            )
+                            actions.append(Action(type=a.get("type", "ignore"), payload=a.get("payload")))
                     result = DispatchResult(
                         message_id=data.get("message_id", message_id),
                         extracted=data.get("extracted") or {},
                         actions=actions,
                         decision=data.get("decision"),
+                        matched_contacts=data.get("matched_contacts") or [],
                     )
+
+                result.transport_status = transport_status or result.transport_status
+                meta = dict(result.dispatch_meta or {})
+                meta.update(dispatch_meta)
+                result.dispatch_meta = meta
                 return result
+        except httpx.TimeoutException as e:
+            last_exc = e
+            dispatch_meta["error_type"] = "timeout"
+            dispatch_meta["error"] = str(e)
+            log_and_print(
+                f"[dispatch_trace] message_id={message_id} attempt={attempt+1}/{retries+1} ip={current_ip} url={url} event=timeout error={e}",
+                "error",
+            )
+        except httpx.RequestError as e:
+            last_exc = e
+            dispatch_meta["error_type"] = "connection_error"
+            dispatch_meta["error"] = str(e)
+            log_and_print(
+                f"[dispatch_trace] message_id={message_id} attempt={attempt+1}/{retries+1} ip={current_ip} url={url} event=connection_error error={e}",
+                "error",
+            )
         except Exception as e:
             last_exc = e
-            ips = _get_ips()
-            current_ip = ips[ip_numbber % len(ips)] if ips else "no-ip-configured"
+            dispatch_meta["error_type"] = type(e).__name__
+            dispatch_meta["error"] = str(e)
             log_and_print(
-                f"[dispatch] attempt {attempt+1}/{retries+1} failed from {current_ip}: {e}", "error"
+                f"[dispatch_trace] message_id={message_id} attempt={attempt+1}/{retries+1} ip={current_ip} url={url} event=error error={e}",
+                "error",
             )
-            if ips:
-                ip_numbber = (ip_numbber + 1) % len(ips)
-                log_and_print(f"[dispatch] change ip to {ips[ip_numbber]}", "debug")
-            else:
-                log_and_print("[dispatch] IPS is empty in settings.json", "ERROR")
 
-            if attempt < retries:
-                await asyncio.sleep(0.7 * (attempt + 1))
-            else:
-                log_and_print("[dispatch] returning fallback result", "error")
-                return _fallback_result(message_id=message_id)
+        if ips:
+            ip_numbber = (ip_numbber + 1) % len(ips)
+            log_and_print(f"[dispatch] change ip to {ips[ip_numbber]}", "debug")
+        else:
+            log_and_print("[dispatch] IPS is empty in settings.json", "error")
 
-    raise DispatchError(f"Dispatch failed: {last_exc}")
+        if attempt < retries:
+            await asyncio.sleep(0.7 * (attempt + 1))
+
+    log_and_print(f"[dispatch_status] message_id={message_id} status=send_failed error={last_exc}", "info")
+    return _fallback_result(message_id=message_id, reason="send_failed", dispatch_meta=last_meta)
 
 def is_foto_message(scope):
     pos = gd.find_text_any(queries=["Копировать фото",],
@@ -949,7 +1040,7 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
         )
     else:
         pos = gd.click_text(
-            ["\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0442\u0435\u043a\u0441\u0442", "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435"],
+            ["Копировать текст", "Скопировать сообщение"],
             count_attempt_find=2,
             pause_attempt=2,
             lang="rus",
@@ -965,7 +1056,7 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
         if tp == "image":
 
             pos = gd.click_text(
-                ["\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0442\u0435\u043a\u0441\u0442", "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435"],
+                ["Копировать текст", "Скопировать сообщение"],
                 count_attempt_find=2,
                 pause_attempt=2,
                 lang="rus",
@@ -986,12 +1077,12 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
 
     if not pos:
 
-        log_and_print("[send_messages_from_y_mess] Not find \u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435", "debug")
+        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "debug")
 
         press_esq(window)
         return "is_foto"
 
-    log_and_print("[send_messages_from_y_mess] \u041f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f \u0441\u043a\u043e\u043f\u0456\u0439\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440 \u043e\u0431\u043c\u0456\u043d\u0443", "debug")
+    log_and_print("[send_messages_from_y_mess] Повідомлення скопійовано в буфер обміну", "debug")
     mark_message_copied()
     return pyperclip.paste()
 count_old_mess = 0
@@ -1028,8 +1119,7 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
 
                 if is_center_ok():
                     continue
-                else:
-                    return "repeat"
+                return "repeat"
 
             if text == "is_foto":
                 log_and_print("[send_messages_from_y_mess] Фото повідомлення", "debug")
@@ -1050,10 +1140,6 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
             if not _is_same_processed_message(text, s.old_text):
                 was_new_mess = True
                 count_old_mess = 0
-                log_and_print(
-                    f"[dispatch_status] message_id={msg_id} status=processing",
-                    "info",
-                )
                 _run_poll_hook()
                 resp = await process_one_message_dispatcher(
                     text, None,
@@ -1061,16 +1147,19 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                     s
                 )
                 log_and_print(
-                    f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}"
+                    f"[send_messages_from_y_mess] response from server: {resp.model_dump() if isinstance(resp, DispatchResult) else resp}",
+                    "debug",
                 )
+
                 action_type = None
                 viber_names = []
+                transport_status = str(getattr(resp, "transport_status", "") or "").strip().lower()
+                dispatch_meta = getattr(resp, "dispatch_meta", {}) or {}
 
                 if isinstance(resp, DispatchResult) and resp.actions:
                     first_action = resp.actions[0]
                     action_type = _safe_action_type(first_action)
-
-                    if hasattr(resp, "matched_contacts") and getattr(resp, "matched_contacts", None):
+                    if getattr(resp, "matched_contacts", None):
                         for mc in resp.matched_contacts or []:
                             if isinstance(mc, dict):
                                 name = mc.get("viber_contact_name")
@@ -1085,18 +1174,24 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                     and str(resp.decision.reason or "").strip().lower() == "fallback"
                 )
                 log_and_print(
-                    f"[send_messages_from_y_mess] action_type={action_type} matched_contacts={len(viber_names)} fallback={fallback_response}",
+                    f"[send_messages_from_y_mess] message_id={msg_id} transport_status={transport_status} action_type={action_type} matched_contacts={len(viber_names)} fallback={fallback_response} dispatch_meta={dispatch_meta}",
                     "debug",
                 )
-                if fallback_response:
+
+                if transport_status == "send_failed" or fallback_response:
                     log_and_print(
-                        f"[dispatch_status] message_id={msg_id} status=fallback ????????????????????????????????????",
+                        f"[dispatch_status] message_id={msg_id} status=send_failed ip={dispatch_meta.get('ip')} job_id={dispatch_meta.get('job_id')}",
                         "info",
                     )
                     continue
 
                 result = True
-                if action_type and action_type != "ignore":
+                if action_type == "ignore":
+                    log_and_print(
+                        f"[dispatch_status] message_id={msg_id} status=ignore ip={dispatch_meta.get('ip')} job_id={dispatch_meta.get('job_id')}",
+                        "info",
+                    )
+                elif action_type:
                     result = sendViberMessDispatherToCarrier(
                         viber_names, window, xRight, yRight, viber_channel, text, s, poll_hook=poll_hook
                     )
@@ -1112,19 +1207,20 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
 
                     if result:
                         log_and_print(
-                            f"[dispatch_status] message_id={msg_id} status=sent recipients={len(viber_names)} ++++++++++++++++++++++++++++++",
+                            f"[dispatch_status] message_id={msg_id} status=sent recipients={len(viber_names)} ip={dispatch_meta.get('ip')} job_id={dispatch_meta.get('job_id')}",
                             "info",
                         )
                     else:
                         log_and_print(
-                            f"[dispatch_status] message_id={msg_id} status=send_failed recipients={len(viber_names)}!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!",
+                            f"[dispatch_status] message_id={msg_id} status=send_failed recipients={len(viber_names)} ip={dispatch_meta.get('ip')} job_id={dispatch_meta.get('job_id')}",
                             "info",
                         )
                 else:
                     log_and_print(
-                        f"[dispatch_status] message_id={msg_id} status=ignore xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+                        f"[dispatch_status] message_id={msg_id} status=send_failed reason=no_confirmed_server_result ip={dispatch_meta.get('ip')} job_id={dispatch_meta.get('job_id')}",
                         "info",
                     )
+                    result = False
 
                 if result:
                     save_current_text(text)
@@ -1142,6 +1238,7 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                 if sending >= 2:
                     pass
     return was_new_mess
+
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
     base_scope = (740, 910, 1120, 1000)
@@ -1740,6 +1837,7 @@ def window_left(window):
     hwnd = window.handle
     win32gui.ShowWindow(hwnd, win32con.SW_MAXIMIZE)
     keyboard.send_keys('{LWIN down}{LEFT}{LWIN up}')
+
 
 
 
