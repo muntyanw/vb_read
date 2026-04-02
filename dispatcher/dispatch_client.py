@@ -1,5 +1,6 @@
 ﻿# viber_worker/dispatch_client.py
 import os
+import json
 from typing import Optional, Dict, Any, List, Union
 import asyncio
 import httpx
@@ -414,12 +415,120 @@ def mark_message_copied() -> None:
     global copied_message_counter, last_message_copy_monotonic
     copied_message_counter += 1
     last_message_copy_monotonic = time.monotonic()
-    log_and_print(f"[copy_watchdog] copied_message_counter={copied_message_counter}", "info")
+    log_and_print(f"[copy_watchdog] copied_message_counter={copied_message_counter}", "debug")
 def reset_copy_watchdog() -> None:
     global copied_message_counter, last_message_copy_monotonic
     copied_message_counter = 0
     last_message_copy_monotonic = time.monotonic()
-    log_and_print("[copy_watchdog] reset on worker start", "info")
+    log_and_print("[copy_watchdog] reset on worker start", "debug")
+
+
+def _forward_registry_path() -> Path:
+    raw = read_setting("dispatch_forward_status_file")
+    name = str(raw or "dispatch_forward_status.json").strip() or "dispatch_forward_status.json"
+    p = Path(name)
+    if not p.is_absolute():
+        p = Path(__file__).resolve().parents[1] / p
+    return p
+
+
+def _forward_in_progress_ttl_seconds() -> int:
+    try:
+        return max(30, int(read_setting("dispatch_forward_in_progress_ttl_seconds") or 300))
+    except Exception:
+        return 300
+
+
+def _forward_sent_ttl_seconds() -> int:
+    try:
+        return max(3600, int(read_setting("dispatch_forward_sent_ttl_seconds") or 604800))
+    except Exception:
+        return 604800
+
+
+def _normalize_forward_text(text: str) -> str:
+    return "\n".join(line.rstrip() for line in str(text or "").strip().splitlines())
+
+
+def _forward_registry_key(text: str, recipient: str) -> str:
+    normalized_text = _normalize_forward_text(text)
+    normalized_recipient = str(recipient or "").strip()
+    payload = f"{normalized_recipient}\n---\n{normalized_text}".encode("utf-8", errors="ignore")
+    return hashlib.sha1(payload).hexdigest()
+
+
+def _load_forward_registry() -> dict:
+    registry_path = _forward_registry_path()
+    if not registry_path.exists():
+        return {}
+    try:
+        data = json.loads(registry_path.read_text(encoding="utf-8"))
+        return data if isinstance(data, dict) else {}
+    except Exception as exc:
+        log_and_print(f"[forward_registry] load failed: {exc}", "error")
+        return {}
+
+
+def _save_forward_registry(data: dict) -> None:
+    registry_path = _forward_registry_path()
+    try:
+        registry_path.parent.mkdir(parents=True, exist_ok=True)
+        registry_path.write_text(json.dumps(data, ensure_ascii=False, indent=2, sort_keys=True), encoding="utf-8")
+    except Exception as exc:
+        log_and_print(f"[forward_registry] save failed: {exc}", "error")
+
+
+def _prune_forward_registry(data: dict) -> dict:
+    now = time.time()
+    sent_ttl = _forward_sent_ttl_seconds()
+    pruned = {}
+    for key, entry in (data or {}).items():
+        if not isinstance(entry, dict):
+            continue
+        updated_at = float(entry.get("updated_at") or 0.0)
+        age = now - updated_at if updated_at > 0 else float("inf")
+        if age > sent_ttl:
+            continue
+        pruned[key] = entry
+    return pruned
+
+
+def _get_forward_entry(text: str, recipient: str) -> dict | None:
+    data = _prune_forward_registry(_load_forward_registry())
+    if data:
+        _save_forward_registry(data)
+    entry = data.get(_forward_registry_key(text, recipient))
+    return entry if isinstance(entry, dict) else None
+
+
+def _set_forward_entry(text: str, recipient: str, status: str, note: str = "") -> None:
+    data = _prune_forward_registry(_load_forward_registry())
+    data[_forward_registry_key(text, recipient)] = {
+        "status": str(status).strip().lower(),
+        "updated_at": time.time(),
+        "recipient": str(recipient or "").strip(),
+        "text_hash": hashlib.sha1(_normalize_forward_text(text).encode("utf-8", errors="ignore")).hexdigest(),
+        "note": str(note or "")[:500],
+    }
+    _save_forward_registry(data)
+
+
+def _should_attempt_forward(text: str, recipient: str) -> tuple[bool, str]:
+    entry = _get_forward_entry(text, recipient)
+    if not entry:
+        return True, "new"
+    status = str(entry.get("status") or "").strip().lower()
+    updated_at = float(entry.get("updated_at") or 0.0)
+    age = time.time() - updated_at if updated_at > 0 else float("inf")
+    if status == "sent":
+        return False, "sent"
+    if status == "in_progress":
+        if age < _forward_in_progress_ttl_seconds():
+            return False, f"in_progress_fresh:{int(age)}s"
+        return True, f"in_progress_stale:{int(age)}s"
+    if status == "failed":
+        return True, f"failed_retry:{int(age)}s"
+    return True, f"unknown_status:{status or 'empty'}"
 # ---- Client-side models for server response ----
 class Action(BaseModel):
     type: str
@@ -571,7 +680,7 @@ async def process_one_message_dispatcher(
     # Process messages sequentially using semaphore.
     async with processing_semaphore:
         try:
-            log_and_print(f"Обработка сообщения: {message_text}", "info")
+            log_and_print(f"\u041e\u0431\u0440\u0430\u0431\u043e\u0442\u043a\u0430 \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u044f: {message_text}", "debug")
             md5_hash = hashlib.md5(uid_source.encode()).hexdigest()
             return await send_for_analysis(
                 message_id=md5_hash,
@@ -640,8 +749,24 @@ async def send_for_analysis(
                 if resp.status_code == 401:
                     raise DispatchError("Unauthorized: check X-API-Key")
 
-                resp.raise_for_status()
                 data = resp.json() or {}
+
+                if resp.status_code == 409:
+                    detail = data.get("detail") if isinstance(data, dict) else None
+                    if isinstance(detail, dict) and str(detail.get("code") or "").strip().lower() == "already_processed":
+                        job_id = str(detail.get("job_id") or "").strip()
+                        job_status = str(detail.get("status") or "").strip().lower()
+                        if not job_id:
+                            raise DispatchError("Dispatch already_processed response missing job_id")
+                        log_and_print(
+                            f"[dispatch] already_processed message_id={message_id} job_id={job_id} status={job_status}",
+                            "info",
+                        )
+                        data = await _poll_dispatch_job_result(client, job_id, headers, timeout_s)
+                    else:
+                        resp.raise_for_status()
+                else:
+                    resp.raise_for_status()
 
                 # New async flow: analyze enqueues a job and returns 202 + job_id.
                 if resp.status_code == 202:
@@ -649,7 +774,7 @@ async def send_for_analysis(
                     job_status = str(data.get("status") or "").strip().lower()
                     if not job_id:
                         raise DispatchError("Dispatch enqueue response missing job_id")
-                    log_and_print(f"[dispatch] processing job_id={job_id} status={job_status}", "info")
+                    log_and_print(f"[dispatch] processing job_id={job_id} status={job_status}", "debug")
                     data = await _poll_dispatch_job_result(client, job_id, headers, timeout_s)
 
                 try:
@@ -682,7 +807,7 @@ async def send_for_analysis(
             )
             if ips:
                 ip_numbber = (ip_numbber + 1) % len(ips)
-                log_and_print(f"[dispatch] change ip to {ips[ip_numbber]}", "INFO")
+                log_and_print(f"[dispatch] change ip to {ips[ip_numbber]}", "debug")
             else:
                 log_and_print("[dispatch] IPS is empty in settings.json", "ERROR")
 
@@ -759,7 +884,7 @@ def press_esq(window):
     gd.pause(0.4)
     pag.keyUp("esc")
     gd.pause(0.4)
-    log_and_print("[press_esq] press esq", "INFO")
+    log_and_print("[press_esq] press esq", "debug")
     # gd.right_click(
     #     s.search_board_mess_x_start + s.x_offset_out_mess,
     #     s.search_board_mess_y_start + 10,
@@ -768,14 +893,14 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
     #global count_y_mess_empty
     if is_debug is None:
         is_debug = _ui_debug()
-    
+
     scope=(
             int(x - s.width_menu),
             y - int(s.height_menu),
             x + int(s.width_menu),
             y + int(s.height_menu),
     )
-    
+
     gd.pause(1)
     pos = False
     if tp == "image":
@@ -789,7 +914,7 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
         )
     else:
         pos = gd.click_text(
-            ["Копировать текст", "Скопировать сообщение"],
+            ["\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0442\u0435\u043a\u0441\u0442", "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435"],
             count_attempt_find=2,
             pause_attempt=2,
             lang="rus",
@@ -798,14 +923,14 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
             threshold=0.8,
             occurrence=1,
         )
-    
-    log_and_print(f"pos = {pos}", "INFO")
+
+    log_and_print(f"pos = {pos}", "debug")
     if not pos:
-        
+
         if tp == "image":
-        
+
             pos = gd.click_text(
-                ["Копировать текст", "Скопировать сообщение"],
+                ["\u041a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0442\u0435\u043a\u0441\u0442", "\u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435"],
                 count_attempt_find=2,
                 pause_attempt=2,
                 lang="rus",
@@ -823,32 +948,32 @@ def click_copy_text(tp, window, s, x, y, is_debug=None):
                 multiscale=True,
                 is_debug=is_debug,
             )
-            
+
     if not pos:
-        
-        log_and_print("[send_messages_from_y_mess] Not find Скопировать сообщение", "INFO")
-        
-        press_esq(window)    
-        #if is_foto_message(scope) or is_link(scope) or is_center_continue():
-    
-        #count_y_mess_empty = count_y_mess_empty + 1
-        
-        #log_and_print("[send_messages_from_y_mess] right click empty place", "INFO")
+
+        log_and_print("[send_messages_from_y_mess] Not find \u0421\u043a\u043e\u043f\u0438\u0440\u043e\u0432\u0430\u0442\u044c \u0441\u043e\u043e\u0431\u0449\u0435\u043d\u0438\u0435", "debug")
+
+        press_esq(window)
         return "is_foto"
-        
-        #else:
-        #    press_esq(window)
-        #    return None
-    log_and_print("[send_messages_from_y_mess] Повідомлення скопійовано в буфер обміну", "INFO")
+
+    log_and_print("[send_messages_from_y_mess] \u041f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f \u0441\u043a\u043e\u043f\u0456\u0439\u043e\u0432\u0430\u043d\u043e \u0432 \u0431\u0443\u0444\u0435\u0440 \u043e\u0431\u043c\u0456\u043d\u0443", "debug")
     mark_message_copied()
     return pyperclip.paste()
 count_old_mess = 0
-async def send_messages_from_y_mess(window, viber_channel, s):
+async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
     window.set_focus()
+    def _run_poll_hook():
+        if poll_hook is not None:
+            try:
+                poll_hook()
+            except Exception as exc:
+                log_and_print(f"[send_messages_from_y_mess] poll hook error: {exc}", "error")
+
     sending = 0
     was_new_mess = False
     global count_old_mess
     for x, y in s.y_mess:
+        _run_poll_hook()
         if y:
             log_and_print(f"[send_messages_from_y_mess] Меседж y = {y}")
             window.set_focus()
@@ -856,35 +981,38 @@ async def send_messages_from_y_mess(window, viber_channel, s):
             y = y + s.search_board_mess_y_start
             xRight = x - 140
             yRight = y - 10
+            _run_poll_hook()
             gd.right_click(xRight, yRight)
             log_and_print(
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
             text = click_copy_text("text", window, s, x, y, is_debug=_ui_debug())
-            
             if len(text) == 1:
                 continue
-    
+
             if text == "is_foto":
-                log_and_print("[send_messages_from_y_mess] Фото повідомлення", "INFO")
+                log_and_print("[send_messages_from_y_mess] \u0424\u043e\u0442\u043e \u043f\u043e\u0432\u0456\u0434\u043e\u043c\u043b\u0435\u043d\u043d\u044f", "debug")
                 continue
-            
+
             if text is None:
                 log_and_print(
-                    "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий", "INFO"
+                    "[send_messages_from_y_mess] \u041d\u0435 \u0432\u0434\u0430\u043b\u043e\u0441\u044f \u0441\u043a\u043e\u043f\u0456\u044e\u0432\u0430\u0442\u0438 \u043c\u0435\u0441\u0435\u0434\u0436, \u0431\u0443\u0444\u0435\u0440 \u043e\u0431\u043c\u0456\u043d\u0443 \u043f\u0443\u0441\u0442\u0438\u0439",
+                    "debug",
                 )
-                
+
                 if is_center_ok():
                     continue
                 else:
                     return "repeat"
-                
+
             if not text_includes_fast(text, s.old_text, 0.7):
                 was_new_mess = True
                 count_old_mess = 0
                 log_and_print(
-                    "[send_messages_from_y_mess] Відправка та збереження нового сповіщення для аналізу", "INFO"
+                    "[send_messages_from_y_mess] \u0412\u0456\u0434\u043f\u0440\u0430\u0432\u043a\u0430 \u0442\u0430 \u0437\u0431\u0435\u0440\u0435\u0436\u0435\u043d\u043d\u044f \u043d\u043e\u0432\u043e\u0433\u043e \u0441\u043f\u043e\u0432\u0456\u0449\u0435\u043d\u043d\u044f \u0434\u043b\u044f \u0430\u043d\u0430\u043b\u0456\u0437\u0443",
+                    "debug",
                 )
+                _run_poll_hook()
                 resp = await process_one_message_dispatcher(
                     text, None,
                     viber_channel["name_viber_channel"],
@@ -928,9 +1056,9 @@ async def send_messages_from_y_mess(window, viber_channel, s):
 
                 result = True
                 if action_type and action_type != "ignore":
-                    log_and_print("++++++++++++++++++++++++++++++++++++++++++++++", "INFO")
+                    log_and_print("++++++++++++++++++++++++++++++++++++++++++++++", "debug")
                     result = sendViberMessDispatherToCarrier(
-                        viber_names, window, xRight, yRight, viber_channel, text, s
+                        viber_names, window, xRight, yRight, viber_channel, text, s, poll_hook=poll_hook
                     )
                     if not result:
                         press_esq(window)
@@ -939,10 +1067,10 @@ async def send_messages_from_y_mess(window, viber_channel, s):
                             s.search_board_mess_y_start + 10,
                         )
                         result = sendViberMessDispatherToCarrier(
-                        viber_names, window, xRight, yRight, viber_channel, text, s
+                        viber_names, window, xRight, yRight, viber_channel, text, s, poll_hook=poll_hook
                     )
                 else:
-                    log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "INFO")
+                    log_and_print("xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx", "debug")
                 if result:
                     save_current_text(text)
                     s.old_text = load_previous_text()
@@ -969,7 +1097,7 @@ def clickLastMess(window, name_viber_channel):
             log_and_print(f"[last_mess] search snapshot: {debug_before_path}", "DEBUG")
     match = _find_last_mess_match(base_scope, name_viber_channel)
     if not match:
-        log_and_print("Not find icon LastMessage", "INFO")
+        log_and_print("Not find icon LastMessage", "debug")
         if _ui_debug():
             debug_after_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_no_candidate")
             if debug_after_path:
@@ -997,10 +1125,10 @@ def clickLastMess(window, name_viber_channel):
         "DEBUG",
     )
     if not bool(match.get("clickable", True)):
-        log_and_print("Not find icon LastMessage (best candidate below tm threshold)", "INFO")
+        log_and_print("Not find icon LastMessage (best candidate below tm threshold)", "debug")
         return False
     gd.click(int(click_pos[0]), int(click_pos[1]))
-    log_and_print("Click down to last messages", "INFO")
+    log_and_print("Click down to last messages", "debug")
     return True
 def moveToContactsAndScrollUp():
     log_and_print("[moveToContactsAndScrollUp] scroll up contacts")
@@ -1035,38 +1163,41 @@ def klickViberChannel(tp, window, clickLastMessBool, viber_channel):
     channel_name = viber_channel["name_viber_channel"]
     log_and_print(f"start click {channel_name}", "DEBUG")
     press_esq(window)
-    
+
+    pos = None
     if tp == "image":
         pos = click_viber_channel_image(channel_name)
-        
-        if not pos:       
-            log_and_print(f"Not find image chat {channel_name}", "INFO")
-                
+        if not pos:
+            log_and_print(f"Not find image chat {channel_name}", "debug")
             pos = click_viber_channel_text(viber_channel)
-            
-            if not pos:  
-                log_and_print(f"Not find text name chat {channel_name}", "INFO")
-            
-        
+            if not pos:
+                log_and_print(f"Not find text name chat {channel_name}", "debug")
     else:
         pos = click_viber_channel_text(viber_channel)
-        
-        if not pos:       
-            log_and_print(f"Not find text name chat {channel_name}", "INFO")
-                
+        if not pos:
+            log_and_print(f"Not find text name chat {channel_name}", "debug")
             pos = click_viber_channel_image(channel_name)
-            
-            if not pos:  
-                log_and_print(f"Not find image chat {channel_name}", "INFO")
-            
+            if not pos:
+                log_and_print(f"Not find image chat {channel_name}", "debug")
+
+    if not pos:
+        log_and_print(f"[klickViberChannel] channel open failed: {channel_name}", "error")
+        return False
+
     log_and_print(f"Click name chat {channel_name}")
     if clickLastMessBool:
         clickLastMess(window, channel_name)
-        
+
     moveToContactsAndScrollUp()
-    
     return True
-def findMessage(window, x, y, viber_channel, text, s):
+def findMessage(window, x, y, viber_channel, text, s, poll_hook=None):
+    def _run_poll_hook():
+        if poll_hook is not None:
+            try:
+                poll_hook()
+            except Exception as exc:
+                log_and_print(f"[findMessage] poll hook error: {exc}", "error")
+
     log_and_print(f"[findMessage] text = {text}")
     gd.right_click(x, y)
     gd.pause(0.5)
@@ -1081,10 +1212,12 @@ def findMessage(window, x, y, viber_channel, text, s):
         count_attempt_find = 0
         count_attempt_find_max = 3
         while True:
+            _run_poll_hook()
             window.set_focus()
             fill_y_mess(window, viber_channel, s)
             if len(s.y_mess) > 0:
                 for x, y in s.y_mess:
+                    _run_poll_hook()
                     if y:
                         log_and_print(f"[findMessage] Меседж y = {y}")
                         window.set_focus()
@@ -1120,9 +1253,48 @@ def findMessage(window, x, y, viber_channel, text, s):
                     s.search_board_mess_x_start + s.x_offset_out_mess,
                     s.search_board_mess_y_start + 10,
                 )
-def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, text, s):
+def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, text, s, poll_hook=None):
+    def _run_poll_hook():
+        if poll_hook is not None:
+            try:
+                poll_hook()
+            except Exception as exc:
+                log_and_print(f"[sendViberMessDispatherToCarrier] poll hook error: {exc}", "error")
+
     is_debug = _ui_debug()
-    resultFind = findMessage(window, x, y, viber_channel, text, s)
+    pending_names = []
+    skipped_sent = []
+    skipped_in_progress = []
+    for viber_name in viber_names:
+        _run_poll_hook()
+        should_send, reason = _should_attempt_forward(text, viber_name)
+        log_and_print(f"[forward_registry] recipient={viber_name} decision={should_send} reason={reason}", "debug")
+        if should_send:
+            pending_names.append(viber_name)
+        elif reason.startswith("sent"):
+            skipped_sent.append(viber_name)
+        else:
+            skipped_in_progress.append(viber_name)
+
+    if not pending_names:
+        if skipped_in_progress:
+            log_and_print(
+                f"[forward_registry] all recipients blocked by fresh in_progress; retry later recipients={skipped_in_progress}",
+                "warning",
+            )
+            return "repeat"
+        if skipped_sent:
+            log_and_print(
+                f"[forward_registry] all recipients already sent; skip resend recipients={skipped_sent}",
+                "info",
+            )
+            save_current_text(text)
+            s.old_text = load_previous_text()
+            return True
+        return False
+
+    _run_poll_hook()
+    resultFind = findMessage(window, x, y, viber_channel, text, s, poll_hook=poll_hook)
     if resultFind:
         x, y = resultFind
     else:
@@ -1143,61 +1315,68 @@ def sendViberMessDispatherToCarrier(viber_names, window, x, y, viber_channel, te
         log_and_print("Not find menu item Переслать")
         return False
     log_and_print("Click Переслать")
-    for idx, viber_name in enumerate(viber_names):
-        log_and_print(f"viber_name = {viber_name}")
-        
-        first_name = viber_name.split()[0]
-   
-        pos = gd.find_image(
-            "find.png", scope=(320, 320, 380, 380), multiscale=True, is_debug=is_debug
-        )
-        if not pos:
-            log_and_print("Not find field find in resend")
-            return False
-    
-        gd.click(pos[0] + 100, pos[1] - 10)
-        log_and_print("Click field find")
-        clear_before_input = (idx == 0)
-        if not _set_and_verify_resend_search_value(viber_name, clear_before_input=clear_before_input):
-            log_and_print(f"[resend] search field fill failed for {viber_name}", "ERROR")
-            return "repeat"
-        gd.pause(0.4)
+
+    selected_names = []
+    try:
+        for idx, viber_name in enumerate(pending_names):
+            _run_poll_hook()
+            log_and_print(f"viber_name = {viber_name}")
+            pos = gd.find_image(
+                "find.png", scope=(320, 320, 380, 380), multiscale=True, is_debug=is_debug
+            )
+            if not pos:
+                log_and_print("Not find field find in resend")
+                raise RuntimeError("Not find field find in resend")
+
+            gd.click(pos[0] + 100, pos[1] - 10)
+            log_and_print("Click field find")
+            clear_before_input = (idx == 0)
+            if not _set_and_verify_resend_search_value(viber_name, clear_before_input=clear_before_input):
+                log_and_print(f"[resend] search field fill failed for {viber_name}", "ERROR")
+                raise RuntimeError(f"search field fill failed for {viber_name}")
+            gd.pause(0.4)
+            if not gd.click_image(
+                "select.png",
+                scope=(580, 400, 940, 620),
+                confidence=0.97,
+                count_click=1,
+                multiscale=False,
+                is_debug=_ui_debug(),
+            ):
+                log_and_print(f"Not find NameViberCarrier  {viber_name}")
+                raise RuntimeError(f"Not find NameViberCarrier {viber_name}")
+            _set_forward_entry(text, viber_name, "in_progress", note="recipient selected in resend dialog")
+            selected_names.append(viber_name)
+            log_and_print(f"click name chat {viber_name}")
+            gd.pause(1)
+
+        _run_poll_hook()
         if not gd.click_image(
-            "select.png",
-            scope=(580, 400, 940, 620),
-            confidence=0.97,
+            "resend.png",
+            scope=(460, 730, 640, 810),
+            confidence=0.5,
             count_click=1,
-            multiscale=False,
             is_debug=_ui_debug(),
-        ): 
-        #if not gd.click_text(
-        #    [first_name],
-        #    count_attempt_find=2,
-        #    pause_attempt=4,
-        #    lang="ukr",
-        #    scope=(pos[0], pos[0] + 40, pos[0] + 300, pos[0] + 200),
-        #    is_debug=_ui_debug(),
-        #    threshold=0.5,
-        #    occurrence=1,
-        #):
-            log_and_print(f"Not find NameViberCarrier  {viber_name}")
-            return "repeat"
-        log_and_print(f"click name chat {viber_name}")
-        gd.pause(1)
-    if not gd.click_image(
-        "resend.png",
-        scope=(460, 730, 640, 810),
-        confidence=0.5,
-        count_click=1,
-        is_debug=_ui_debug(),
-    ):
-        log_and_print("Not find button resend")
+        ):
+            log_and_print("Not find button resend")
+            raise RuntimeError("Not find button resend")
+
+        for viber_name in selected_names:
+            _set_forward_entry(text, viber_name, "sent", note="resend button clicked")
+        log_and_print(f"click button resend success recipients={selected_names}", "info")
+        save_current_text(text)
+        s.old_text = load_previous_text()
+        klickViberChannel("image", window, True, viber_channel)
+        return True
+    except Exception as exc:
+        for viber_name in selected_names:
+            _set_forward_entry(text, viber_name, "failed", note=str(exc))
+        if selected_names:
+            log_and_print(
+                f"[forward_registry] marked failed recipients={selected_names} reason={exc}",
+                "warning",
+            )
         return "repeat"
-    log_and_print("click button resend success")
-    save_current_text(text)
-    s.old_text = load_previous_text()
-    klickViberChannel("image", window, True, viber_channel)
-    return True
 def fill_y_mess(window, viber_channel, s):
     s.y_mess = []
     window.set_focus()
@@ -1228,7 +1407,7 @@ def fill_y_mess(window, viber_channel, s):
     s.y_mess = [(coord[0], coord[1]) for coord in coordinates]
     log_and_print(f"s.y_mess = {s.y_mess}")
 def click_close_hitlite():
-    log_and_print("Find hitlite", "INFO")
+    log_and_print("Find hitlite", "debug")
     if not gd.click_image(
         "close.png",
         scope=(750, 945, 800, 990),
@@ -1239,12 +1418,12 @@ def click_close_hitlite():
         plus_y=6,
         is_debug=_ui_debug(),
     ):
-        log_and_print("Not find icon close", "INFO")
+        log_and_print("Not find icon close", "debug")
         return False
-    log_and_print("Find success hitlite and click close", "INFO")
+    log_and_print("Find success hitlite and click close", "debug")
     return True
 def click_folder():
-    log_and_print("Find button folder", "INFO")
+    log_and_print("Find button folder", "debug")
     if not gd.click_image(
         "folder.png",
         scope=(66, 154, 175, 207),
@@ -1253,12 +1432,12 @@ def click_folder():
         multiscale=True,
         is_debug=_ui_debug(),
     ):
-        log_and_print("Not find button folder", "INFO")
+        log_and_print("Not find button folder", "debug")
         return False
-    log_and_print("Find success button folder and click", "INFO")
+    log_and_print("Find success button folder and click", "debug")
     return True
 def click_close_image():
-    log_and_print("Find hitlite", "INFO")
+    log_and_print("Find hitlite", "debug")
     if not gd.click_image(
         "close_image.png",
         scope=(930, 40, 1080, 100),
@@ -1269,13 +1448,13 @@ def click_close_image():
         plus_y=6,
         is_debug=_ui_debug(),
     ):
-        log_and_print("Not find icon close image", "INFO")
+        log_and_print("Not find icon close image", "debug")
         return False
     
-    log_and_print("Find success image close and click close", "INFO")
+    log_and_print("Find success image close and click close", "debug")
     return True
 def click_exist_mess(window, viber_channel):
-    log_and_print("Find exist mrssages", "INFO")
+    log_and_print("Find exist mrssages", "debug")
     
     for number in range(5):
         if not gd.click_image(
@@ -1288,18 +1467,18 @@ def click_exist_mess(window, viber_channel):
             plus_y=0,
             is_debug=_ui_debug(),
         ):
-            log_and_print(f"Not find exist mrssages{number}", "INFO")
+            log_and_print(f"Not find exist mrssages{number}", "debug")
             
         else:
-            log_and_print("Success find and click images exist messages", "INFO")
+            log_and_print("Success find and click images exist messages", "debug")
             
             clickLastMess(window, viber_channel["name_viber_channel"])
             return True
         
-    log_and_print("Not find images exist messages", "INFO")
+    log_and_print("Not find images exist messages", "debug")
     return False
 def click_close_info():
-    log_and_print("Find info", "INFO")
+    log_and_print("Find info", "debug")
     if not gd.click_image(
         "info.png",
         scope=(720, 70, 800, 120),
@@ -1310,12 +1489,12 @@ def click_close_info():
         multiscale=True,
         is_debug=_ui_debug(),
     ):
-        log_and_print("Not find icon close info, attempt 2", "INFO")
+        log_and_print("Not find icon close info, attempt 2", "debug")
         
-    log_and_print("Find success image close info and click", "INFO")
+    log_and_print("Find success image close info and click", "debug")
     return True
 def click_open_info():
-    log_and_print("Find info", "INFO")
+    log_and_print("Find info", "debug")
     if not gd.click_image(
         "info.png",
         scope=(1050, 70, 1100, 120),
@@ -1324,7 +1503,7 @@ def click_open_info():
         multiscale=True,
         is_debug=_ui_debug(),
     ):
-        log_and_print("Not find icon open info, attempt 2", "INFO")
+        log_and_print("Not find icon open info, attempt 2", "debug")
         if not gd.click_image(
         "info.png",
         scope=(910, 70, 950, 120),
@@ -1334,13 +1513,13 @@ def click_open_info():
         is_debug=_ui_debug(),
         ):
             
-            log_and_print("Not find icon open info atte,pt2", "INFO")
+            log_and_print("Not find icon open info atte,pt2", "debug")
             return False
         
-    log_and_print("Find success image open info and click", "INFO")
+    log_and_print("Find success image open info and click", "debug")
     return True
 def click_cancel_window_save_as():
-    log_and_print("Find window_save_as", "INFO")
+    log_and_print("Find window_save_as", "debug")
     if not gd.click_image(
         "cancel.png",
         scope=(800, 500, 1060, 580),
@@ -1349,7 +1528,7 @@ def click_cancel_window_save_as():
         multiscale=True,
         is_debug=_ui_debug(),
     ):
-        log_and_print("Not find window_save_as - attempt 2", "INFO")
+        log_and_print("Not find window_save_as - attempt 2", "debug")
         if not gd.click_image(
             "cancel2.png",
             scope=(800, 500, 1060, 580),
@@ -1358,7 +1537,7 @@ def click_cancel_window_save_as():
             multiscale=True,
             is_debug=_ui_debug(),
         ):
-            log_and_print("Not find window_save_as - attempt 3", "INFO")
+            log_and_print("Not find window_save_as - attempt 3", "debug")
             if not gd.click_image(
                 "cancel_close.png",
                 scope=(800, 20, 970, 100),
@@ -1368,13 +1547,13 @@ def click_cancel_window_save_as():
                 is_debug=_ui_debug(),
                 ):
                     
-                    log_and_print("Not find window_save_as attempt2", "INFO")
+                    log_and_print("Not find window_save_as attempt2", "debug")
                     return False
         
-    log_and_print("Find success window_save_as and click", "INFO")
+    log_and_print("Find success window_save_as and click", "debug")
     return True
 async def processViberMess(
-    window, s, count_scroll_up, count_scroll_down, pause_cycle_read
+    window, s, count_scroll_up, count_scroll_down, pause_cycle_read, poll_hook=None
 ):
     global count_y_mess_empty
     empty_send_count = 0
@@ -1387,10 +1566,10 @@ async def processViberMess(
     click_close_info()
     click_cancel_window_save_as()
     if not klickViberChannel("image",window, True, viber_channel):
-                log_and_print(f"Not find chat {viber_channel['name_viber_channel']}", "INFO")
+                log_and_print(f"Not find chat {viber_channel['name_viber_channel']}", "debug")
                 return None
             
-    log_and_print(f"click chat {viber_channel['name_viber_channel']}", "INFO")
+    log_and_print(f"click chat {viber_channel['name_viber_channel']}", "debug")
     gd.right_click(
         s.search_board_mess_x_start + s.x_offset_out_mess,
         s.search_board_mess_y_start + 10,
@@ -1399,6 +1578,11 @@ async def processViberMess(
     break_flag = False
     for i in range(count_repeat):
         while True:
+            if poll_hook is not None:
+                try:
+                    poll_hook()
+                except Exception as exc:
+                    log_and_print(f"[processViberMess] poll hook error: {exc}", "error")
             copy_stall_restart_seconds = int(read_setting("copy_stall_restart_seconds") or 3600)
             if copy_stall_restart_seconds > 0:
                 idle_seconds = time.monotonic() - last_message_copy_monotonic
@@ -1409,7 +1593,7 @@ async def processViberMess(
                     )
             # Keep group list pane in expected state at the beginning of each reader loop.
             click_folder()
-            log_and_print(f"empty_send_count: {empty_send_count}", "INFO")
+            log_and_print(f"empty_send_count: {empty_send_count}", "debug")
             if empty_send_count > 4:
                 window_top_focus(window)
                 window_left(window)
@@ -1436,11 +1620,11 @@ async def processViberMess(
                     else:
                         numberViberChannel = numberViberChannel + 1
                     
-                    log_and_print(f"empty_send_count > 10 change channel to : {s.viber_channels[numberViberChannel]}", "INFO")
+                    log_and_print(f"empty_send_count > 10 change channel to : {s.viber_channels[numberViberChannel]}", "debug")
                     viber_channel = s.viber_channels[numberViberChannel]
                 
                     if klickViberChannel("image", window, True, viber_channel):
-                        log_and_print(f"Not find chat {viber_channel['name_viber_channel']}", "INFO")
+                        log_and_print(f"Not find chat {viber_channel['name_viber_channel']}", "debug")
                         
                         empty_send_count = 0
                 
@@ -1450,8 +1634,8 @@ async def processViberMess(
                 
             fill_y_mess(window, viber_channel, s)
             if len(s.y_mess) > 0:
-                was_send = await send_messages_from_y_mess(window, viber_channel, s)
-                log_and_print(f"was_send: {was_send}", "INFO")
+                was_send = await send_messages_from_y_mess(window, viber_channel, s, poll_hook=poll_hook)
+                log_and_print(f"was_send: {was_send}", "debug")
                 if was_send != "repeat":
                     if was_send:
                         empty_send_count = 0
@@ -1481,10 +1665,10 @@ async def processViberMess(
         if break_flag:
             break
         ctypes.windll.user32.LockWindowUpdate(0)
-        log_and_print(f"count_y_mess_empty = {count_y_mess_empty}")
+        log_and_print(f"count_y_mess_empty = {count_y_mess_empty}", "debug")
     window_top_focus(window)
     press_esq(window)
-    log_and_print(f"pause = {read_setting('pause_read_messages_second')}")
+    log_and_print(f"pause = {read_setting('pause_read_messages_second')}", "debug")
     
 def window_top_focus(window):
     

@@ -229,7 +229,6 @@ async def main():
     last_settings_reload_at = time.monotonic()
 
     gd.ensure_layout()
-    periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config())
     personal_config = load_personal_broadcast_config()
     if personal_config.processing_mode == "by_positions":
         personal_sender = PersonalBroadcastPositionSender(personal_config)
@@ -237,6 +236,7 @@ async def main():
         personal_sender = PersonalBroadcastScrollNamesSender(personal_config)
     else:
         personal_sender = PersonalBroadcastSender(personal_config)
+    periodic_sender = PeriodicBroadcastSender(load_periodic_broadcast_config(), personal_sender=personal_sender)
     server_sender = ServerDispatcherSender(load_server_dispatcher_config(), personal_sender=personal_sender)
 
     def stop_requested():
@@ -287,6 +287,7 @@ async def main():
                     )
                 else:
                     personal_sender.update_config(new_personal_config)
+                periodic_sender.set_personal_sender(personal_sender)
                 server_sender.set_personal_sender(personal_sender)
                 log_and_print(
                     f"[pwa] settings reloaded; mode={runtime_settings['work_mode']}",
@@ -306,6 +307,7 @@ async def main():
                     runtime_settings["count_scroll_up"],
                     runtime_settings["count_scroll_down"],
                     runtime_settings["pause_cycle_read"],
+                    poll_hook=lambda: server_sender.send_if_due(window, s),
                 )
 
     while True:

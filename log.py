@@ -12,6 +12,10 @@ def _configure_third_party_loggers() -> None:
     logging.getLogger("matplotlib").setLevel(logging.WARNING)
     logging.getLogger("matplotlib.font_manager").setLevel(logging.WARNING)
     logging.getLogger("PIL").setLevel(logging.WARNING)
+    logging.getLogger("httpx").setLevel(logging.WARNING)
+    logging.getLogger("httpcore").setLevel(logging.WARNING)
+    logging.getLogger("urllib3").setLevel(logging.WARNING)
+    logging.getLogger("requests").setLevel(logging.WARNING)
 
 logging.basicConfig(
     level=logging.INFO,
@@ -30,13 +34,21 @@ def set_debug_mode(enabled: bool) -> None:
     logging.getLogger().setLevel(logging.DEBUG if DEBUG_MODE else logging.INFO)
     _configure_third_party_loggers()
     if not _SESSION_LOGGED:
-        logging.info(f"[log] session_start run_id={RUN_ID}")
+        logging.debug(f"[log] session_start run_id={RUN_ID}")
         _SESSION_LOGGED = True
-    logging.info(f"[log] run_id={RUN_ID} debug_logs_mode={'on' if DEBUG_MODE else 'off'}")
+    logging.debug(f"[log] run_id={RUN_ID} debug_logs_mode={'on' if DEBUG_MODE else 'off'}")
 
 
-def log_and_print(message: str, level: str = "debug"):
-    level = level.lower()
+def log_and_print(message: str, level: str = "debug", *extra):
+    if extra:
+        try:
+            message = " ".join([str(message), str(level), *[str(x) for x in extra]])
+            level = "warning"
+            logging.warning(f"[log] extra positional args passed to log_and_print; coerced message={message}")
+        except Exception:
+            message = str(message)
+            level = "warning"
+    level = str(level).lower()
     now = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     if level in ("info", "warning", "error", "critical") or (level == "debug" and DEBUG_MODE):
@@ -52,3 +64,5 @@ def log_and_print(message: str, level: str = "debug"):
         logging.critical(message)
     elif level == "debug":
         logging.debug(message)
+    else:
+        logging.info(message)

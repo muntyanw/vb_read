@@ -80,7 +80,7 @@ class PersonalBroadcastSender:
         self._exceptions_cache: set[str] = set()
         self._exceptions_cache_mtime: float | None = None
         self._exceptions_cache_file: str | None = None
-        log_and_print("[personal_broadcast] initialized", "info")
+        log_and_print("[personal_broadcast] initialized", "debug")
 
     def update_config(self, config: PersonalBroadcastConfig) -> None:
         sent_file_changed = self._config.sent_names_file != config.sent_names_file
@@ -395,7 +395,7 @@ class PersonalBroadcastSender:
             gd.pause(1.5)
             step += 1
 
-        log_and_print(f"[personal_broadcast] no more candidates in {channel_name}", "info")
+        log_and_print(f"[personal_broadcast] no more candidates in {channel_name}", "debug")
         self._back_to_group(window)
         return had_candidates_total
 
@@ -1653,7 +1653,7 @@ class PersonalBroadcastSender:
             log_and_print(f"[personal_broadcast] skip role account before send: {name} scan_id={sid}", "debug")
             return "skip"
 
-        log_and_print(f"[personal_broadcast] sending to {name} scan_id={sid}", "info")
+        log_and_print(f"[personal_broadcast] sending to {name} scan_id={sid}", "debug")
         log_and_print(f"[personal_broadcast] click member name='{name}' at x={x}, y={y} scan_id={sid}", "debug")
 
         window.set_focus()
@@ -1759,20 +1759,9 @@ class PersonalBroadcastSender:
             return "recover"
         if action_state == "unknown":
             log_and_print(
-                f"[personal_broadcast] cannot confidently determine send icon, "
-                f"skip click to avoid microphone misclick scan_id={sid}",
-                "error",
+                f"[personal_broadcast] dialog action unknown; try direct send-image click scan_id={sid}",
+                "warning",
             )
-            self._save_dialog_action_snapshot(
-                dialog_send_scope,
-                reason="dialog_action_unknown",
-                state=action_state,
-                send_score=send_score,
-                mic_score=mic_score,
-                scan_id=sid,
-                member_name=name,
-            )
-            return "recover"
 
         # If error popup is already visible, do not click send again.
         if self._dismiss_no_personal_messages_popup(scan_id=sid, context="before_send_click"):
@@ -1790,6 +1779,11 @@ class PersonalBroadcastSender:
             multiscale=True,
             is_debug=_ui_debug(),
         ):
+            if action_state == "unknown":
+                log_and_print(
+                    f"[personal_broadcast] direct send-image click failed in unknown state scan_id={sid}",
+                    "error",
+                )
             log_and_print(f"[personal_broadcast] dialog send icon not found for {name} scan_id={sid}", "error")
             self._save_dialog_action_snapshot(
                 dialog_send_scope,
@@ -1808,6 +1802,33 @@ class PersonalBroadcastSender:
             log_and_print(
                 f"[personal_broadcast] no-personal-messages popup after send: {name} scan_id={sid}",
                 "warning",
+            )
+            return "recover"
+
+        gd.pause(0.6)
+        text_still_present = self._input_contains_text(self._config.message_text)
+        state_after, send_score_after, mic_score_after = self._detect_dialog_action_state_with_pause(
+            dialog_send_scope,
+            pause_s=0.6,
+        )
+        log_and_print(
+            f"[personal_broadcast] post-send verify state={state_after} text_still_present={text_still_present} "
+            f"send_score={send_score_after:.3f} mic_score={mic_score_after:.3f} scan_id={sid}",
+            "info",
+        )
+        if text_still_present:
+            self._save_dialog_action_snapshot(
+                dialog_send_scope,
+                reason="dialog_post_send_text_still_present",
+                state=state_after,
+                send_score=send_score_after,
+                mic_score=mic_score_after,
+                scan_id=sid,
+                member_name=name,
+            )
+            log_and_print(
+                f"[personal_broadcast] send not confirmed because input still contains message: {name} scan_id={sid}",
+                "error",
             )
             return "recover"
 
@@ -2179,28 +2200,31 @@ class PersonalBroadcastSender:
 
     def _insert_message_text(self, window) -> bool:
         return insert_message_text(self, window)
+
     def _type_message_fallback(self, window, text: str, x: int, y: int) -> bool:
         try:
-            # Manual typing fallback (requested): force focus into input first.
             window.set_focus()
             gd.click(x, y)
             gd.pause(0.08)
             gd.click(x, y)
             gd.pause(0.12)
-            pag.hotkey("ctrl", "a")
-            gd.pause(0.04)
-            pag.press("backspace")
-            gd.pause(0.05)
-            # Prevent sticky modifier keys from corrupting typed text.
+            try:
+                pag.press("end")
+                gd.pause(0.04)
+            except Exception:
+                pass
+            for _ in range(max(len(str(text or "")) + 12, 32)):
+                pag.press("backspace")
+            gd.pause(0.08)
+
             for key in ("ctrl", "shift", "alt", "win"):
                 try:
                     pag.keyUp(key)
                 except Exception:
                     pass
 
-            # If message has Cyrillic and config layout is en, auto-switch for typing fallback.
             layout_for_typing = self._target_input_layout()
-            if layout_for_typing == "en" and any("\u0400" <= ch <= "\u04FF" for ch in text):
+            if layout_for_typing == "en" and any("Ѐ" <= ch <= "ӿ" for ch in text):
                 layout_for_typing = "uk"
             try:
                 gd.ensure_layout(layout_for_typing)
@@ -2213,32 +2237,18 @@ class PersonalBroadcastSender:
                     f"[personal_broadcast] cannot set manual typing layout={layout_for_typing}: {exc}",
                     "error",
                 )
-            # Primary: pywinauto keyboard typing (Unicode on Windows).
+
+            typed = False
             if self._type_with_pywinauto(text):
                 log_and_print("[personal_broadcast] manual typing method=pywinauto.send_keys", "debug")
+                typed = True
             elif gd.type_text_unicode(text, interval_s=0.005):
                 log_and_print("[personal_broadcast] manual typing method=unicode_sendinput", "debug")
-            else:
-                # Fallback: paste full text, then Shift+Insert as backup.
-                log_and_print("[personal_broadcast] unicode_sendinput failed, use clipboard full-paste fallback", "warning")
-                old_clip = None
-                try:
-                    old_clip = pyperclip.paste()
-                except Exception:
-                    old_clip = None
-                try:
-                    pyperclip.copy(text)
-                    self._paste_ctrl_v()
-                    gd.pause(0.12)
-                    pyperclip.copy(text)
-                    self._paste_shift_insert()
-                    gd.pause(0.12)
-                finally:
-                    if old_clip is not None:
-                        try:
-                            pyperclip.copy(old_clip)
-                        except Exception:
-                            pass
+                typed = True
+
+            if not typed:
+                return False
+
             gd.pause(0.2)
             state, send_score, mic_score = self._detect_dialog_action_state_with_pause(self._config.dialog_send_scope, pause_s=1.0)
             log_and_print(
@@ -2246,11 +2256,7 @@ class PersonalBroadcastSender:
                 f"send_score={send_score:.3f} mic_score={mic_score:.3f}",
                 "debug",
             )
-            if state == "send":
-                return True
-            if state == "microphone":
-                return False
-            return False
+            return state == "send"
         except Exception as exc:
             log_and_print(f"[personal_broadcast] manual typing fallback failed: {exc}", "error")
             return False
@@ -2259,9 +2265,12 @@ class PersonalBroadcastSender:
     def _type_with_pywinauto(text: str) -> bool:
         if not text:
             return False
+        source_text = str(text)
+        if "\n" in source_text or "\r" in source_text:
+            return False
         # Escape send_keys reserved symbols so text is typed literally.
         escaped = []
-        for ch in str(text):
+        for ch in source_text:
             if ch in {"+", "^", "%", "~", "(", ")", "{", "}"}:
                 escaped.append("{" + ch + "}")
             else:
@@ -2294,7 +2303,6 @@ class PersonalBroadcastSender:
 
     @staticmethod
     def _paste_ctrl_v() -> None:
-        # Match forwarding flow style: keyDown/press/keyUp with small pauses.
         pag.keyDown("ctrl")
         gd.pause(0.2)
         pag.press("v")
@@ -2480,6 +2488,7 @@ class PersonalBroadcastSender:
             if ch.isalpha() or ch in {"-", "'"}:
                 allowed.append(ch)
         return "".join(allowed).strip()
+
 
 
 

@@ -114,7 +114,13 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
     dialog_send_image = str(read_setting("personal_broadcast_dialog_send_image"))
     dialog_send_scope = _as_tuple4(
         read_setting("personal_broadcast_dialog_send_scope"),
-        (710, 980, 800, 1040),
+        (730, 960, 1030, 1060),
+    )
+    dialog_send_scope = (
+        730,
+        int(dialog_send_scope[1]),
+        1030,
+        int(dialog_send_scope[3]),
     )
     return_image = str(read_setting("personal_broadcast_return_image"))
     return_scope = _as_optional_tuple4(read_setting("personal_broadcast_return_scope"))
@@ -232,3 +238,4 @@ def load_personal_broadcast_config() -> PersonalBroadcastConfig:
         scroll_names_reset_every=scroll_names_reset_every,
         target_channel=target_channel,
     )
+

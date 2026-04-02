@@ -71,17 +71,16 @@ def preprocess_image(image_np):
 def read_setting(field_path) -> str | int | float | bool | list[str] | dict | None:
     file_path = _resolve_read_path("settings.json")
     try:
-        # Open and load the JSON file
         settings = _read_json_utf8(file_path)
-
-        # Navigate to the desired field
         keys = field_path.split('.')
         value = settings
         for key in keys:
             value = value[key]
-
         return value
-    except (FileNotFoundError, KeyError, json.JSONDecodeError) as e:
+    except KeyError:
+        # Optional setting is absent: caller handles default fallback.
+        return None
+    except (FileNotFoundError, json.JSONDecodeError) as e:
         print(f"Error reading field '{field_path}' from '{file_path}': {e}")
         return None
 

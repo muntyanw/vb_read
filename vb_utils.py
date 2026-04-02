@@ -30,10 +30,10 @@ def scroll_with_mouse(window, count_scroll, direction="down"):
     for _ in range(count_scroll):  # Repeat scroll attempts
         if direction == "down":
             mouse.scroll(coords=(center_x, center_y), wheel_dist=-1)
-            print("Scrolled down with mouse wheel")
+            log_and_print("[scroll_with_mouse] Scrolled down with mouse wheel", "debug")
         else:
             mouse.scroll(coords=(center_x, center_y), wheel_dist=1)
-            print("Scrolled up with mouse wheel")
+            log_and_print("[scroll_with_mouse] Scrolled up with mouse wheel", "debug")
 
 
 def right_click_on_panel(x_offset=0, y_offset=0):

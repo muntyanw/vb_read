@@ -108,7 +108,7 @@ def pause(amount):
     
 def _get_monitor_region(scope) -> dict:
     left, bottom, right, top = scope
-    print(f"MON_X = {MON_X}")
+    #print(f"MON_X = {MON_X}")
     monitor_region = {
         "top": bottom,
         "left": MON_X + left,
@@ -461,7 +461,7 @@ def _grab_with_dxcam(scope: Optional[Tuple[int, int, int, int]]) -> Optional[np.
     if scope:
         l, t, w, h = scope
         l = l + MON_X
-        print(f"MON_X = {MON_X}")
+        #print(f"MON_X = {MON_X}")
         frame = _DXCAM_HANDLE.grab(region=(l, t, l + w, t + h))
     else:
         frame = _DXCAM_HANDLE.grab()
@@ -1051,24 +1051,7 @@ def click_text(
     occurrence: int = 1,
     duration: Tuple[float, float] = (0.2, 0.3),
 ) -> bool | Tuple[List[Tuple[int, int]], Tuple[int, int] | None]:
-    """
-    OCR-based search: РЅР°Р№С‚Рё С‚РµРєСЃС‚ `query` РЅР° СЌРєСЂР°РЅРµ (РІ РїСЂРµРґРµР»Р°С… MON_X..MON_W, MON_Y..MON_H)
-    Рё РєР»РёРєРЅСѓС‚СЊ РµРіРѕ С†РµРЅС‚СЂ.
-    Р’РѕР·РІСЂР°С‰Р°РµС‚ True, РµСЃР»Рё СѓРґР°Р»РѕСЃСЊ РЅР°Р№С‚Рё Рё РєР»РёРєРЅСѓС‚СЊ, РёРЅР°С‡Рµ False РїРѕ РёСЃС‚РµС‡РµРЅРёРё timeout.
-
-    РџР°СЂР°РјРµС‚СЂС‹:
-    -----------
-    query : str
-        РџРѕРґСЃС‚СЂРѕРєР° (Р±РµР· СѓС‡С‘С‚Р° СЂРµРіРёСЃС‚СЂР°), РєРѕС‚РѕСЂСѓСЋ РёС‰РµРј СЃСЂРµРґРё СЂР°СЃРїРѕР·РЅР°РЅРЅС‹С… СЃР»РѕРІ.
-    timeout : float
-        РњР°РєСЃРёРјР°Р»СЊРЅРѕРµ РІСЂРµРјСЏ (РІ СЃРµРєСѓРЅРґР°С…) РЅР° РїРѕРїС‹С‚РєРё РїРѕРёСЃРєР°.
-    lang : str
-        РЇР·С‹Рє Tesseract (РЅР°РїСЂРёРјРµСЂ, "eng", "rus", "ukr").
-    conf_threshold : float
-        РњРёРЅРёРјР°Р»СЊРЅС‹Р№ РїРѕСЂРѕРі РґРѕРІРµСЂРёСЏ (0.0вЂ“1.0) РґР»СЏ СЂР°СЃРїРѕР·РЅР°РЅРЅС‹С… СЃР»РѕРІ.
-    padding : tuple[int, int, int, int], optional
-        РЎРјРµС‰РµРЅРёРµ (left, bottom, right, top) РґР»СЏ СЃСѓР¶РµРЅРёСЏ РѕР±Р»Р°СЃС‚Рё СЃРєСЂРёРЅС€РѕС‚Р°.
-    """
+   
     LOGGER.debug(f"find and click {query},scope: {scope}")
     
     pos = None
@@ -1096,12 +1079,12 @@ def click_text(
         print("click_text error value query")
     
     if pos:
-        print(f"time find_text_any queries= {query}  : {tm}")
+        LOGGER.debug(f"time find_text_any queries= {query}  : {tm}")
         abs_x, abs_y = pos
         human_move_and_click(abs_x + plus_x, abs_y + plus_y, duration, count_click=count_click)
         return pos
     else:
-        print(f"Not find time find_text_any queries= {query}  : {tm}")
+        LOGGER.debug(f"Not find time find_text_any queries= {query}  : {tm}")
 
     time.sleep(0.2)
 
