@@ -686,7 +686,7 @@ async def process_one_message_dispatcher(
                 message_id=md5_hash,
                 text=message_text or "",
                 chat_id=name_viber_channel,
-                sender="",  # sender name if available
+                sender=str(read_setting("reader_sender_name") or "").strip(),
                 attachments=None,
                 locale="uk",
                 timeout_s=float(read_setting("dispatch_timeout_s") or 15.0),
