@@ -3,6 +3,7 @@ import requests
 from typing import List, Dict, Any
 
 from log import log_and_print
+from utils import read_setting
 from dispatcher.dispatch_client import klickViberChannel, window_top_focus, click_folder
 from dispatcher.message_send_logger import log_sent_message
 from dispatcher.dispatch_client import _get_ips
@@ -121,7 +122,12 @@ class ServerDispatcherSender:
             log_and_print("[server_dispatcher] no IPS configured", "error")
             return
 
-        params = {"limit": self._config.poll_limit}
+        params = {
+            "limit": self._config.poll_limit,
+            "reader_name": str(read_setting("reader_sender_name") or "").strip(),
+            "reader_type": "viber",
+            "poll_interval_seconds": self._config.poll_interval_seconds,
+        }
         if self._config.user_id:
             params["user_id"] = self._config.user_id
 

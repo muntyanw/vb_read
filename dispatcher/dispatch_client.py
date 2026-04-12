@@ -1745,7 +1745,7 @@ async def processViberMess(
             # Keep group list pane in expected state at the beginning of each reader loop.
             click_folder()
             log_and_print(f"empty_send_count: {empty_send_count}", "debug")
-            if empty_send_count > 4:
+            if empty_send_count > 8:
                 window_top_focus(window)
                 window_left(window)
                 is_center_continue()
