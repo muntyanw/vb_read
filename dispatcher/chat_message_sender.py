@@ -8,7 +8,7 @@ from pywinauto import keyboard as win_keyboard
 
 from core import gui_driver as gd
 from log import log_and_print
-from utils import take_screenshot
+from utils import take_screenshot, read_setting
 
 
 def _normalize_input_text(text: str | None) -> str:
@@ -64,6 +64,8 @@ def _input_debug_region(input_xy: tuple[int, int]) -> tuple[int, int, int, int]:
 
 
 def _save_input_snapshot(input_xy: tuple[int, int], tag: str) -> str | None:
+    if not bool(read_setting("debug_methods_mode")):
+        return None
     try:
         region = _input_debug_region(input_xy)
         snap_rgb = take_screenshot(region)

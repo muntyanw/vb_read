@@ -817,6 +817,8 @@ class PersonalBroadcastSender:
         return best
 
     def _save_scope_click_snapshot(self, scope: tuple[int, int, int, int], click_xy: tuple[int, int], tag: str) -> str | None:
+        if not _ui_debug():
+            return None
         try:
             left, top, right, bottom = [int(v) for v in scope]
             width = max(1, right - left)
@@ -1045,6 +1047,8 @@ class PersonalBroadcastSender:
         return out_dir / f"{scan_id}.json"
 
     def _update_scan_metadata(self, scan_id: str, **fields) -> None:
+        if not _ui_debug():
+            return
         try:
             meta_path = self._scan_meta_path(scan_id)
             if meta_path.exists():
@@ -1061,6 +1065,8 @@ class PersonalBroadcastSender:
         ts = datetime.now().strftime("%Y%m%d_%H%M%S_%f")
         safe_channel = "".join(ch if ch.isalnum() or ch in {"-", "_"} else "_" for ch in str(channel_name or "unknown"))
         scan_id = f"pb_{safe_channel}_step{int(step):03d}_{ts}"
+        if not _ui_debug():
+            return scan_id, None
         try:
             out_dir = Path(__file__).resolve().parents[1] / "temp_log"
             out_dir.mkdir(parents=True, exist_ok=True)
@@ -1099,6 +1105,8 @@ class PersonalBroadcastSender:
         scan_id: str | None = None,
         member_name: str | None = None,
     ) -> None:
+        if not _ui_debug():
+            return
         try:
             left, top, right, bottom = [int(v) for v in scope]
             width = max(1, right - left)

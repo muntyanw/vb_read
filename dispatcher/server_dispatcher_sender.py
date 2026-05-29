@@ -271,7 +271,22 @@ class ServerDispatcherSender:
             window_top_focus(window)
             channel_name = channel.get("name_viber_channel")
             log_and_print(f"[server_dispatcher] channel send start channel={channel_name}", "debug")
-            if not klickViberChannel("image", window, True, channel):
+            try:
+                opened = klickViberChannel("image", window, True, channel)
+            except FileNotFoundError as exc:
+                log_and_print(
+                    f"[server_dispatcher] skip channel={channel_name} template_missing error={exc}",
+                    "warning",
+                )
+                continue
+            except Exception as exc:
+                log_and_print(
+                    f"[server_dispatcher] skip channel={channel_name} open_error={exc}",
+                    "warning",
+                )
+                continue
+
+            if not opened:
                 log_and_print(
                     f"[server_dispatcher] skip channel: {channel_name}",
                     "error",

@@ -30,6 +30,8 @@ ip_numbber = 0
 def _ui_debug() -> bool:
     return bool(read_setting("debug_methods_mode"))
 def _save_last_mess_debug(scope: tuple[int, int, int, int], channel_name: str, reason: str) -> str | None:
+    if not _ui_debug():
+        return None
     try:
         left, top, right, bottom = [int(v) for v in scope]
         width = max(1, right - left)
@@ -55,6 +57,8 @@ def _save_last_mess_annotated(
     color_score: float,
     template_name: str,
 ) -> str | None:
+    if not _ui_debug():
+        return None
     try:
         left, top, right, bottom = [int(v) for v in scope]
         width = max(1, right - left)
@@ -278,6 +282,8 @@ def _save_resend_field_state(
     has_content: bool,
     scope: tuple[int, int, int, int] = (320, 300, 980, 470),
 ) -> str | None:
+    if not _ui_debug():
+        return None
     try:
         left, top, right, bottom = [int(v) for v in scope]
         width = max(1, right - left)
