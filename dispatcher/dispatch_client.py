@@ -7,6 +7,7 @@ import httpx
 from pydantic import BaseModel, Field, field_validator, ValidationError, ConfigDict
 from datetime import datetime, timezone
 from pathlib import Path
+from difflib import SequenceMatcher
 from find_message import load_previous_text, save_current_text
 from log import log_and_print
 from core import gui_driver as gd
@@ -16,7 +17,7 @@ from utils import read_setting, take_screenshot
 import hashlib
 import ctypes
 from vb_utils import scroll_with_mouse
-from recognize_text import text_includes_fast
+from recognize_text import perform_ocr_with_positions, text_includes_fast
 import time
 import random
 import win32gui
@@ -414,6 +415,7 @@ processed_messages = set()
 processing_semaphore = asyncio.Semaphore(1)
 count_y_mess_empty = 0
 copied_message_counter = 0
+next_viber_channel_index = 0
 last_message_copy_monotonic = time.monotonic()
 class DispatchError(Exception):
     pass
@@ -1021,6 +1023,63 @@ def press_esq(window):
     #     s.search_board_mess_x_start + s.x_offset_out_mess,
     #     s.search_board_mess_y_start + 10,
     # )
+def _comments_back_position(header_rgb):
+    scaled = cv2.resize(header_rgb, None, fx=2, fy=2, interpolation=cv2.INTER_CUBIC)
+    words = perform_ocr_with_positions(scaled, min_conf=40, lang="rus+ukr+eng")
+    labels = ("комментарии", "коментарі", "comments")
+    template = cv2.imread(str(TEMPLATE_DIR / "return_to_group.png"), cv2.IMREAD_GRAYSCALE)
+    if template is None:
+        raise FileNotFoundError(TEMPLATE_DIR / "return_to_group.png")
+    gray = cv2.cvtColor(header_rgb, cv2.COLOR_RGB2GRAY)
+
+    for word in words:
+        text = "".join(ch for ch in str(word["text"]).lower() if ch.isalpha())
+        if not any(SequenceMatcher(None, text, label).ratio() >= 0.88 for label in labels):
+            continue
+        x = int(word["left"]) // 2
+        y = int(word["top"]) // 2
+        height = int(word["height"]) // 2
+        left, top = max(0, x - 75), max(0, y - 15)
+        right, bottom = x, min(gray.shape[0], y + height + 24)
+        roi = gray[top:bottom, left:right]
+        best = None
+        for scale in np.arange(0.65, 1.26, 0.05):
+            width = round(template.shape[1] * scale)
+            tpl_height = round(template.shape[0] * scale)
+            if width > roi.shape[1] or tpl_height > roi.shape[0]:
+                continue
+            resized = cv2.resize(template, (width, tpl_height))
+            result = cv2.matchTemplate(roi, resized, cv2.TM_CCOEFF_NORMED)
+            _, score, _, (match_x, match_y) = cv2.minMaxLoc(result)
+            center_x = left + match_x + width // 2
+            center_y = top + match_y + tpl_height // 2
+            if x - center_x > 60 or abs(center_y - (y + height // 2)) > 20:
+                continue
+            if best is None or score > best[0]:
+                best = (score, center_x, center_y)
+        if best and best[0] >= 0.86:
+            return (best[1], best[2])
+        log_and_print("[comments] header detected but back arrow not found", "warning")
+        raise RuntimeError("[comments] cannot safely return to chat: back arrow not found")
+    return None
+
+
+def close_comments_if_open(window):
+    window.set_focus()
+    rect = window.rectangle()
+    left, top, right, bottom = map(int, (rect.left, rect.top, rect.right, rect.bottom))
+    scope = (left, top, right - left, min(150, bottom - top))
+    position = _comments_back_position(take_screenshot(scope))
+    if position is None:
+        return False
+    pag.click(left + position[0], top + position[1])
+    gd.pause(0.7)
+    if _comments_back_position(take_screenshot(scope)) is not None:
+        raise RuntimeError("[comments] back arrow clicked but comments are still open")
+    log_and_print("[comments] returned to chat", "info")
+    return True
+
+
 def click_copy_text(tp, window, s, x, y, is_debug=None):
     #global count_y_mess_empty
     if is_debug is None:
@@ -1112,12 +1171,16 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
             xRight = x - 140
             yRight = y - 10
             _run_poll_hook()
+            if close_comments_if_open(window):
+                count_old_mess = 0
+                return "repeat"
             gd.right_click(xRight, yRight)
             log_and_print(
                 f"[send_messages_from_y_mess] right_click xRight = {xRight}, yRight = {yRight}"
             )
             text = click_copy_text("text", window, s, x, y, is_debug=_ui_debug())
             if text is None:
+                count_old_mess = 0
                 log_and_print(
                     "[send_messages_from_y_mess] Не вдалося скопіювати меседж, буфер обміну пустий",
                     "debug",
@@ -1128,10 +1191,12 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                 return "repeat"
 
             if text == "is_foto":
+                count_old_mess = 0
                 log_and_print("[send_messages_from_y_mess] Фото повідомлення", "debug")
                 continue
 
             if not isinstance(text, str):
+                count_old_mess = 0
                 log_and_print(
                     f"[send_messages_from_y_mess] skip non-text clipboard type={type(text).__name__}",
                     "debug",
@@ -1139,6 +1204,7 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
                 continue
 
             if len(text) == 1:
+                count_old_mess = 0
                 continue
 
             msg_id = hashlib.md5(text.encode("utf-8", errors="ignore")).hexdigest()
@@ -1234,12 +1300,16 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
             else:
                 count_old_mess += 1
                 if count_old_mess >= 3:
-                    was_new_mess = False
                     count_old_mess = 0
-                    return was_new_mess
+                    log_and_print(
+                        "[send_messages_from_y_mess] 3 consecutive already-processed messages; channel exhausted",
+                        "info",
+                    )
+                    return "channel_exhausted"
                 sending += 1
                 log_and_print(
-                    "[send_messages_from_y_mess] ------------------------------------- Сповіщення вже було відправлено", "info"
+                    f"[send_messages_from_y_mess] already processed message_id={msg_id} consecutive={count_old_mess}/3",
+                    "info",
                 )
                 if sending >= 2:
                     pass
@@ -1247,7 +1317,12 @@ async def send_messages_from_y_mess(window, viber_channel, s, poll_hook=None):
 
 def clickLastMess(window, name_viber_channel):
     window.set_focus()
-    base_scope = (740, 910, 1120, 1000)
+    try:
+        rect = window.rectangle()
+        left, top, right, bottom = map(int, (rect.left, rect.top, rect.right, rect.bottom))
+        base_scope = (min(right, left + 200), max(top, bottom - 180), right, bottom)
+    except Exception:
+        base_scope = (680, 900, 960, 1080)
     if _ui_debug():
         debug_before_path = _save_last_mess_debug(base_scope, name_viber_channel, "search_scope")
         if debug_before_path:
@@ -1293,7 +1368,11 @@ def moveToContactsAndScrollUp():
     gd.human_move(140, 400)
     gd.scroll(3000)
 def click_viber_channel_image(name_viber_channel ):
-    
+    template_path = TEMPLATE_DIR / f"{name_viber_channel}.png"
+    if not template_path.is_file():
+        log_and_print(f"Not find image template chat {name_viber_channel}: {template_path}", "debug")
+        return False
+
     return gd.click_image(
             name_viber_channel + ".png",
             scope=(0, 200, 120, 700),
@@ -1342,10 +1421,31 @@ def klickViberChannel(tp, window, clickLastMessBool, viber_channel):
         return False
 
     log_and_print(f"Click name chat {channel_name}")
-    if clickLastMessBool:
-        clickLastMess(window, channel_name)
-
     moveToContactsAndScrollUp()
+    close_comments_if_open(window)
+    if clickLastMessBool:
+        window.set_focus()
+        moved_to_bottom = False
+        for attempt in range(1, 4):
+            gd.pause(0.7)
+            if clickLastMess(window, channel_name):
+                moved_to_bottom = True
+                log_and_print(
+                    f"[klickViberChannel] moved to bottom: {channel_name} attempt={attempt}",
+                    "info",
+                )
+                break
+
+            log_and_print(
+                f"[klickViberChannel] down-arrow not detected: {channel_name} attempt={attempt}/3",
+                "debug",
+            )
+
+        if not moved_to_bottom:
+            log_and_print(
+                f"[klickViberChannel] down-arrow not detected after opening {channel_name}",
+                "warning",
+            )
     return True
 def findMessage(window, x, y, viber_channel, text, s, poll_hook=None):
     def _run_poll_hook():
@@ -1355,6 +1455,8 @@ def findMessage(window, x, y, viber_channel, text, s, poll_hook=None):
             except Exception as exc:
                 log_and_print(f"[findMessage] poll hook error: {exc}", "error")
 
+    if close_comments_if_open(window):
+        return False
     log_and_print(f"[findMessage] text = {text}")
     gd.right_click(x, y)
     gd.pause(0.5)
@@ -1370,11 +1472,15 @@ def findMessage(window, x, y, viber_channel, text, s, poll_hook=None):
         count_attempt_find_max = 3
         while True:
             _run_poll_hook()
+            if close_comments_if_open(window):
+                continue
             window.set_focus()
             fill_y_mess(window, viber_channel, s)
             if len(s.y_mess) > 0:
                 for x, y in s.y_mess:
                     _run_poll_hook()
+                    if close_comments_if_open(window):
+                        return False
                     if y:
                         log_and_print(f"[findMessage] Меседж y = {y}")
                         window.set_focus()
@@ -1538,30 +1644,39 @@ def fill_y_mess(window, viber_channel, s):
     s.y_mess = []
     window.set_focus()
     log_and_print("Старт fill_y_mess")
-    height = s.search_board_mess_y_end - s.search_board_mess_y_start
+    configured_y_start = s.search_board_mess_y_start
+    try:
+        window_top = int(window.rectangle().top)
+        scan_y_start = min(configured_y_start, window_top + 140)
+    except Exception:
+        scan_y_start = configured_y_start
+    height = s.search_board_mess_y_end - scan_y_start
     width = s.search_board_mess_x_end - s.search_board_mess_x_start
-    x, y = s.search_board_mess_x_start + 120, s.search_board_mess_y_start
-    log_and_print(f"x = {x} y = {y} height = {height}, width = {width}")
-    heart_templates = []
+    x, y = s.search_board_mess_x_start + 120, scan_y_start
+    log_and_print(
+        f"[fill_y_mess] scan region x={x} y={y} height={height} width={width}"
+    )
     channel_name = viber_channel["name_viber_channel"]
-    for idx in range(1, 8):
-        file_name = "heart.png" if idx == 1 else f"heart{idx}.png"
-        file_path = str(TEMPLATE_DIR / channel_name / file_name)
-        if not os.path.exists(file_path):
-            log_and_print(f"[fill_y_mess] template not found, stop heart scan list: {file_path}", "debug")
-            break
-        heart_templates.append(file_path)
+    channel_template_dir = TEMPLATE_DIR / channel_name
+    heart_templates = sorted(
+        {
+            path
+            for pattern in ("heart*.png", "hear*.png")
+            for path in channel_template_dir.glob(pattern)
+        }
+    )
     if not heart_templates:
         log_and_print(f"[fill_y_mess] no heart templates found for channel={channel_name}", "error")
         return
     coordinates = gd.capture_and_find_image_boundary_coordinates(
         (x, y, 800, height),
-        heart_templates,
+        [str(path) for path in heart_templates],
         visualize=False,
-        threshold=0.88,
+        threshold=0.74,
     )
     window.set_focus()
-    s.y_mess = [(coord[0], coord[1]) for coord in coordinates]
+    y_offset = scan_y_start - configured_y_start
+    s.y_mess = [(coord[0], coord[1] + y_offset) for coord in coordinates]
     log_and_print(f"s.y_mess = {s.y_mess}")
 def click_close_hitlite():
     log_and_print("Find hitlite", "debug")
@@ -1713,19 +1828,50 @@ async def processViberMess(
     window, s, count_scroll_up, count_scroll_down, pause_cycle_read, poll_hook=None
 ):
     global count_y_mess_empty
+    global next_viber_channel_index
+    global count_old_mess
     empty_send_count = 0
-    numberViberChannel = 0
-    viber_channel = s.viber_channels[numberViberChannel]
+    channels = s.viber_channels
+    if not channels:
+        log_and_print("[processViberMess] no channels configured", "warning")
+        return None
+
+    channel_count = len(channels)
+    start_index = next_viber_channel_index % channel_count
+    numberViberChannel = start_index
+    viber_channel = None
     window_top_focus(window)
     
     is_center_continue()
     click_folder()
     click_close_info()
     click_cancel_window_save_as()
-    if not klickViberChannel("image",window, True, viber_channel):
-                log_and_print(f"Not find chat {viber_channel['name_viber_channel']}", "debug")
-                return None
-            
+
+    for offset in range(channel_count):
+        numberViberChannel = (start_index + offset) % channel_count
+        candidate = channels[numberViberChannel]
+        if poll_hook is not None:
+            try:
+                poll_hook()
+            except Exception as exc:
+                log_and_print(f"[processViberMess] poll hook error: {exc}", "error")
+
+        if not klickViberChannel("image", window, True, candidate):
+            continue
+
+        log_and_print(f"[processViberMess] checking chat {candidate['name_viber_channel']}", "debug")
+        fill_y_mess(window, candidate, s)
+        if s.y_mess:
+            viber_channel = candidate
+            next_viber_channel_index = (numberViberChannel + 1) % channel_count
+            break
+
+    if viber_channel is None:
+        next_viber_channel_index = (start_index + 1) % channel_count
+        log_and_print("[processViberMess] no messages found in configured channels", "debug")
+        await asyncio.sleep(max(0.0, pause_cycle_read))
+        return None
+
     log_and_print(f"click chat {viber_channel['name_viber_channel']}", "debug")
     gd.right_click(
         s.search_board_mess_x_start + s.x_offset_out_mess,
@@ -1740,6 +1886,9 @@ async def processViberMess(
                     poll_hook()
                 except Exception as exc:
                     log_and_print(f"[processViberMess] poll hook error: {exc}", "error")
+            if close_comments_if_open(window):
+                empty_send_count = 0
+                continue
             copy_stall_restart_seconds = int(read_setting("copy_stall_restart_seconds") or 3600)
             if copy_stall_restart_seconds > 0:
                 idle_seconds = time.monotonic() - last_message_copy_monotonic
@@ -1793,6 +1942,48 @@ async def processViberMess(
             if len(s.y_mess) > 0:
                 was_send = await send_messages_from_y_mess(window, viber_channel, s, poll_hook=poll_hook)
                 log_and_print(f"was_send: {was_send}", "debug")
+
+                if was_send == "channel_exhausted":
+                    count_old_mess = 0
+                    switched_channel = False
+                    for offset in range(1, channel_count):
+                        candidate_index = (numberViberChannel + offset) % channel_count
+                        candidate = channels[candidate_index]
+                        if poll_hook is not None:
+                            try:
+                                poll_hook()
+                            except Exception as exc:
+                                log_and_print(f"[processViberMess] poll hook error: {exc}", "error")
+
+                        if not klickViberChannel("image", window, True, candidate):
+                            continue
+
+                        fill_y_mess(window, candidate, s)
+                        if not s.y_mess:
+                            continue
+
+                        numberViberChannel = candidate_index
+                        viber_channel = candidate
+                        next_viber_channel_index = (candidate_index + 1) % channel_count
+                        switched_channel = True
+                        log_and_print(
+                            f"[processViberMess] three already-processed messages; switched to {candidate['name_viber_channel']}",
+                            "info",
+                        )
+                        break
+
+                    if not switched_channel:
+                        next_viber_channel_index = (numberViberChannel + 1) % channel_count
+                        log_and_print(
+                            "[processViberMess] channel exhausted; no other channel has messages",
+                            "info",
+                        )
+                        await asyncio.sleep(max(0.0, pause_cycle_read))
+                        return None
+
+                    empty_send_count = 0
+                    continue
+
                 if was_send != "repeat":
                     if was_send:
                         empty_send_count = 0
@@ -1803,7 +1994,11 @@ async def processViberMess(
                     else:
                         empty_send_count += 1
                         press_esq(window)
-                        clickLastMess(window, viber_channel["name_viber_channel"])
+                        log_and_print(
+                            f"[processViberMess] no new message in {viber_channel['name_viber_channel']}; scrolling up to older messages",
+                            "info",
+                        )
+                        scroll_with_mouse(window, count_scroll=count_scroll_up, direction="up")
                         
             else:
                 empty_send_count += 1
